@@ -15,9 +15,27 @@ importers:
       '@kitschpatrol/shared-config':
         specifier: ^5.7.4
         version: 5.7.4(@types/estree@1.0.8)(@types/node@20.19.21)(@typescript-eslint/utils@8.46.1(eslint@9.37.0(jiti@2.6.1))(typescript@5.9.3))(jiti@2.6.1)(postcss-html@1.8.0)(svelte@5.40.1)(typescript@5.9.3)
+      '@loglayer/context-manager':
+        specifier: ^1.1.6
+        version: 1.1.6
+      '@loglayer/transport-log-file-rotation':
+        specifier: ^2.1.7
+        version: 2.1.7
       bumpp:
         specifier: ^10.3.1
         version: 10.3.1
+      filenamify:
+        specifier: ^7.0.0
+        version: 7.0.0
+      loglayer:
+        specifier: ^6.9.1
+        version: 6.9.1
+      read-package-up:
+        specifier: ^11.0.0
+        version: 11.0.0
+      serialize-error:
+        specifier: ^12.0.0
+        version: 12.0.0
       tsdown:
         specifier: ^0.15.7
         version: 0.15.7(oxc-resolver@11.9.0)(typescript@5.9.3)
@@ -557,6 +575,26 @@ packages:
     hasBin: true
     peerDependencies:
       typescript: ^5.8.3
+
+  '@loglayer/context-manager@1.1.6':
+    resolution: {integrity: sha512-kntdCN9MtNctoMpDBMk9D1begChINbdYJNso5YLB0bbKNIy819rKfarSn7Xmtcq0aBxFUHPp04wj6XnvWseFOQ==}
+    engines: {node: '>=18'}
+
+  '@loglayer/plugin@2.1.6':
+    resolution: {integrity: sha512-jZWnExpiYl+BefpiZC34/Finuu9fucxkPfz6re0xF1cUSOmZjy3fGeQtB+zVFYQz7mf6bWbN8dn5z22cH+Hdug==}
+    engines: {node: '>=18'}
+
+  '@loglayer/shared@2.5.3':
+    resolution: {integrity: sha512-KT8ic1wWstCKOjZNR6Vqpk9rK7PPx/QPjGhfqePGYjo6l9R94mSHry+zdtYjIrIPvQHbnzsp/wd6lj6IvD3MvQ==}
+    engines: {node: '>=18'}
+
+  '@loglayer/transport-log-file-rotation@2.1.7':
+    resolution: {integrity: sha512-JB4fOaCxPUUdLO9GrJLnTUCnk+Yn/iY8VdoaZAP18OLMiTUAEqDncoCeMmPVtrj3OgFzohoAOd0EYgqxvZlKBg==}
+    engines: {node: '>=18'}
+
+  '@loglayer/transport@2.3.4':
+    resolution: {integrity: sha512-SHvaex987nfqV9hNj/KEMEnE7SwtDa5YwxqXbZNEtWDSWimn6agHyce73/qJC86GVrtOJmLj2HMii9JdKeZozw==}
+    engines: {node: '>=18'}
 
   '@napi-rs/wasm-runtime@0.2.12':
     resolution: {integrity: sha512-ZVWUcfwY4E/yPitQJl481FjFo3K22D6qF0DuFH6Y/nbnE11GY5uguDxZMGXPQ8WQ0128MXQD7TnfHyK4oWoIJQ==}
@@ -2146,6 +2184,17 @@ packages:
     resolution: {integrity: sha512-XXTUwCvisa5oacNGRP9SfNtYBNAMi+RPwBFmblZEF7N7swHYQS6/Zfk7SRwx4D5j3CH211YNRco1DEMNVfZCnQ==}
     engines: {node: '>=16.0.0'}
 
+  file-stream-rotator@1.0.0:
+    resolution: {integrity: sha512-qg5mQO7o+vhS7NPqkrkfJS8qqhz0d17Tnewmb5sUTUKwYe27LKaDtbTuRAtQWkBn6jROuFPVIDF5DtckzokFTQ==}
+
+  filename-reserved-regex@4.0.0:
+    resolution: {integrity: sha512-9ZT504KxEQDamsOogZImAWGEN24R1uFAxU3ZS4AZqn2ooidmN68Olh7n4/RcA4lLatZztjA0ZSuxeLHVoCc8JA==}
+    engines: {node: '>=20'}
+
+  filenamify@7.0.0:
+    resolution: {integrity: sha512-nfY7iUozEErS4qKYu5X/DT+rafo43o642xAG/3AmZFp7chhVB20gsU4kH8KJZLDhyEZ2o4kHMSBDLDNBJ4r/cw==}
+    engines: {node: '>=20'}
+
   fill-range@7.1.1:
     resolution: {integrity: sha512-YsGpe3WHLK8ZYi4tWDg2Jy3ebRz2rXowDxnld4bkQB00cc/1Zw9AWnC0i9ztDJitivtQvaI9KaLyKrc+hBW0yg==}
     engines: {node: '>=8'}
@@ -2746,6 +2795,10 @@ packages:
 
   lodash@4.17.21:
     resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
+
+  loglayer@6.9.1:
+    resolution: {integrity: sha512-NNqSGZYwFFw3x5abn1nc2OcDm8WnWdZ0Ai08rYbVbwZf5bVJNMLVeTwrT12vid0nxv3imzMgJWZShpO4TH5XKw==}
+    engines: {node: '>=18'}
 
   longest-streak@3.1.0:
     resolution: {integrity: sha512-9Ri+o0JYgehTaVBBDoMqIl8GXtbWg711O3srftcHhZ0dqnETqLaoIK0x17fUw9rFSlK/0NlsKe0Ahhyl5pXE2g==}
@@ -3459,6 +3512,10 @@ packages:
     resolution: {integrity: sha512-0J+Msgym3vrLOUB3hzQCuZHII0xkNGCtz/HJH9xZshwv9DbDwkw1KaE3gx/e2J5rpEY5rtOy6cyhKOPrkP7FZw==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
 
+  read-package-up@11.0.0:
+    resolution: {integrity: sha512-MbgfoNPANMdb4oRBNg5eqLbB2t2r+o5Ua1pNt8BqGp4I0FJZhuVSOj3PaBPni4azWuSzEdNn2evevzVmEk1ohQ==}
+    engines: {node: '>=18'}
+
   read-pkg@9.0.1:
     resolution: {integrity: sha512-9viLL4/n1BJUCT1NXVTdS1jtm80yDEgR5T4yCelII49Mbj0v1rZdKqj7zCiYdbB0CuCgdrvHcNogAKTFPBocFA==}
     engines: {node: '>=18'}
@@ -3714,6 +3771,10 @@ packages:
     resolution: {integrity: sha512-SdsKMrI9TdgjdweUSR9MweHA4EJ8YxHn8DFaDisvhVlUOe4BF1tLD7GAj0lIqWVl+dPb/rExr0Btby5loQm20Q==}
     engines: {node: '>=10'}
     hasBin: true
+
+  serialize-error@12.0.0:
+    resolution: {integrity: sha512-ZYkZLAvKTKQXWuh5XpBw7CdbSzagarX39WyZ2H07CDLC5/KfsRGlIXV8d4+tfqX1M7916mRqR1QfNHSij+c9Pw==}
+    engines: {node: '>=18'}
 
   set-function-length@1.2.2:
     resolution: {integrity: sha512-pgRc4hJ4/sNjWCSS9AmnS40x3bNMDTknHgL5UaMBTMyJnU90EgWh1Rz+MC9eFu4BuN/UwZjKQuY/1v3rM7HMfg==}
@@ -5255,6 +5316,25 @@ snapshots:
       typescript: 5.9.3
     transitivePeerDependencies:
       - '@types/node'
+
+  '@loglayer/context-manager@1.1.6':
+    dependencies:
+      '@loglayer/shared': 2.5.3
+
+  '@loglayer/plugin@2.1.6':
+    dependencies:
+      '@loglayer/shared': 2.5.3
+
+  '@loglayer/shared@2.5.3': {}
+
+  '@loglayer/transport-log-file-rotation@2.1.7':
+    dependencies:
+      '@loglayer/transport': 2.3.4
+      file-stream-rotator: 1.0.0
+
+  '@loglayer/transport@2.3.4':
+    dependencies:
+      '@loglayer/shared': 2.5.3
 
   '@napi-rs/wasm-runtime@0.2.12':
     dependencies:
@@ -7102,6 +7182,14 @@ snapshots:
     dependencies:
       flat-cache: 4.0.1
 
+  file-stream-rotator@1.0.0: {}
+
+  filename-reserved-regex@4.0.0: {}
+
+  filenamify@7.0.0:
+    dependencies:
+      filename-reserved-regex: 4.0.0
+
   fill-range@7.1.1:
     dependencies:
       to-regex-range: 5.0.1
@@ -7696,6 +7784,13 @@ snapshots:
   lodash.truncate@4.4.2: {}
 
   lodash@4.17.21: {}
+
+  loglayer@6.9.1:
+    dependencies:
+      '@loglayer/context-manager': 1.1.6
+      '@loglayer/plugin': 2.1.6
+      '@loglayer/shared': 2.5.3
+      '@loglayer/transport': 2.3.4
 
   longest-streak@3.1.0: {}
 
@@ -8730,6 +8825,12 @@ snapshots:
       json-parse-even-better-errors: 3.0.2
       npm-normalize-package-bin: 3.0.1
 
+  read-package-up@11.0.0:
+    dependencies:
+      find-up-simple: 1.0.1
+      read-pkg: 9.0.1
+      type-fest: 4.41.0
+
   read-pkg@9.0.1:
     dependencies:
       '@types/normalize-package-data': 2.4.4
@@ -9233,6 +9334,10 @@ snapshots:
       regexp-ast-analysis: 0.7.1
 
   semver@7.7.3: {}
+
+  serialize-error@12.0.0:
+    dependencies:
+      type-fest: 4.41.0
 
   set-function-length@1.2.2:
     dependencies:
