@@ -2,7 +2,7 @@ import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 import { readPackageUpSync } from 'read-package-up'
-
+import { isNode } from 'std-env'
 /**
  * Helper function to get the platform-specific log path. Based on the platform,
  * the log path is different.
@@ -34,6 +34,9 @@ export function getPlatformLogPath(name?: string): string {
  * Helper function to get the name of the package. Based on the package.json file.
  */
 export function getName(): string {
-	const packageJson = readPackageUpSync()
-	return packageJson?.packageJson.name ?? 'default'
+	if (isNode) {
+		const packageJson = readPackageUpSync()
+		return packageJson?.packageJson.name ?? 'default'
+	}
+	return 'default'
 }

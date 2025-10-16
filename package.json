@@ -23,17 +23,17 @@
 	"type": "module",
 	"exports": {
 		".": {
-			"import": "./dist/lib/index.js",
-			"types": "./dist/lib/index.d.ts"
+			"import": "./dist/index.js",
+			"types": "./dist/index.d.ts"
 		}
 	},
-	"main": "./dist/lib/index.js",
-	"module": "./dist/lib/index.js",
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
 	"files": [
 		"dist/*"
 	],
 	"scripts": {
-		"build": "tsdown --minify --platform neutral --tsconfig tsconfig.build.json",
+		"build": "tsdown",
 		"clean": "git rm -f pnpm-lock.yaml ; git clean -fdX",
 		"fix": "ksc fix",
 		"lint": "ksc lint",
@@ -41,17 +41,18 @@
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"dependencies": {
-		"@types/node": "^20.19.21"
+		"@loglayer/transport-log-file-rotation": "^2.1.7",
+		"@types/node": "^20.19.21",
+		"read-package-up": "^11.0.0"
 	},
 	"devDependencies": {
 		"@kitschpatrol/shared-config": "^5.7.4",
 		"@loglayer/context-manager": "^1.1.6",
-		"@loglayer/transport-log-file-rotation": "^2.1.7",
 		"bumpp": "^10.3.1",
 		"filenamify": "^7.0.0",
 		"loglayer": "^6.9.1",
-		"read-package-up": "^11.0.0",
 		"serialize-error": "^12.0.0",
+		"std-env": "^3.10.0",
 		"tsdown": "^0.15.7",
 		"typescript": "~5.9.3"
 	},
