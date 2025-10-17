@@ -1,14 +1,12 @@
-import type { ILogLayer, LogLayerTransport } from 'loglayer'
-import { LogFileRotationTransport } from '@loglayer/transport-log-file-rotation'
-import filenamify from 'filenamify/browser'
-import { BlankTransport, ConsoleTransport, LogLayer, LogLevel } from 'loglayer'
-import path from 'node:path'
-import { serializeError } from 'serialize-error'
-import { isNode } from 'std-env'
-import { HierarchicalContextManager } from './hierarchical-context-manager'
-import { getName, getPlatformLogPath } from './node-utilities'
+/**
+ * Core logging functionality that works in all environments.
+ * Platform-specific features are injected via the PlatformAdapter.
+ */
 
-console.log('LogLayer module loaded')
+import type { ILogLayer, LogLayerTransport } from 'loglayer'
+import { BlankTransport, ConsoleTransport, LogLayer, LogLevel } from 'loglayer'
+import { serializeError } from 'serialize-error'
+import { HierarchicalContextManager } from './loglayer/hierarchical-context-manager'
 
 export type { ILogLayer } from 'loglayer'
 
@@ -23,7 +21,7 @@ export type ILogBasic =
 			warn(data: unknown[]): void
 	  }
 
-type LogOptions = {
+export type LogOptions = {
 	/** Log to the console in JSON format. Useful for debugging structured logging. */
 	logJsonToConsole?: boolean | ILogBasic
 	/** Log to a typical log file path. If a string is passed, log to the given directory path. Logs are gzipped and rotated daily, and are never removed. */
@@ -37,11 +35,31 @@ type LogOptions = {
 
 type RequiredExcept<T, K extends keyof T> = Pick<T, K> & Required<Omit<T, K>>
 
-const defaultLogOptions: RequiredExcept<LogOptions, 'name'> = {
+/**
+ * Platform-specific adapter interface
+ */
+export type PlatformAdapter = {
+	createFileTransport?: (name?: string, logDirectory?: string) => LogLayerTransport
+	getName: () => string | undefined
+}
+
+let platformAdapter: PlatformAdapter
+
+/**
+ * Set the platform adapter. This is called by the platform-specific entry points.
+ * @internal
+ */
+export function setPlatformAdapter(adapter: PlatformAdapter): void {
+	platformAdapter = adapter
+}
+
+export const defaultLogOptions: RequiredExcept<LogOptions, 'name'> = {
 	logJsonToConsole: false,
 	logJsonToFile: false,
 	logToConsole: true,
-	name: getName(),
+	get name() {
+		return platformAdapter.getName()
+	},
 	verbose: false,
 }
 
@@ -61,20 +79,9 @@ export function getChildLogger(logger: ILogLayer, name?: string): ILogLayer {
 }
 
 /**
- * Helper function to get the default log directory.
- */
-export function getDefaultLogDirectory(): string {
-	return './logs'
-}
-
-// File transports must be reused, so we cache them by path
-const fileTransportsByPath = new Map<string, LogLayerTransport>()
-
-/**
  * Helper function to create a logger with a given options.
  */
 export function createLogger(options?: LogOptions): ILogLayer {
-	console.log('createLogger', options)
 	const resolvedOptions = { ...defaultLogOptions, ...options }
 
 	const transports: LogLayerTransport[] = []
@@ -114,32 +121,20 @@ export function createLogger(options?: LogOptions): ILogLayer {
 	}
 
 	if (typeof resolvedOptions.logJsonToFile === 'string' || resolvedOptions.logJsonToFile) {
-		if (!isNode) {
-			throw new Error('File logging is not supported in Node environments')
-		}
-
-		const cleanName = filenamify(resolvedOptions.name ?? 'default', { replacement: '-' })
-
-		const filename = path.join(
-			typeof resolvedOptions.logJsonToFile === 'string'
-				? resolvedOptions.logJsonToFile
-				: getPlatformLogPath(cleanName),
-			`${cleanName}-%DATE%.log`,
-		)
-
-		if (!fileTransportsByPath.has(filename)) {
-			fileTransportsByPath.set(
-				filename,
-				new LogFileRotationTransport({
-					compressOnRotate: true,
-					dateFormat: 'YMD',
-					filename,
-					frequency: 'daily',
-				}),
+		if (platformAdapter.createFileTransport === undefined) {
+			throw new Error(
+				'File logging is only supported in Node.js environments. Import the `@kitschpatrol/log/node` entry point instead.',
 			)
 		}
 
-		transports.push(fileTransportsByPath.get(filename)!)
+		transports.push(
+			platformAdapter.createFileTransport(
+				resolvedOptions.name,
+				typeof resolvedOptions.logJsonToFile === 'string'
+					? resolvedOptions.logJsonToFile
+					: undefined,
+			),
+		)
 	}
 
 	const logLayer = new LogLayer({
@@ -163,14 +158,31 @@ export function createLogger(options?: LogOptions): ILogLayer {
 }
 
 /**
- * Create a LogLayer logger targeting a specific basic target logger.
- * Pretty much only used when doing dependency injection on a library.
+ * Helper to inject a logger-like instance as a the LogLayer target.
+ * @param logger Accepts either a LogLayer instance or a target with typical Console-like logging methods.
+ * @returns A LogLayer instance, either the provided instance if it was a
+ * LogLayer instance, or a new LogLayer console-only instance if the passed in
+ * logger was a console-like instance.
+ * @example
+ * ```ts
+ * // Logger instance in a library's module
+ * export let log = createLogger()
+ *
+ * // Expose setter to allow dependency injection
+ * export function setLogger(logger: ILogBasic | ILogLayer) {
+ *   log = injectionHelper(logger) || log
+ * }
+ * ```
  */
-export function createBasicLogger(target: ILogBasic): ILogLayer {
+export function injectionHelper(logger: ILogBasic | ILogLayer): ILogLayer {
+	if (isILogLayer(logger)) {
+		return logger
+	}
+
 	return createLogger({
 		logJsonToConsole: false,
 		logJsonToFile: false,
-		logToConsole: target,
+		logToConsole: logger,
 		name: undefined,
 		verbose: true,
 	})
