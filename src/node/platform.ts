@@ -13,7 +13,7 @@ import type { PlatformAdapter } from '../log.js'
  *
  * - macOS: `~/Library/Logs/app`
  * - Windows: `%LOCALAPPDATA%\app\Log`
- * - Linux/Unix: `~/.local/state/app`
+ * - Linux/UNIX: `~/.local/state/app`
  */
 function getPlatformLogPath(name?: string): string {
 	const homedir = os.homedir()
@@ -30,7 +30,7 @@ function getPlatformLogPath(name?: string): string {
 		return path.join(localAppData, resolvedName, 'Log')
 	}
 
-	// Linux/Unix
+	// Linux/UNIX
 	return path.join(env.XDG_STATE_HOME ?? path.join(homedir, '.local', 'state'), resolvedName)
 }
 

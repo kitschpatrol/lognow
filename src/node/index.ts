@@ -8,15 +8,15 @@ import { nodePlatformAdapter } from './platform.js'
 setPlatformAdapter(nodePlatformAdapter)
 
 // Re-export everything from core
-
 export type { ILogBasic, ILogLayer, LogOptions } from '../log.js'
 export {
-	configureDefaultLogger,
 	createLogger,
-	defaultLogOptions,
+	DEFAULT_LOG_OPTIONS,
 	getChildLogger,
 	injectionHelper,
 	log,
+	setDefaultLogOptions,
 } from '../log.js'
 
-export * as LogLayer from 'loglayer'
+export { HierarchicalContextManager } from '../loglayer/hierarchical-context-manager.js'
+export * as LogLayerModule from 'loglayer'

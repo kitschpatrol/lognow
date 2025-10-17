@@ -53,7 +53,7 @@ export function setPlatformAdapter(adapter: PlatformAdapter): void {
 	platformAdapter = adapter
 }
 
-export const defaultLogOptions: RequiredExcept<LogOptions, 'name'> = {
+export const DEFAULT_LOG_OPTIONS: RequiredExcept<LogOptions, 'name'> = {
 	logJsonToConsole: false,
 	logJsonToFile: false,
 	logToConsole: true,
@@ -65,7 +65,7 @@ export const defaultLogOptions: RequiredExcept<LogOptions, 'name'> = {
 
 /**
  * Helper function to create a child logger with a given name. Pairs with the
- * HierarchicalContextManager to maintain a hierarchy of ancestor logger names.
+ * `HierarchicalContextManager` to maintain a hierarchy of ancestor logger names.
  * Based on convention of storing the log name in the context.name value.
  */
 export function getChildLogger(logger: ILogLayer, name?: string): ILogLayer {
@@ -82,7 +82,7 @@ export function getChildLogger(logger: ILogLayer, name?: string): ILogLayer {
  * Helper function to create a logger with a given options.
  */
 export function createLogger(options?: LogOptions): ILogLayer {
-	const resolvedOptions = { ...defaultLogOptions, ...options }
+	const resolvedOptions = { ...DEFAULT_LOG_OPTIONS, ...options }
 
 	const transports: LogLayerTransport[] = []
 
@@ -189,9 +189,9 @@ export function injectionHelper(logger: ILogBasic | ILogLayer): ILogLayer {
 }
 
 /**
- * Check if a value is a LogLayer instance.
+ * Type guard to check if a value is a LogLayer instance.
  */
-export function isILogLayer(instance: unknown): instance is ILogLayer {
+function isILogLayer(instance: unknown): instance is ILogLayer {
 	return (
 		typeof instance === 'object' &&
 		instance !== null &&
@@ -207,23 +207,32 @@ export function isILogLayer(instance: unknown): instance is ILogLayer {
 // Default singleton logger instance, for convenience
 
 let _log: ILogLayer | undefined
-let currentOptions: LogOptions = defaultLogOptions
+let currentOptions: LogOptions = DEFAULT_LOG_OPTIONS
 
-// eslint-disable-next-line ts/no-unsafe-type-assertion
-export const log = new Proxy({} as ILogLayer, {
-	get(_, property: keyof ILogLayer) {
-		_log ??= createLogger(currentOptions)
-		const value = _log[property]
-		return typeof value === 'function' ? value.bind(_log) : value
+/**
+ * The default singleton logger instance.
+ * To customize this instance, use the `setDefaultLogOptions` function.
+ * This is provided for convenience and quick prototypes.
+ * Libraries should manage their own instance.
+ */
+export const log = new Proxy(
+	// eslint-disable-next-line ts/no-unsafe-type-assertion
+	{} as ILogLayer,
+	{
+		get(_, property: keyof ILogLayer) {
+			_log ??= createLogger(currentOptions)
+			const value = _log[property]
+			return typeof value === 'function' ? value.bind(_log) : value
+		},
 	},
-}) satisfies ILogLayer
+) satisfies ILogLayer
 
 /**
  * Configure the default singleton logger instance with custom options.
  * If specific options are not provided, the singleton's previous options are preserved.
  * @param options - The options to configure the logger with.
  */
-export function configureDefaultLogger(options: LogOptions): void {
+export function setDefaultLogOptions(options: LogOptions): void {
 	currentOptions = { ...currentOptions, ...options }
 	// Will be lazily recreated on next access through the proxy
 	_log = undefined

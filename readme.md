@@ -33,6 +33,90 @@
 
 ### Examples
 
+#### Libraries
+
+In your library project, you might create a simple `log.ts` file which creates a logger instance used throughout the library:
+
+```ts
+import type { ILogBasic, ILogLayer } from '@kitschpatrol/log'
+import { createLogger, injectionHelper } from '@kitschpatrol/log'
+
+/**
+ * The default logger instance for the module. Configure log settings here.
+ */
+export let log = createLogger({ name: 'Library Name' })
+
+/**
+ * Set the logger instance for the module. Useful for dependency injection.
+ * Export this for library consumers.
+ * @param logger - Accepts either a LogLayer instance or a target with typical Console-like logging methods.
+ */
+export function setLogger(logger: ILogBasic | ILogLayer) {
+  log = injectionHelper(logger)
+}
+```
+
+Then, in a different application project that uses the library, you can use `@kitschpatrol/log` to create another logger instance and inject it into the library:
+
+```ts
+import { getChildLogger, log } from '@kitschpatrol/log'
+import { greet, setLogger } from 'the-library'
+
+// The library we've imported had its own @kitschpatrol/log instance:
+greet()
+// Logs: "Hello from library! { name: 'Library Name' }""
+
+// In our application, we can use the default logger:
+log.info('Hello from application!')
+// Logs: "Hello from application! { name: 'package-name' }"
+
+// We can create and attach a child logger to the default logger,
+// and then inject it into the library to override its internal transports.
+setLogger(getChildLogger(log, 'child'))
+
+// Now the library logs run through the application's logger,
+// with the chain of inheritance in the context object.
+greet()
+// Logs: "Hello from library! { name: 'child', parentNames: [ 'package-name' ] }"
+```
+
+If the library consumer doesn't want to use `@kitschpatrol/log`, they can still inject and `Console`-like logger instance into the library to receive messages:
+
+```ts
+import { greet, setLogger } from 'the-library'
+
+setLogger(console)
+
+// Now the library's logs go straight to the passed `console` instance:
+greet()
+// Logs: "Hello from library! { name: 'Library Name' }"
+```
+
+Or, since LogLayer provides [many additional transport adapters](https://loglayer.dev/transports/), it's easy for library consumers to integrate with their existing logging infrastructure of choice:
+
+```ts
+import { PinoTransport } from '@loglayer/transport-pino'
+import { LogLayer } from 'loglayer'
+import { pino } from 'pino'
+import { greet, setLogger } from 'the-library'
+
+const pinoLogger = pino({
+  level: 'trace',
+})
+
+const log = new LogLayer({
+  transport: new PinoTransport({
+    logger: pinoLogger,
+  }),
+})
+
+setLogger(log)
+
+// Now the library's logs are passed to the pino logger:
+greet()
+// Logs: "Hello from library!"
+```
+
 ## Background
 
 ### Motivation
