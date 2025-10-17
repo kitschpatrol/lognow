@@ -7,6 +7,7 @@ import type { ILogLayer, LogLayerTransport } from 'loglayer'
 import { BlankTransport, ConsoleTransport, LogLayer, LogLevel } from 'loglayer'
 import { serializeError } from 'serialize-error'
 import { HierarchicalContextManager } from './loglayer/hierarchical-context-manager'
+import { timestampPlugin } from './loglayer/timestamp-context-plugin'
 
 export type { ILogLayer } from 'loglayer'
 
@@ -103,18 +104,26 @@ export function createLogger(options?: LogOptions): ILogLayer {
 
 	if (resolvedOptions.logJsonToConsole) {
 		const consoleInstance =
-			typeof resolvedOptions.logToConsole === 'boolean'
+			typeof resolvedOptions.logJsonToConsole === 'boolean'
 				? console
 				: // eslint-disable-next-line ts/no-unsafe-type-assertion
 					(resolvedOptions.logToConsole as Console)
 
 		transports.push(
 			new BlankTransport({
-				shipToLogger(params) {
-					consoleInstance.info(JSON.stringify(params, undefined, 2))
+				shipToLogger({ data, hasData, logLevel, messages }) {
+					// From LogFileRotationTransport.ts
+					const logEntry = {
+						level: logLevel,
+						message: messages.join(' ') || '',
+						timestamp: new Date().toISOString(),
+						...(hasData ? data : {}),
+					}
 
-					// eslint-disable-next-line ts/no-unsafe-return
-					return params.messages
+					const logString = JSON.stringify(logEntry)
+					consoleInstance.info(logString)
+
+					return messages as unknown[]
 				},
 			}),
 		)
@@ -139,6 +148,7 @@ export function createLogger(options?: LogOptions): ILogLayer {
 
 	const logLayer = new LogLayer({
 		errorSerializer: serializeError,
+		plugins: [timestampPlugin],
 		transport: transports,
 	}).withContextManager(new HierarchicalContextManager())
 
