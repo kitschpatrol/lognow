@@ -4,7 +4,14 @@
  */
 
 import type { ILogLayer, LogLayerTransport } from 'loglayer'
-import { BlankTransport, ConsoleTransport, LogLayer, LogLevel } from 'loglayer'
+import {
+	BlankTransport,
+	ConsoleTransport,
+	LogLayer,
+	LogLevel,
+	MockLogBuilder,
+	MockLogLayer,
+} from 'loglayer'
 import { serializeError } from 'serialize-error'
 import { HierarchicalContextManager } from './loglayer/hierarchical-context-manager'
 import { timestampPlugin } from './loglayer/timestamp-context-plugin'
@@ -23,6 +30,8 @@ export type ILogBasic =
 	  }
 
 export type LogOptions = {
+	/** Whether to enable logging. If false, the logger will log nothing. */
+	enabled?: boolean
 	/** Log to the console in JSON format. Useful for debugging structured logging. */
 	logJsonToConsole?: boolean | ILogBasic
 	/** Log to a typical log file path. If a string is passed, log to the given directory path. Logs are gzipped and rotated daily, and are never removed. */
@@ -55,6 +64,7 @@ export function setPlatformAdapter(adapter: PlatformAdapter): void {
 }
 
 export const DEFAULT_LOG_OPTIONS: RequiredExcept<LogOptions, 'name'> = {
+	enabled: true,
 	logJsonToConsole: false,
 	logJsonToFile: false,
 	logToConsole: true,
@@ -84,6 +94,10 @@ export function getChildLogger(logger: ILogLayer, name?: string): ILogLayer {
  */
 export function createLogger(options?: LogOptions): ILogLayer {
 	const resolvedOptions = { ...DEFAULT_LOG_OPTIONS, ...options }
+
+	if (!resolvedOptions.enabled) {
+		return new MockLogLayer()
+	}
 
 	const transports: LogLayerTransport[] = []
 
@@ -169,7 +183,9 @@ export function createLogger(options?: LogOptions): ILogLayer {
 
 /**
  * Helper to inject a logger-like instance as a the LogLayer target.
- * @param logger Accepts either a LogLayer instance or a target with typical Console-like logging methods.
+ * @param logger Accepts either a LogLayer instance or a target with typical
+ * Console-like logging methods. If undefined, a MockLogLayer instance is
+ * returned which will log nothing.
  * @returns A LogLayer instance, either the provided instance if it was a
  * LogLayer instance, or a new LogLayer console-only instance if the passed in
  * logger was a console-like instance.
@@ -184,12 +200,17 @@ export function createLogger(options?: LogOptions): ILogLayer {
  * }
  * ```
  */
-export function injectionHelper(logger: ILogBasic | ILogLayer): ILogLayer {
+export function injectionHelper(logger: ILogBasic | ILogLayer | undefined): ILogLayer {
+	if (logger === undefined) {
+		return createLogger({ enabled: false })
+	}
+
 	if (isILogLayer(logger)) {
 		return logger
 	}
 
 	return createLogger({
+		enabled: true,
 		logJsonToConsole: false,
 		logJsonToFile: false,
 		logToConsole: logger,
