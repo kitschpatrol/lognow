@@ -8,9 +8,9 @@ import type { InspectOptions } from 'node-inspect-extracted'
 import { LogLayer, LogLevel, MockLogLayer } from 'loglayer'
 import { serializeError } from 'serialize-error'
 import { HierarchicalContextManager } from './loglayer/hierarchical-context-manager'
+import { JsonBasicTransport } from './loglayer/json-basic-transport'
 import { PrettyBasicTransport } from './loglayer/pretty-basic-transport'
 import { timestampPlugin } from './loglayer/timestamp-context-plugin'
-import { JsonBasicTransport } from './loglayer/json-basic-transport'
 
 export type { ILogLayer } from 'loglayer'
 
@@ -54,12 +54,12 @@ export function pickLogTarget(target: boolean | ILogBasic): ILogBasic {
 }
 
 export type LogOptions = {
+	/** Log to the console in JSON format. Useful for debugging structured logging. */
+	logJsonToConsole?: boolean | ILogBasic
 	/** Log to a typical log file path. If a string is passed, log to the given directory path. Logs are gzipped and rotated daily, and are never removed. */
 	logJsonToFile?: boolean | string
 	/** Log to the console in a pretty and human-readable format. */
 	logToConsole?: boolean | ILogBasic
-	/** Log to the console in JSON format. Useful for debugging structured logging. */
-	logJsonToConsole?: boolean | ILogBasic
 	/** The name of the logger, also used as the log file name if file logging is enabled. */
 	name?: string
 	verbose?: boolean
@@ -136,6 +136,7 @@ export function createLogger(options?: LogOptions): ILogLayer {
 		transports.push(
 			new JsonBasicTransport({
 				getTerminalWidth: platformAdapter.getTerminalWidth,
+				inspect: platformAdapter.inspect,
 				logger: pickLogTarget(resolvedOptions.logJsonToConsole),
 			}),
 		)

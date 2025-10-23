@@ -1,4 +1,5 @@
 import type { LogLayerTransportConfig, LogLayerTransportParams } from '@loglayer/transport'
+import type { InspectOptions } from 'node-inspect-extracted'
 import { BaseTransport, LogLevel } from '@loglayer/transport'
 import type { ILogBasic, LogBasicTypedTarget } from '../log'
 import { createLogBasicTypedTarget, pickLogTarget } from '../log'
@@ -9,23 +10,25 @@ import { paramsToJsonString } from './json-shared'
 interface JsonBasicTransportConfigInterface extends LogLayerTransportConfig<ILogBasic> {
 	colorize?: boolean
 	getTerminalWidth: () => number
+	inspect: (object: unknown, options?: InspectOptions) => string
+	pretty?: boolean
 }
 
 export type JsonBasicTransportConfig = JsonBasicTransportConfigInterface
 
-const JSON_BASIC_TRANSPORT_CONFIG_DEFAULTS: Required<JsonBasicTransportConfig> = {
+const JSON_BASIC_TRANSPORT_CONFIG_DEFAULTS: Omit<Required<JsonBasicTransportConfig>, 'inspect'> = {
 	colorize: false,
 	consoleDebug: false,
 	enabled: true,
 	getTerminalWidth: () => Number.MAX_SAFE_INTEGER,
-	id: 'pretty-basic-transport',
+	id: 'json-basic-transport',
 	// Overridden by the logger instance...
 	level: 'trace',
 	logger: pickLogTarget(true),
+	pretty: false,
 }
 
-// TODO
-// const MAX_WIDTH = 120
+const MAX_WIDTH = 120
 
 /**
  * TK
@@ -62,16 +65,25 @@ export class JsonBasicTransport extends BaseTransport<ILogBasic> {
 		// }
 	}
 
-	/**
-	 * TK
-	 */
+	// eslint-disable-next-line complexity
 	shipToLogger(params: LogLayerTransportParams): unknown[] {
 		// If transport is disabled, return messages without processing
 		if (!this.config.enabled) {
 			return params.messages
 		}
 
-		const logString = paramsToJsonString(params)
+		const jsonString = paramsToJsonString(params)
+		const logString =
+			this.config.pretty || this.config.colorize
+				? this.config.inspect(JSON.parse(jsonString), {
+						breakLength: this.config.pretty
+							? Math.min(this.config.getTerminalWidth(), MAX_WIDTH)
+							: Number.MAX_SAFE_INTEGER,
+						colors: this.config.colorize,
+						compact: !this.config.pretty,
+						depth: Infinity,
+					})
+				: jsonString
 
 		// Type narrowing based on the discriminated union
 		switch (this.typedTarget.type) {
