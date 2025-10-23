@@ -7,8 +7,8 @@ import type { InspectOptions } from 'node-inspect-extracted'
 import { BaseTransport, LogLevel } from '@loglayer/transport'
 import c from 'ansi-colors'
 import wrapAnsi from 'wrap-ansi'
-import type { ILogBasic, LogBasicTypedTarget } from '../../log'
-import { createLogBasicTypedTarget, pickLogTarget } from '../../log'
+import type { ILogBasic, LogBasicTypedTarget } from '../log'
+import { createLogBasicTypedTarget, pickLogTarget } from '../log'
 
 // Dance to make the config interface convertible to a type
 // eslint-disable-next-line ts/consistent-type-definitions

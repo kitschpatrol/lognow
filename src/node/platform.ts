@@ -1,5 +1,4 @@
 import type { LogLayerTransport } from 'loglayer'
-import { LogFileRotationTransport } from '@loglayer/transport-log-file-rotation'
 import filenamify from 'filenamify'
 import os from 'node:os'
 import path from 'node:path'
@@ -8,6 +7,7 @@ import { inspect as nodeInspect } from 'node:util'
 import { readPackageUpSync } from 'read-package-up'
 import terminalSize from 'terminal-size'
 import type { PlatformAdapter } from '../log.js'
+import { JsonFileTransport } from '../loglayer/json-file-transport.js'
 
 /**
  * Helper function to get the platform-specific log path. Based on the platform,
@@ -58,7 +58,7 @@ function createFileTransport(name = 'default', logDirectory?: string): LogLayerT
 	if (!fileTransportsByPath.has(filename)) {
 		fileTransportsByPath.set(
 			filename,
-			new LogFileRotationTransport({
+			new JsonFileTransport({
 				compressOnRotate: true,
 				dateFormat: 'YMD',
 				filename,

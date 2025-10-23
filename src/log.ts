@@ -5,11 +5,12 @@
 
 import type { ILogLayer, LogLayerTransport } from 'loglayer'
 import type { InspectOptions } from 'node-inspect-extracted'
-import { BlankTransport, ConsoleTransport, LogLayer, LogLevel, MockLogLayer } from 'loglayer'
+import { LogLayer, LogLevel, MockLogLayer } from 'loglayer'
 import { serializeError } from 'serialize-error'
 import { HierarchicalContextManager } from './loglayer/hierarchical-context-manager'
 import { PrettyBasicTransport } from './loglayer/pretty-basic-transport'
 import { timestampPlugin } from './loglayer/timestamp-context-plugin'
+import { JsonBasicTransport } from './loglayer/json-basic-transport'
 
 export type { ILogLayer } from 'loglayer'
 
@@ -53,14 +54,12 @@ export function pickLogTarget(target: boolean | ILogBasic): ILogBasic {
 }
 
 export type LogOptions = {
-	/** Log to the console in JSON format. Useful for debugging structured logging. */
-	logJsonToConsole?: boolean | ILogBasic
 	/** Log to a typical log file path. If a string is passed, log to the given directory path. Logs are gzipped and rotated daily, and are never removed. */
 	logJsonToFile?: boolean | string
 	/** Log to the console in a pretty and human-readable format. */
 	logToConsole?: boolean | ILogBasic
-	/** Log to the pretty basic transport, will replace the console transport soon. */
-	logToPrettyBasic?: boolean | ILogBasic
+	/** Log to the console in JSON format. Useful for debugging structured logging. */
+	logJsonToConsole?: boolean | ILogBasic
 	/** The name of the logger, also used as the log file name if file logging is enabled. */
 	name?: string
 	verbose?: boolean
@@ -91,8 +90,7 @@ export function setPlatformAdapter(adapter: PlatformAdapter): void {
 export const DEFAULT_LOG_OPTIONS: RequiredExcept<LogOptions, 'name'> = {
 	logJsonToConsole: false,
 	logJsonToFile: false,
-	logToConsole: false,
-	logToPrettyBasic: true,
+	logToConsole: true,
 	get name() {
 		return platformAdapter.getName()
 	},
@@ -122,58 +120,28 @@ export function createLogger(options?: LogOptions): ILogLayer {
 
 	const transports: LogLayerTransport[] = []
 
-	if (resolvedOptions.logToPrettyBasic) {
+	// Pretty transport
+	if (resolvedOptions.logToConsole) {
 		transports.push(
 			new PrettyBasicTransport({
 				getTerminalWidth: platformAdapter.getTerminalWidth,
 				inspect: platformAdapter.inspect,
-				logger: pickLogTarget(resolvedOptions.logToPrettyBasic),
+				logger: pickLogTarget(resolvedOptions.logToConsole),
 			}),
 		)
 	}
 
-	if (resolvedOptions.logToConsole) {
-		const consoleInstance =
-			typeof resolvedOptions.logToConsole === 'boolean'
-				? console
-				: // eslint-disable-next-line ts/no-unsafe-type-assertion
-					(resolvedOptions.logToConsole as Console)
-
-		transports.push(
-			new ConsoleTransport({
-				appendObjectData: true,
-				logger: consoleInstance,
-			}),
-		)
-	}
-
+	// JSON transport
 	if (resolvedOptions.logJsonToConsole) {
-		const consoleInstance =
-			typeof resolvedOptions.logJsonToConsole === 'boolean'
-				? console
-				: // eslint-disable-next-line ts/no-unsafe-type-assertion
-					(resolvedOptions.logToConsole as Console)
-
 		transports.push(
-			new BlankTransport({
-				shipToLogger({ data, hasData, logLevel, messages }) {
-					// From LogFileRotationTransport.ts
-					const logEntry = {
-						level: logLevel,
-						message: messages.join(' ') || '',
-						timestamp: new Date().toISOString(),
-						...(hasData ? data : {}),
-					}
-
-					const logString = JSON.stringify(logEntry)
-					consoleInstance.info(logString)
-
-					return messages as unknown[]
-				},
+			new JsonBasicTransport({
+				getTerminalWidth: platformAdapter.getTerminalWidth,
+				logger: pickLogTarget(resolvedOptions.logJsonToConsole),
 			}),
 		)
 	}
 
+	// File transport
 	if (typeof resolvedOptions.logJsonToFile === 'string' || resolvedOptions.logJsonToFile) {
 		if (platformAdapter.createFileTransport === undefined) {
 			throw new Error(
@@ -243,7 +211,6 @@ export function injectionHelper(logger: ILogBasic | ILogLayer | undefined): ILog
 	// Must be ILogBasic,
 	// so create a new LogLayer instance with the basic transport
 	return createLogger({
-		logJsonToConsole: false,
 		logJsonToFile: false,
 		logToConsole: logger,
 		name: undefined,
