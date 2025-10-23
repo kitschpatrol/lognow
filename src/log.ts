@@ -4,40 +4,63 @@
  */
 
 import type { ILogLayer, LogLayerTransport } from 'loglayer'
-import {
-	BlankTransport,
-	ConsoleTransport,
-	LogLayer,
-	LogLevel,
-	MockLogBuilder,
-	MockLogLayer,
-} from 'loglayer'
+import type { InspectOptions } from 'node-inspect-extracted'
+import { BlankTransport, ConsoleTransport, LogLayer, LogLevel, MockLogLayer } from 'loglayer'
 import { serializeError } from 'serialize-error'
 import { HierarchicalContextManager } from './loglayer/hierarchical-context-manager'
+import { PrettyBasicTransport } from './loglayer/pretty-basic-transport'
 import { timestampPlugin } from './loglayer/timestamp-context-plugin'
 
 export type { ILogLayer } from 'loglayer'
 
+type ConsoleLike = {
+	debug(...data: unknown[]): void
+	error(...data: unknown[]): void
+	info(...data: unknown[]): void
+	trace(...data: unknown[]): void
+	warn(...data: unknown[]): void
+}
+
+type StreamLike = {
+	write(data: string | Uint8Array): Promise<void> | void
+}
+
+type StreamStdout = typeof process.stdout
+type StreamStderr = typeof process.stderr
+
 // eslint-disable-next-line ts/naming-convention
-export type ILogBasic =
-	| Console
-	| {
-			debug(data: unknown[]): void
-			error(data: unknown[]): void
-			info(data: unknown[]): void
-			trace(data: unknown[]): void
-			warn(data: unknown[]): void
-	  }
+export type ILogBasic = Console | ConsoleLike | StreamLike | StreamStderr | StreamStdout
+
+/**
+ * Helper function to pick a log target based on the platform context, or pass through an explicit target.
+ * @param target - The target to pick.
+ * @returns The picked log target.
+ */
+export function pickLogTarget(target: boolean | ILogBasic): ILogBasic {
+	if (typeof target === 'boolean') {
+		if (target) {
+			// Use stdout by default in a node environment, or console by default in a browser environment.
+			if (typeof process !== 'undefined') {
+				return process.stdout
+			}
+			return console
+		}
+
+		// Should be unreachable
+		throw new Error('Invalid target')
+	}
+	return target
+}
 
 export type LogOptions = {
-	/** Whether to enable logging. If false, the logger will log nothing. */
-	enabled?: boolean
 	/** Log to the console in JSON format. Useful for debugging structured logging. */
 	logJsonToConsole?: boolean | ILogBasic
 	/** Log to a typical log file path. If a string is passed, log to the given directory path. Logs are gzipped and rotated daily, and are never removed. */
 	logJsonToFile?: boolean | string
 	/** Log to the console in a pretty and human-readable format. */
 	logToConsole?: boolean | ILogBasic
+	/** Log to the pretty basic transport, will replace the console transport soon. */
+	logToPrettyBasic?: boolean | ILogBasic
 	/** The name of the logger, also used as the log file name if file logging is enabled. */
 	name?: string
 	verbose?: boolean
@@ -51,6 +74,8 @@ type RequiredExcept<T, K extends keyof T> = Pick<T, K> & Required<Omit<T, K>>
 export type PlatformAdapter = {
 	createFileTransport?: (name?: string, logDirectory?: string) => LogLayerTransport
 	getName: () => string | undefined
+	getTerminalWidth: () => number
+	inspect: (object: unknown, options?: InspectOptions) => string
 }
 
 let platformAdapter: PlatformAdapter
@@ -64,10 +89,10 @@ export function setPlatformAdapter(adapter: PlatformAdapter): void {
 }
 
 export const DEFAULT_LOG_OPTIONS: RequiredExcept<LogOptions, 'name'> = {
-	enabled: true,
 	logJsonToConsole: false,
 	logJsonToFile: false,
-	logToConsole: true,
+	logToConsole: false,
+	logToPrettyBasic: true,
 	get name() {
 		return platformAdapter.getName()
 	},
@@ -95,11 +120,17 @@ export function getChildLogger(logger: ILogLayer, name?: string): ILogLayer {
 export function createLogger(options?: LogOptions): ILogLayer {
 	const resolvedOptions = { ...DEFAULT_LOG_OPTIONS, ...options }
 
-	if (!resolvedOptions.enabled) {
-		return new MockLogLayer()
-	}
-
 	const transports: LogLayerTransport[] = []
+
+	if (resolvedOptions.logToPrettyBasic) {
+		transports.push(
+			new PrettyBasicTransport({
+				getTerminalWidth: platformAdapter.getTerminalWidth,
+				inspect: platformAdapter.inspect,
+				logger: pickLogTarget(resolvedOptions.logToPrettyBasic),
+			}),
+		)
+	}
 
 	if (resolvedOptions.logToConsole) {
 		const consoleInstance =
@@ -202,15 +233,16 @@ export function createLogger(options?: LogOptions): ILogLayer {
  */
 export function injectionHelper(logger: ILogBasic | ILogLayer | undefined): ILogLayer {
 	if (logger === undefined) {
-		return createLogger({ enabled: false })
+		return new MockLogLayer()
 	}
 
 	if (isILogLayer(logger)) {
 		return logger
 	}
 
+	// Must be ILogBasic,
+	// so create a new LogLayer instance with the basic transport
 	return createLogger({
-		enabled: true,
 		logJsonToConsole: false,
 		logJsonToFile: false,
 		logToConsole: logger,
@@ -231,6 +263,102 @@ function isILogLayer(instance: unknown): instance is ILogLayer {
 		typeof instance.withContext === 'function' &&
 		typeof instance.child === 'function'
 	)
+}
+
+/**
+ * Type guard to check if a value is process.stdout
+ */
+function isStreamStdout(instance: unknown): instance is StreamStdout {
+	return typeof process !== 'undefined' && instance === process.stdout
+}
+
+/**
+ * Type guard to check if a value is process.stderr
+ */
+function isStreamStderr(instance: unknown): instance is StreamStderr {
+	return typeof process !== 'undefined' && instance === process.stderr
+}
+
+/**
+ * Type guard to check if a value is a StreamLike object
+ */
+function isStreamLike(instance: unknown): instance is StreamLike {
+	return (
+		typeof instance === 'object' &&
+		instance !== null &&
+		'write' in instance &&
+		typeof instance.write === 'function'
+	)
+}
+
+/**
+ * Type guard to check if a value is a Console instance
+ */
+function isConsole(instance: unknown): instance is Console {
+	return (
+		typeof instance === 'object' &&
+		instance !== null &&
+		(instance === globalThis.console ||
+			(instance as { constructor?: { name?: string } }).constructor?.name === 'Console')
+	)
+}
+
+/**
+ * Type guard to check if a value is a ConsoleLike object
+ */
+function isConsoleLike(instance: unknown): instance is ConsoleLike {
+	return (
+		typeof instance === 'object' &&
+		instance !== null &&
+		'debug' in instance &&
+		'error' in instance &&
+		'info' in instance &&
+		'trace' in instance &&
+		'warn' in instance &&
+		typeof instance.debug === 'function' &&
+		typeof instance.error === 'function' &&
+		typeof instance.info === 'function' &&
+		typeof instance.trace === 'function' &&
+		typeof instance.warn === 'function'
+	)
+}
+
+/**
+ * Type narrowing function that identifies the specific type of ILogBasic
+ * @param instance - The ILogBasic instance to check
+ * @returns The specific type as a string: 'Console', 'ConsoleLike', 'StreamLike', 'StreamStderr', or 'StreamStdout'
+ */
+
+// Discriminated union for properly typed targets
+export type LogBasicTypedTarget =
+	| { target: Console; type: 'Console' }
+	| { target: ConsoleLike; type: 'ConsoleLike' }
+	| { target: StreamLike; type: 'StreamLike' }
+	| { target: StreamStderr; type: 'StreamStderr' }
+	| { target: StreamStdout; type: 'StreamStdout' }
+
+/**
+ * Helper function to create a typed target from an ILogBasic instance
+ */
+export function createLogBasicTypedTarget(instance: ILogBasic): LogBasicTypedTarget {
+	// Check most specific types first
+	if (isStreamStdout(instance)) {
+		return { target: instance, type: 'StreamStdout' }
+	}
+	if (isStreamStderr(instance)) {
+		return { target: instance, type: 'StreamStderr' }
+	}
+	if (isConsole(instance)) {
+		return { target: instance, type: 'Console' }
+	}
+	if (isConsoleLike(instance)) {
+		return { target: instance, type: 'ConsoleLike' }
+	}
+	if (isStreamLike(instance)) {
+		return { target: instance, type: 'StreamLike' }
+	}
+
+	throw new Error('Unable to identify ILogBasic type')
 }
 
 // ------------------------------------------------------------------------------------------------

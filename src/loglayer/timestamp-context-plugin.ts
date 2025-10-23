@@ -7,7 +7,7 @@ export const timestampPlugin: LogLayerPlugin = {
 			...context,
 
 			// Overwrites timestamp set in JSON and file transports
-			timestamp: 'new Date().toISOString()',
+			timestamp: new Date().toISOString(),
 		}
 	},
 }

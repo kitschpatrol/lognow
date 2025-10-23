@@ -4,7 +4,9 @@ import filenamify from 'filenamify'
 import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
+import { inspect as nodeInspect } from 'node:util'
 import { readPackageUpSync } from 'read-package-up'
+import terminalSize from 'terminal-size'
 import type { PlatformAdapter } from '../log.js'
 
 /**
@@ -71,4 +73,9 @@ function createFileTransport(name = 'default', logDirectory?: string): LogLayerT
 export const nodePlatformAdapter: PlatformAdapter = {
 	createFileTransport,
 	getName,
+	getTerminalWidth() {
+		// TODO reconsider
+		return terminalSize().columns
+	},
+	inspect: nodeInspect,
 }
