@@ -40,6 +40,11 @@ function getPlatformLogPath(name?: string): string {
  * Helper function to get the name of the package. Based on the package.json file.
  */
 function getName(): string | undefined {
+	// Detect electron main process
+	if (process.env.ELECTRON_MAIN) {
+		return 'Main'
+	}
+
 	const packageJson = readPackageUpSync()
 	return packageJson?.packageJson.name
 }
@@ -47,7 +52,13 @@ function getName(): string | undefined {
 // File transports must be reused, so we cache them by path
 const fileTransportsByPath = new Map<string, LogLayerTransport>()
 
-function createFileTransport(name = 'default', logDirectory?: string): LogLayerTransport {
+/**
+ * Create a file transport for the given name and log directory.
+ * @param name - The name of the log file.
+ * @param logDirectory - The directory to log to.
+ * @returns The file transport.
+ */
+export function createFileTransport(name = 'default', logDirectory?: string): LogLayerTransport {
 	const cleanName = filenamify(name, { replacement: '-' })
 
 	const filename = path.join(
@@ -70,12 +81,18 @@ function createFileTransport(name = 'default', logDirectory?: string): LogLayerT
 	return fileTransportsByPath.get(filename)!
 }
 
+/**
+ * Get the terminal width.
+ * @returns The terminal width.
+ */
+export function getTerminalWidth(): number {
+	// TODO reconsider
+	return terminalSize().columns
+}
+
 export const nodePlatformAdapter: PlatformAdapter = {
 	createFileTransport,
 	getName,
-	getTerminalWidth() {
-		// TODO reconsider
-		return terminalSize().columns
-	},
+	getTerminalWidth,
 	inspect: nodeInspect,
 }

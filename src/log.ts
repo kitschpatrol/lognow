@@ -3,6 +3,7 @@
  * Platform-specific features are injected via the PlatformAdapter.
  */
 
+import type { LoggerlessTransport } from '@loglayer/transport'
 import type { ILogLayer, LogLayerTransport } from 'loglayer'
 import type { InspectOptions } from 'node-inspect-extracted'
 import { LogLayer, LogLevel, MockLogLayer } from 'loglayer'
@@ -71,6 +72,8 @@ type RequiredExcept<T, K extends keyof T> = Pick<T, K> & Required<Omit<T, K>>
  * Platform-specific adapter interface
  */
 export type PlatformAdapter = {
+	createElectronListener?: (logger: ILogLayer) => void
+	createElectronTransport?: () => LoggerlessTransport
 	createFileTransport?: (name?: string, logDirectory?: string) => LogLayerTransport
 	getName: () => string | undefined
 	getTerminalWidth: () => number
@@ -160,6 +163,11 @@ export function createLogger(options?: LogOptions): ILogLayer {
 		)
 	}
 
+	// Electron transport
+	if (platformAdapter.createElectronTransport) {
+		transports.push(platformAdapter.createElectronTransport())
+	}
+
 	const logLayer = new LogLayer({
 		errorSerializer: serializeError,
 		plugins: [timestampPlugin],
@@ -176,6 +184,10 @@ export function createLogger(options?: LogOptions): ILogLayer {
 		logLayer.setLevel(LogLevel.trace)
 	} else {
 		logLayer.setLevel(LogLevel.info)
+	}
+
+	if (platformAdapter.createElectronListener) {
+		platformAdapter.createElectronListener(logLayer)
 	}
 
 	return logLayer

@@ -35,6 +35,24 @@
 				"types": "./dist/browser/index.d.ts",
 				"import": "./dist/browser/index.js"
 			}
+		},
+		"./electron": {
+			"node": {
+				"types": "./dist/electron/main/index.d.ts",
+				"import": "./dist/electron/main/index.js"
+			},
+			"browser": {
+				"types": "./dist/electron/renderer/index.d.ts",
+				"import": "./dist/electron/renderer/index.js"
+			},
+			"default": {
+				"types": "./dist/electron/renderer/index.d.ts",
+				"import": "./dist/electron/renderer/index.js"
+			}
+		},
+		"./electron/preload": {
+			"types": "./dist/electron/preload/index.d.ts",
+			"import": "./dist/electron/preload/index.js"
 		}
 	},
 	"files": [
@@ -63,8 +81,10 @@
 		"@vitest/browser": "^4.0.2",
 		"ansi-colors": "^4.1.3",
 		"bumpp": "^10.3.1",
+		"electron": "^38.4.0",
 		"filenamify": "^7.0.0",
 		"loglayer": "^6.10.0",
+		"next-json": "^0.5.0",
 		"node-inspect-extracted": "^3.2.2",
 		"playwright": "^1.56.1",
 		"read-package-up": "^11.0.0",

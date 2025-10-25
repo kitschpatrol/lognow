@@ -1,5 +1,5 @@
 import { cspellConfig } from '@kitschpatrol/cspell-config'
 
 export default cspellConfig({
-	words: ['loglayer', 'LOCALAPPDATA'],
+	words: ['loglayer', 'LOCALAPPDATA', 'NJSON', 'loggerless'],
 })
