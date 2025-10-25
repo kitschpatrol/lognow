@@ -63,6 +63,7 @@ export type LogOptions = {
 	logToConsole?: boolean | ILogBasic
 	/** The name of the logger, also used as the log file name if file logging is enabled. */
 	name?: string
+	/** TODO */
 	verbose?: boolean
 }
 

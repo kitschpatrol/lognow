@@ -2,6 +2,7 @@ import { eslintConfig } from '@kitschpatrol/eslint-config'
 
 export default eslintConfig(
 	{
+		ignores: ['./test/assets/nightmare-object.ts'],
 		ts: {
 			overrides: {
 				'depend/ban-dependencies': [

@@ -21,21 +21,234 @@
 
 ## Overview
 
+I'd rather not think about logging.
+
+Somehow, no single logging library out there did quite what I wanted, so it's come to this.
+
+@kitschpatrol/log provides a handful of helpers and turn-key configurations for working with [LogLayer](https://loglayer.dev/) in a consistent and unobtrusive way across my projects.
+
+It provides:
+
+- Pretty console logs by default with a reasonable amount of metadata, colors, object formatting, error handling, etc.
+- Rotating JSONL file logs enabled via a single option flag.
+- A plausible strategy for log dependency injection in library projects and integration with other logging systems.
+- A universal / isomorphic implementation with support for Node.js, web browsers, and Electron.
+
+It's probably most similar aesthetically to [tslog](TK), but with the extra interoperability abstractions provided by [LogLayer](https://loglayer.dev/), and integrated Electron support a la [electron-log](TK).
+
+This library is not designed to be infinitely configurable or extensible. Instead, it's designed to cover 95% of my use-cases with a single import, and gets to 99% with a few lines of configuration.
+For the remaining 1% of my logging needs, it makes more sense to just work with LogLayer directly.
+
 ## Getting started
 
 ### Dependencies
 
+Node 20.19.0+, or any recent web browser.
+
 ### Installation
+
+```sh
+npm install --save-dev @kitschpatrol/log
+```
 
 ## Usage
 
-### API
+### Basic
 
-### Examples
+Most of the time, it makes sense to just import the default log instance:
+
+```ts
+import { log } from '@kitschpatrol/log'
+
+log.info('What hath God wrought?')
+```
+
+By default, you'll get a timestamped pretty log in the console:
+
+```txt
+12:47:56.394 INFO | What hath God wrought?
+```
+
+Note that the log isntance's interface is a bit different than a typical `Console` object — it's an `ILogLayer` instance, so instead of passing objects and metadata directly to the logging method, additional methods are chained together to separate message strings from metadata or context objects.
+
+This is a bit of extra work, but it disambiguates your logging intent in such a way that future interoperability with different logging targets is guaranteed to work as intended.
+
+For example:
+
+```ts
+import { log } from '@kitschpatrol/log'
+
+log.withMetadata({ energy: 2, mood: 3 }).info('vibe check')
+```
+
+```txt
+15:09:21.011 INFO  [@kitschpatrol/log] vibe check
+{ mood: 3, energy: 2 }
+```
+
+See the [LogLayer docs](TK) for a full description of the interface.
+
+### Options
+
+@kitschpatrol/log has just five options:
+
+#### `name`
+
+Set the name of the logger, which is used as a prefix in messages logged to a console, and as extra metadata in logs written to files.
+
+Default behavior depends on your runtime context:
+
+Browser projects default to undefined.
+
+Node projects with a `package.json` will default to the package name.
+
+Electron projects default to `"Main"` for the main process and `"Renderer"` for the render process.
+
+#### `logToConsole`
+
+Set to `true` or `false` to enable or disable pretty console logging.
+
+Defaults to `true`.
+
+Aternately, set to any Console-like object to log . (If you don't define the target explicitly, `process.stdout` is used in node and `console` is used in the browser.)
+
+#### `logJsonToFile`
+
+Set to `true` or `false` to enable or disable file logging. This is identical to the serialized JSON that's sent to the log file when `logJsonToFile` is enabled.
+
+Defaults to `false`.
+
+Logs are stored in the platform-standard location. The files are gzipped and rotated daily, and are never removed.
+
+Complex metadata or context objects not natively representable within the JSON specification are serialized on a best-effort basis, with emphasis on being human-readable rather than being perfectly reconstructable as JavaScript.
+
+Alternately, pass a path to a directory to log to the location of your choosing.
+
+#### `logJsonToConsole`
+
+Set to `true` or `false` to enable or disable pretty console logging. This is identical to the serialized JSON that's sent to the log file when `logJsonToFile` is enabled.
+
+Defaults to `false`.
+
+#### `verbose`
+
+This is just a shortcut for setting the log level.
+
+If `true`, all logs are shown regardless of level. If `false`, only `info` and higher logs are shown.
+
+Defaults to `false`.
+
+### Configuration
+
+#### Configuring the default log instance
+
+Use `setDefaultLogOptions()` to set options on the default log instance.
+
+```ts
+import { log, setDefaultLogOptions } from '@kitschpatrol/log'
+
+setDefaultLogOptions({
+  logJsonToConsole: true,
+  logToConsole: false,
+  name: 'example',
+})
+
+log.withMetadata({ energy: 2, mood: 3 }).info('vibe check')
+```
+
+Will log:
+
+```txt
+{"level":"info","messages":["vibe check"],"metadata":{"energy":2,"mood":3},"name":"example","timestamp":"2025-10-25T19:34:14.754Z"}
+```
+
+#### Configuring new instances
+
+Use `createLogger()` to set options on a new custom logger instance. Defaults are assumed for any undefined options.
+
+```ts
+import { createLogger } from '@kitschpatrol/log'
+
+const customLog = createLogger({
+  name: 'custom',
+})
+
+customLog.info('hello')
+```
+
+Will log:
+
+```txt
+15:38:50.138 INFO  [custom] hello
+```
+
+Note that only the default log instance's configuration is mutable (via `setDefaultLogOptions()`). Custom logs should be recreated with `createLogger()` if you need to change configuration.
+
+## Examples
+
+### Log to a File
+
+By default, log files are stored in the typical logging directory for your platform:
+
+```ts
+import { log, setDefaultLogOptions } from '@kitschpatrol/log'
+
+setDefaultLogOptions({
+  logJsonToFile: true,
+  name: 'My Application',
+})
+
+log.info('File this away')
+```
+
+On macOS, this will write to `~/Library/Logs/My Application/`.
+
+### Electron
+
+@kitschpatrol/log automatically manages inter-process communication in Electron applications to merge any logs from the render process into your main process' log stream.
+
+In your main process, e.g. `main.js`, grab the default log instance like you would in any other context — the only difference is that you explicitly import from the `@kitschpatrol/log/electron` export instead:
+
+```ts
+import { log } from '@kitschpatrol/log/electron'
+
+log.info('Hello from main!')
+
+// The rest of your Electron main process code...
+```
+
+When you want to log from the renderer, add the following to your preload script, e.g. `preload.js`. This sets up an inter-process-communication (IPC) channel to ship messages from the renderer to the main process:
+
+```ts
+import '@kitschpatrol/log/electron/preload'
+
+// The rest of your Electron preload code...
+```
+
+Then, in your renderer / browser code, use the default `@kitschpatrol/log/electron` log export as usual:
+
+```ts
+import { log } from '@kitschpatrol/log/electron'
+
+log.info('Hello from renderer!')
+
+// The rest of your Electron renderer code...
+```
+
+That's it. When you run the project, logs from both processes will appear in your main process' console, prefixed with their origin:
+
+```txt
+12:47:56.394 INFO [Main] Hello from main!
+12:47:56.633 INFO [Renderer] Hello from renderer!
+```
+
+Electron support is designed primarily for use with the default log instance — for now, every log instance in the renderer process automatically sends logs to every log instance in the main process, so you can quickly end up with duplicate logs if you have multiple log instances in the main process.
 
 #### Libraries
 
 In your library project, you might create a simple `log.ts` file which creates a logger instance used throughout the library:
+
+`the-library/log.ts`:
 
 ```ts
 import type { ILogBasic, ILogLayer } from '@kitschpatrol/log'
@@ -56,7 +269,9 @@ export function setLogger(logger: ILogBasic | ILogLayer) {
 }
 ```
 
-Then, in a different application project that uses the library, you can use `@kitschpatrol/log` to create another logger instance and inject it into the library:
+Then, in a different project that uses the library, you can use `@kitschpatrol/log` to create another logger instance and inject it into the library:
+
+`the-application.ts`:
 
 ```ts
 import { getChildLogger, log } from '@kitschpatrol/log'
@@ -80,7 +295,9 @@ greet()
 // Logs: "Hello from library! { name: 'child', parentNames: [ 'package-name' ] }"
 ```
 
-If the library consumer doesn't want to use `@kitschpatrol/log`, they can still inject and `Console`-like logger instance into the library to receive messages:
+If the library consumer doesn't want to use `@kitschpatrol/log`, they can still inject and `Console`- or `WritableStream`-like logger instance into the library to receive basic messages without additional dependencies:
+
+`the-application.ts`:
 
 ```ts
 import { greet, setLogger } from 'the-library'
@@ -92,7 +309,9 @@ greet()
 // Logs: "Hello from library! { name: 'Library Name' }"
 ```
 
-Or, since LogLayer provides [many additional transport adapters](https://loglayer.dev/transports/), it's easy for library consumers to integrate with their existing logging infrastructure of choice:
+Or, since LogLayer provides [many additional transport adapters](https://loglayer.dev/transports/), it's easy for library consumers to integrate with their existing logging infrastructure of choice by defining a LogLayer instance to their liking:
+
+`the-application.ts`:
 
 ```ts
 import { PinoTransport } from '@loglayer/transport-pino'
@@ -119,21 +338,45 @@ greet()
 
 ## Background
 
-### Motivation
-
 ### Implementation notes
 
-### Similar projects
+#### Why free functions
 
-## The future
+Why do we have to use free functions to manipulate the default log instance instead of calling `log.options()` or something?
+
+@kitschpatrol/log exposes a standard LogLayer instance so you can trivially ditch @kitschpatrol/log without modifying any of your logging call sites.
+
+This brings a slight compromise in discoverability: Additional configuration management and convenience functions must be provided via procedural-style free functions instead of extensions of the `LogLayer` class itself.
+
+#### Pretty printing objects
+
+In the browser, you can pass objects directly to the console, but logging to a stream requires object serialization, formatting, and colorization.
+
+Many strategies were evaluated for pretty printing: [node:util inspect](https://nodejs.org/api/util.html#utilinspectvalue-options), [node-inspect-extracted](https://github.com/hildjj/node-inspect-extracted), [json-stringify-pretty-compact](https://github.com/lydell/json-stringify-pretty-compact), [pretty-format](https://github.com/facebook/jest/tree/main/packages/pretty-format), [stringify-object](https://github.com/sindresorhus/stringify-object), [loupe](https://github.com/sindresorhus/loupe), [object-inspect](https://github.com/inspect-js/object-inspect), and [tslog](https://github.com/fullstack-build/tslog).
+
+I found that it's hard to improve on node's native inspect implementation for handling unusual object types. A universal port of `inspect` is used for serialization to stream targets in the browser environment.
+
+#### Serializing complex objects for file logs
+
+Many packages exist for serializing complex JavaScript objects into valid JSON, but few are equipped to handle esoteric data types and fewer still emphasize human readability of the output over being parsable back into JavaScript.
+
+Human readability seems more important than reconstructability for the kind of context and metadata objects we're likely to want to log.
+
+I found that [safe-stable-stringify](TK) does a nice job of this in combination with the [serialize-error](TK) package for Error object serialization.
+
+#### Serializing complex objects for Electron IPC
+
+Log objects must be serialized for transport between processes in Electron. Here, we _do_ care about parsability, since the log object must be deserialized before it's passed into the main process' log instance. [SuperJson](TK), [devalue](TK), and [next-json](TK) were evaluated.
+
+Only next-json successfully round-tripped the [nightmare object](TK) used in testing.
 
 ## Maintainers
 
-_List maintainer(s) for a repository, along with one way of contacting them (e.g. GitHub link or email)._
+[@kitschpatrol](https://github.com/kitschpatrol)
 
 ## Acknowledgments
 
-_State anyone or anything that significantly helped with the development of your project. State public contact hyper-links if applicable._
+Thanks to [TK](TK) for developing [LogLayer](TK), and for responding to my questions so quickly and helpfully.
 
 <!-- contributing -->
 
