@@ -18,6 +18,10 @@ interface PrettyBasicTransportConfigInterface extends LogLayerTransportConfig<IL
 	inspect: (object: unknown, options?: InspectOptions) => string
 }
 
+/**
+ * Configuration for the pretty basic transport
+ * @public
+ */
 export type PrettyBasicTransportConfig = PrettyBasicTransportConfigInterface
 
 const PRETTY_BASIC_TRANSPORT_CONFIG_DEFAULTS: Omit<

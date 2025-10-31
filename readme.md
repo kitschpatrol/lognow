@@ -110,7 +110,7 @@ Set to `true` or `false` to enable or disable pretty console logging.
 
 Defaults to `true`.
 
-Aternately, set to any Console-like object to log . (If you don't define the target explicitly, `process.stdout` is used in node and `console` is used in the browser.)
+Alternately, set to any Console-like object to log . (If you don't define the target explicitly, `process.stdout` is used in node and `console` is used in the browser.)
 
 #### `logJsonToFile`
 
@@ -120,7 +120,7 @@ Defaults to `false`.
 
 Logs are stored in the platform-standard location. The files are gzipped and rotated daily, and are never removed.
 
-Complex metadata or context objects not natively representable within the JSON specification are serialized on a best-effort basis, with emphasis on being human-readable rather than being perfectly reconstructable as JavaScript.
+Complex metadata or context objects not natively representable within the JSON specification are serialized on a best-effort basis, with emphasis on being human-readable rather than being perfectly reconstructible as JavaScript.
 
 Alternately, pass a path to a directory to log to the location of your choosing.
 

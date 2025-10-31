@@ -14,6 +14,10 @@ interface JsonBasicTransportConfigInterface extends LogLayerTransportConfig<ILog
 	pretty?: boolean
 }
 
+/**
+ * Configuration for the JSON basic transport
+ * @public
+ */
 export type JsonBasicTransportConfig = JsonBasicTransportConfigInterface
 
 const JSON_BASIC_TRANSPORT_CONFIG_DEFAULTS: Omit<Required<JsonBasicTransportConfig>, 'inspect'> = {

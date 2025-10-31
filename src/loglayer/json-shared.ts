@@ -2,6 +2,10 @@ import type { LogLayerTransportParams } from '@loglayer/transport'
 import { stringify as safeStableStringify } from 'safe-stable-stringify'
 import { serializeError } from 'serialize-error'
 
+/**
+ * Options for paramsToJsonString function
+ * @public
+ */
 export type ParamsToJsonStringOptions = {
 	staticData?: (() => Record<string, unknown>) | Record<string, unknown>
 	timestampFn?: () => number | string
