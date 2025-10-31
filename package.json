@@ -1,18 +1,19 @@
 {
-	"name": "@kitschpatrol/log",
+	"name": "lognow",
 	"version": "0.0.0",
-	"description": "A library project.",
+	"description": "Quick and clean universal logging.",
 	"keywords": [
-		"npm-package",
 		"logging",
 		"loglayer",
-		"log"
+		"log",
+		"electron",
+		"npm-package"
 	],
-	"homepage": "https://github.com/kitschpatrol/log",
-	"bugs": "https://github.com/kitschpatrol/log/issues",
+	"homepage": "https://github.com/kitschpatrol/lognow",
+	"bugs": "https://github.com/kitschpatrol/lognow/issues",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/kitschpatrol/log.git"
+		"url": "git+https://github.com/kitschpatrol/lognow.git"
 	},
 	"license": "MIT",
 	"author": {

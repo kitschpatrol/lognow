@@ -150,7 +150,7 @@ export function createLogger(options?: LogOptions): ILogLayer {
 	if (typeof resolvedOptions.logJsonToFile === 'string' || resolvedOptions.logJsonToFile) {
 		if (platformAdapter.createFileTransport === undefined) {
 			throw new Error(
-				'File logging is only supported in Node.js environments. Import the `@kitschpatrol/log/node` entry point instead.',
+				'File logging is only supported in Node.js environments. Import the `lognow/node` entry point instead.',
 			)
 		}
 

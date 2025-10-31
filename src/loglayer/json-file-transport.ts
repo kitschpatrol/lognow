@@ -9,7 +9,7 @@ function isEmptyObject(value: unknown): value is Record<string, unknown> {
 
 /**
  * Semi-flattened JSON transport for file logging, designed for integration with
- * the \@kitschpatrol/log package. Privileges name, parentNames, and timestamp as top-level keys.
+ * the lognow package. Privileges name, parentNames, and timestamp as top-level keys.
  * Any other context values are nested under a `context` key.
  * Metadata is nested under a `metadata` key.
  * Error is nested under an `error` key, and are serialized using serialize-error.

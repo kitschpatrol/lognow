@@ -2,39 +2,41 @@
 
 <!-- title -->
 
-# @kitschpatrol/log
+# lognow
 
 <!-- /title -->
 
 <!-- badges -->
 
-[![NPM Package @kitschpatrol/log](https://img.shields.io/npm/v/@kitschpatrol/log.svg)](https://npmjs.com/package/@kitschpatrol/log)
+[![NPM Package lognow](https://img.shields.io/npm/v/lognow.svg)](https://npmjs.com/package/lognow)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <!-- /badges -->
 
 <!-- short-description -->
 
-**A library project.**
+**Quick and clean universal logging.**
 
 <!-- /short-description -->
 
 ## Overview
 
-I'd rather not think about logging.
+> [!WARNING]
+>
+> Lognow is under development. It should not be considered suitable for general use until a 1.0 release.
 
-Somehow, no single logging library out there did quite what I wanted, so it's come to this.
+Somehow, no single logging library out there quite worked for my purposes, so it's come to this.
 
-@kitschpatrol/log provides a handful of helpers and turn-key configurations for working with [LogLayer](https://loglayer.dev/) in a consistent and unobtrusive way across my projects.
+Lognow provides a handful of helpers and turn-key configurations for typical logging needs. It's a thin wrapper over the [LogLayer](https://loglayer.dev) project, allowing its use in a consistent, pre-configured, and unobtrusive way across my projects.
 
 It provides:
 
-- Pretty console logs by default with a reasonable amount of metadata, colors, object formatting, error handling, etc.
+- Pretty console logs by default with a reasonable amount of metadata, colorization, object formatting, error handling, etc.
 - Rotating JSONL file logs enabled via a single option flag.
 - A plausible strategy for log dependency injection in library projects and integration with other logging systems.
 - A universal / isomorphic implementation with support for Node.js, web browsers, and Electron.
 
-It's probably most similar aesthetically to [tslog](TK), but with the extra interoperability abstractions provided by [LogLayer](https://loglayer.dev/), and integrated Electron support a la [electron-log](TK).
+It's probably most similar aesthetically to [tslog](https://tslog.js.org), but with the extra interoperability abstractions provided by [LogLayer](https://loglayer.dev), and integrated Electron support a la [electron-log](https://github.com/megahertz/electron-log).
 
 This library is not designed to be infinitely configurable or extensible. Instead, it's designed to cover 95% of my use-cases with a single import, and gets to 99% with a few lines of configuration.
 For the remaining 1% of my logging needs, it makes more sense to just work with LogLayer directly.
@@ -48,7 +50,7 @@ Node 20.19.0+, or any recent web browser.
 ### Installation
 
 ```sh
-npm install --save-dev @kitschpatrol/log
+npm install --save-dev lognow
 ```
 
 ## Usage
@@ -58,51 +60,49 @@ npm install --save-dev @kitschpatrol/log
 Most of the time, it makes sense to just import the default log instance:
 
 ```ts
-import { log } from '@kitschpatrol/log'
+import { log } from 'lognow'
 
 log.info('What hath God wrought?')
 ```
 
-By default, you'll get a timestamped pretty log in the console:
+By default, you'll get a timestamped pretty log in the console or terminal:
 
 ```txt
 12:47:56.394 INFO | What hath God wrought?
 ```
 
-Note that the log isntance's interface is a bit different than a typical `Console` object — it's an `ILogLayer` instance, so instead of passing objects and metadata directly to the logging method, additional methods are chained together to separate message strings from metadata or context objects.
+Note that the log instance's interface is a bit different than a typical `Console` object — it's a LogLayer `ILogLayer` instance, so instead of passing objects and metadata directly to the logging method, additional methods are chained together to separate message strings from metadata or context objects.
 
-This is a bit of extra work, but it disambiguates your logging intent in such a way that future interoperability with different logging targets is guaranteed to work as intended.
-
-For example:
+A quick example:
 
 ```ts
-import { log } from '@kitschpatrol/log'
+import { log } from 'lognow'
 
 log.withMetadata({ energy: 2, mood: 3 }).info('vibe check')
 ```
 
 ```txt
-15:09:21.011 INFO  [@kitschpatrol/log] vibe check
+15:09:21.011 INFO | vibe check
 { mood: 3, energy: 2 }
 ```
 
-See the [LogLayer docs](TK) for a full description of the interface.
+This is a bit of extra work, but it disambiguates your logging intent in such a way that future interoperability with different logging targets is assured.
+
+See the [LogLayer docs](https://loglayer.dev) for a full description of the interface.
 
 ### Options
 
-@kitschpatrol/log has just five options:
+Lognow has just five options:
 
 #### `name`
 
 Set the name of the logger, which is used as a prefix in messages logged to a console, and as extra metadata in logs written to files.
 
-Default behavior depends on your runtime context:
+The default behavior depends on your runtime context:
 
-Browser projects default to undefined.
-
-Node projects with a `package.json` will default to the package name.
-
-Electron projects default to `"Main"` for the main process and `"Renderer"` for the render process.
+- Browser projects default to undefined.
+- Node projects with a `package.json` will default to the package name.
+- Electron projects default to `"Main"` for the main process and `"Renderer"` for the renderer process.
 
 #### `logToConsole`
 
@@ -145,7 +145,7 @@ Defaults to `false`.
 Use `setDefaultLogOptions()` to set options on the default log instance.
 
 ```ts
-import { log, setDefaultLogOptions } from '@kitschpatrol/log'
+import { log, setDefaultLogOptions } from 'lognow'
 
 setDefaultLogOptions({
   logJsonToConsole: true,
@@ -167,7 +167,7 @@ Will log:
 Use `createLogger()` to set options on a new custom logger instance. Defaults are assumed for any undefined options.
 
 ```ts
-import { createLogger } from '@kitschpatrol/log'
+import { createLogger } from 'lognow'
 
 const customLog = createLogger({
   name: 'custom',
@@ -191,7 +191,7 @@ Note that only the default log instance's configuration is mutable (via `setDefa
 By default, log files are stored in the typical logging directory for your platform:
 
 ```ts
-import { log, setDefaultLogOptions } from '@kitschpatrol/log'
+import { log, setDefaultLogOptions } from 'lognow'
 
 setDefaultLogOptions({
   logJsonToFile: true,
@@ -205,12 +205,12 @@ On macOS, this will write to `~/Library/Logs/My Application/`.
 
 ### Electron
 
-@kitschpatrol/log automatically manages inter-process communication in Electron applications to merge any logs from the render process into your main process' log stream.
+Lognow automatically manages inter-process communication in Electron applications to merge any logs from the render process into your main process' log stream.
 
-In your main process, e.g. `main.js`, grab the default log instance like you would in any other context — the only difference is that you explicitly import from the `@kitschpatrol/log/electron` export instead:
+In your main process, e.g. `main.js`, grab the default log instance like you would in any other context — the only difference is that you explicitly import from the `lognow/electron` export instead:
 
 ```ts
-import { log } from '@kitschpatrol/log/electron'
+import { log } from 'lognow/electron'
 
 log.info('Hello from main!')
 
@@ -220,15 +220,15 @@ log.info('Hello from main!')
 When you want to log from the renderer, add the following to your preload script, e.g. `preload.js`. This sets up an inter-process-communication (IPC) channel to ship messages from the renderer to the main process:
 
 ```ts
-import '@kitschpatrol/log/electron/preload'
+import 'lognow/electron/preload'
 
 // The rest of your Electron preload code...
 ```
 
-Then, in your renderer / browser code, use the default `@kitschpatrol/log/electron` log export as usual:
+Then, in your renderer / browser code, use the default `lognow/electron` log export as usual:
 
 ```ts
-import { log } from '@kitschpatrol/log/electron'
+import { log } from 'lognow/electron'
 
 log.info('Hello from renderer!')
 
@@ -251,8 +251,8 @@ In your library project, you might create a simple `log.ts` file which creates a
 `the-library/log.ts`:
 
 ```ts
-import type { ILogBasic, ILogLayer } from '@kitschpatrol/log'
-import { createLogger, injectionHelper } from '@kitschpatrol/log'
+import type { ILogBasic, ILogLayer } from 'lognow'
+import { createLogger, injectionHelper } from 'lognow'
 
 /**
  * The default logger instance for the module. Configure log settings here.
@@ -264,26 +264,24 @@ export let log = createLogger({ name: 'Library Name' })
  * Export this for library consumers.
  * @param logger - Accepts either a LogLayer instance or a target with typical Console-like logging methods.
  */
-export function setLogger(logger: ILogBasic | ILogLayer) {
+export function setLogger(logger: ILogBasic | ILogLayer | undefined) {
   log = injectionHelper(logger)
 }
 ```
 
-Then, in a different project that uses the library, you can use `@kitschpatrol/log` to create another logger instance and inject it into the library:
+Then, in a different project that uses the library, you can use `lognow` to create another logger instance and inject it into the library:
 
 `the-application.ts`:
 
 ```ts
-import { getChildLogger, log } from '@kitschpatrol/log'
+import { getChildLogger, log } from 'lognow'
 import { greet, setLogger } from 'the-library'
 
-// The library we've imported had its own @kitschpatrol/log instance:
+// The library we've imported has its own lognow instance:
 greet()
-// Logs: "Hello from library! { name: 'Library Name' }""
 
 // In our application, we can use the default logger:
 log.info('Hello from application!')
-// Logs: "Hello from application! { name: 'package-name' }"
 
 // We can create and attach a child logger to the default logger,
 // and then inject it into the library to override its internal transports.
@@ -292,10 +290,9 @@ setLogger(getChildLogger(log, 'child'))
 // Now the library logs run through the application's logger,
 // with the chain of inheritance in the context object.
 greet()
-// Logs: "Hello from library! { name: 'child', parentNames: [ 'package-name' ] }"
 ```
 
-If the library consumer doesn't want to use `@kitschpatrol/log`, they can still inject and `Console`- or `WritableStream`-like logger instance into the library to receive basic messages without additional dependencies:
+If the library consumer doesn't want to use `lognow`, they can still inject a `Console`- or `WritableStream`-like logger instance into the library to receive basic messages without additional dependencies:
 
 `the-application.ts`:
 
@@ -306,10 +303,9 @@ setLogger(console)
 
 // Now the library's logs go straight to the passed `console` instance:
 greet()
-// Logs: "Hello from library! { name: 'Library Name' }"
 ```
 
-Or, since LogLayer provides [many additional transport adapters](https://loglayer.dev/transports/), it's easy for library consumers to integrate with their existing logging infrastructure of choice by defining a LogLayer instance to their liking:
+Or, since LogLayer provides [many additional transport adapters](https://loglayer.dev/transports), it's easy for library consumers to integrate with their existing logging infrastructure of choice by defining a LogLayer instance to their liking:
 
 `the-application.ts`:
 
@@ -344,7 +340,7 @@ greet()
 
 Why do we have to use free functions to manipulate the default log instance instead of calling `log.options()` or something?
 
-@kitschpatrol/log exposes a standard LogLayer instance so you can trivially ditch @kitschpatrol/log without modifying any of your logging call sites.
+lognow exposes a standard LogLayer instance so you can trivially ditch lognow without modifying any of your logging call sites.
 
 This brings a slight compromise in discoverability: Additional configuration management and convenience functions must be provided via procedural-style free functions instead of extensions of the `LogLayer` class itself.
 
@@ -362,13 +358,13 @@ Many packages exist for serializing complex JavaScript objects into valid JSON, 
 
 Human readability seems more important than reconstructability for the kind of context and metadata objects we're likely to want to log.
 
-I found that [safe-stable-stringify](TK) does a nice job of this in combination with the [serialize-error](TK) package for Error object serialization.
+I found that [safe-stable-stringify](https://github.com/BridgeAR/safe-stable-stringify) does a nice job of this in combination with the [serialize-error](https://github.com/sindresorhus/serialize-error) package for Error object serialization.
 
 #### Serializing complex objects for Electron IPC
 
-Log objects must be serialized for transport between processes in Electron. Here, we _do_ care about parsability, since the log object must be deserialized before it's passed into the main process' log instance. [SuperJson](TK), [devalue](TK), and [next-json](TK) were evaluated.
+Log objects must be serialized for transport between processes in Electron. Here, we _do_ care about parsability, since the log object must be deserialized before it's passed into the main process' log instance. [SuperJson](https://github.com/flightcontrolhq/superjson), [devalue](https://github.com/Rich-Harris/devalue), and [next-json](https://github.com/iccicci/next-json) were evaluated.
 
-Only next-json successfully round-tripped the [nightmare object](TK) used in testing.
+Only next-json successfully round-tripped the [nightmare object](https://github.com/kitschpatrol/lognow/blob/main/test/assets/nightmare-object.ts) used in testing.
 
 ## Maintainers
 
@@ -376,13 +372,13 @@ Only next-json successfully round-tripped the [nightmare object](TK) used in tes
 
 ## Acknowledgments
 
-Thanks to [TK](TK) for developing [LogLayer](TK), and for responding to my questions so quickly and helpfully.
+Thanks to [Theo Gravity](https://suteki.nu) for developing [LogLayer](https://loglayer.dev), and for responding to my questions so quickly and helpfully.
 
 <!-- contributing -->
 
 ## Contributing
 
-[Issues](https://github.com/kitschpatrol/log/issues) and pull requests are welcome.
+[Issues](https://github.com/kitschpatrol/lognow/issues) and pull requests are welcome.
 
 <!-- /contributing -->
 
