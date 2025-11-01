@@ -60,7 +60,7 @@
 		"dist/*"
 	],
 	"scripts": {
-		"build": "tsdown",
+		"build": "tsdown && tsc -p tsconfig.build.json",
 		"clean": "git rm -f pnpm-lock.yaml ; git clean -fdX",
 		"fix": "ksc fix",
 		"lint": "ksc lint",

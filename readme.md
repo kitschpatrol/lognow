@@ -25,9 +25,9 @@
 >
 > Lognow is under development. It should not be considered suitable for general use until a 1.0 release.
 
-Somehow, no single logging library out there quite worked for my purposes, so it's come to this.
+Somehow, no single logging library out there quite worked for my purposes... so it's come to this.
 
-Lognow provides a handful of helpers and turn-key configurations for typical logging needs. It's a thin wrapper over the [LogLayer](https://loglayer.dev) project, allowing its use in a consistent, pre-configured, and unobtrusive way across my projects.
+Lognow provides a handful of helpers and turn-key configurations for (my) typical logging needs. It's a thin wrapper over the [LogLayer](https://loglayer.dev) project, allowing its use in a consistent, pre-configured, and unobtrusive way.
 
 It provides:
 
@@ -137,6 +137,15 @@ This is just a shortcut for setting the log level.
 If `true`, all logs are shown regardless of level. If `false`, only `info` and higher logs are shown.
 
 Defaults to `false`.
+
+| Level   | Priority | Verbose: False | Verbose: True |
+| ------- | -------- | -------------- | ------------- |
+| `trace` | 10       | ❌             | ✅            |
+| `debug` | 20       | ❌             | ✅            |
+| `info`  | 30       | ✅             | ✅            |
+| `warn`  | 40       | ✅             | ✅            |
+| `error` | 50       | ✅             | ✅            |
+| `fatal` | 60       | ✅             | ✅            |
 
 ### Configuration
 
