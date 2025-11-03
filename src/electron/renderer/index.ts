@@ -19,4 +19,7 @@ export {
 } from '../../log.js'
 
 export { HierarchicalContextManager } from '../../loglayer/hierarchical-context-manager.js'
+export type { JsonBasicTransportConfig } from '../../loglayer/json-basic-transport.js'
+export type { JsonFileTransportConfig } from '../../loglayer/json-file-transport.js'
+export type { PrettyBasicTransportConfig } from '../../loglayer/pretty-basic-transport.js'
 export * as LogLayerModule from 'loglayer'
