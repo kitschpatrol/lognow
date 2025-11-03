@@ -49,13 +49,14 @@ function stripTimestamp(object: Record<string, unknown>): Record<string, unknown
 			if (Array.isArray(value)) {
 				return [
 					key,
-					value.map((item) =>
+					value.map((item) => {
+						if (item && typeof item === 'object' && !Array.isArray(item)) {
+							// eslint-disable-next-line ts/no-unsafe-type-assertion
+							return stripTimestamp(item as Record<string, unknown>)
+						}
 						// eslint-disable-next-line ts/no-unsafe-return
-						item && typeof item === 'object' && !Array.isArray(item)
-							? // eslint-disable-next-line ts/no-unsafe-type-assertion
-								stripTimestamp(item as Record<string, unknown>)
-							: item,
-					),
+						return item
+					}),
 				]
 			}
 

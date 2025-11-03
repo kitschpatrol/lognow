@@ -11,6 +11,10 @@ export default eslintConfig(
 						allowed: ['read-package-up'],
 					},
 				],
+				// Disabled due to bug in @typescript-eslint/eslint-plugin where it
+				// fails on certain type constructs
+				// Error: "typeParameters.params is not iterable"
+				'ts/unified-signatures': 'off',
 			},
 		},
 		type: 'lib',
