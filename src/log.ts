@@ -428,12 +428,27 @@ export function defaultInspector(object: unknown): string {
 	}
 }
 
+function isEnvDefined(value: string): boolean {
+	if (typeof process !== 'undefined') {
+		return process.env[value] !== undefined
+	}
+	if (typeof globalThis !== 'undefined' && 'process' in globalThis && 'env' in globalThis.process) {
+		return globalThis.process.env[value] !== undefined
+	}
+	// eslint-disable-next-line unicorn/prefer-global-this
+	if (typeof window !== 'undefined' && 'process' in window && 'env' in window.process) {
+		// eslint-disable-next-line unicorn/prefer-global-this
+		return window.process.env[value] !== undefined
+	}
+	return false
+}
+
 /**
  * Check if the NO_COLOR environment variable is set
  * https://no-color.org/
  */
 export function isNoColorSet(): boolean {
-	return process.env.NO_COLOR !== undefined
+	return isEnvDefined('NO_COLOR')
 }
 
 /**
@@ -441,12 +456,12 @@ export function isNoColorSet(): boolean {
  * https://force-color.org/
  */
 export function isForceColorSet(): boolean {
-	return process.env.FORCE_COLOR !== undefined
+	return isEnvDefined('FORCE_COLOR')
 }
 
 /**
  * Check if the DEBUG environment variable is set
  */
 function isDebugSet(): boolean {
-	return process.env.DEBUG !== undefined
+	return isEnvDefined('DEBUG')
 }

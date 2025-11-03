@@ -5,7 +5,7 @@ import { contextBridge, ipcRenderer } from 'electron'
  */
 export function preload() {
 	contextBridge.exposeInMainWorld('logToMain', (message: string) => {
-		ipcRenderer.send('kitschpatrol-log', message)
+		ipcRenderer.send('lognow-electron-channel', message)
 	})
 }
 

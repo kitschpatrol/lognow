@@ -10,7 +10,7 @@ function getName(): string | undefined {
 }
 
 function createElectronListener(logger: ILogLayer): void {
-	ipcMain.on('kitschpatrol-log', (_, message: string) => {
+	ipcMain.on('lognow-electron-channel', (_, message: string) => {
 		const params = NJSON.parse<LogLayerTransportParams>(message)
 
 		logger.raw({
@@ -23,6 +23,7 @@ function createElectronListener(logger: ILogLayer): void {
 		})
 	})
 }
+
 export const electronMainPlatformAdapter: PlatformAdapter = {
 	createElectronListener,
 	createFileTransport,
