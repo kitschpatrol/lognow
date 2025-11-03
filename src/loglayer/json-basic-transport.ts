@@ -3,7 +3,13 @@ import type { InspectOptions } from 'node-inspect-extracted'
 import { BaseTransport, LogLevel } from '@loglayer/transport'
 import { defu } from 'defu'
 import type { ILogBasic, LogBasicTypedTarget } from '../log'
-import { createLogBasicTypedTarget, defaultInspector, isNoColorSet, pickLogTarget } from '../log'
+import {
+	createLogBasicTypedTarget,
+	defaultInspector,
+	isForceColorSet,
+	isNoColorSet,
+	pickLogTarget,
+} from '../log'
 import { paramsToJsonString } from './json-shared'
 
 // Dance to make the config interface convertible to a type
@@ -52,6 +58,10 @@ export class JsonBasicTransport extends BaseTransport<ILogBasic> {
 
 		if (isNoColorSet()) {
 			resolvedConfig.colorize = false
+		}
+
+		if (isForceColorSet()) {
+			resolvedConfig.colorize = true
 		}
 
 		super(resolvedConfig)

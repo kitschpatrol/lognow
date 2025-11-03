@@ -430,9 +430,18 @@ export function defaultInspector(object: unknown): string {
 
 /**
  * Check if the NO_COLOR environment variable is set
+ * https://no-color.org/
  */
 export function isNoColorSet(): boolean {
 	return process.env.NO_COLOR !== undefined
+}
+
+/**
+ * Check if the FORCE_COLOR environment variable is set
+ * https://force-color.org/
+ */
+export function isForceColorSet(): boolean {
+	return process.env.FORCE_COLOR !== undefined
 }
 
 /**

@@ -195,7 +195,7 @@ Note that only the default log instance's configuration is mutable (via `setDefa
 
 #### Environment configuration
 
-In node-like environments, Lognow respects the [`NO_COLOR`](https://no-color.org/) environment variable to disable colorization, and `DEBUG` to enable verbose logging. These environment variables override any code-level configuration.
+In node-like environments, Lognow respects the [`NO_COLOR`](https://no-color.org/) and [`FORCE_COLOR`](https://force-color.org/) environment variables to disable or enable colorization (with the latter taking precedence if both are set), and `DEBUG` to enable verbose logging. These environment variables override any code-level configuration.
 
 ## Examples
 
@@ -353,7 +353,7 @@ greet()
 
 Why do we have to use free functions to manipulate the default log instance instead of calling `log.options()` or something?
 
-lognow exposes a standard LogLayer instance so you can trivially ditch lognow without modifying any of your logging call sites.
+Lognow exposes a standard LogLayer instance so you can trivially ditch lognow without modifying any of your logging call sites.
 
 This brings a slight compromise in discoverability: Additional configuration management and convenience functions must be provided via procedural-style free functions instead of extensions of the `LogLayer` class itself.
 
@@ -369,7 +369,7 @@ I found that it's hard to improve on node's native inspect implementation for ha
 
 Many packages exist for serializing complex JavaScript objects into valid JSON, but few are equipped to handle esoteric data types and fewer still emphasize human readability of the output over being parsable back into JavaScript.
 
-Human readability seems more important than reconstructability for the kind of context and metadata objects we're likely to want to log.
+Human readability seems more important than parsability for the kind of context and metadata objects we're likely to want to log.
 
 I found that [safe-stable-stringify](https://github.com/BridgeAR/safe-stable-stringify) does a nice job of this in combination with the [serialize-error](https://github.com/sindresorhus/serialize-error) package for Error object serialization.
 
