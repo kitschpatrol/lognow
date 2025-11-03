@@ -50,7 +50,30 @@ Node 20.19.0+, or any recent web browser.
 ### Installation
 
 ```sh
-npm install --save-dev lognow
+npm install lognow
+```
+
+### Quick Start
+
+```ts
+import { log } from 'lognow'
+
+// Simple logging
+log.info('Hello, world!')
+
+// With metadata
+log.withMetadata({ action: 'login', userId: '123' }).info('User logged in')
+
+// With persistent context
+log.withContext({ requestId: 'req-456' })
+log.info('Processing request')
+log.info('Request completed')
+// Both logs include the requestId context
+
+// Different log levels
+log.debug('Debug message')
+log.warn('Warning message')
+log.error('Error message')
 ```
 
 ## Usage
@@ -71,7 +94,9 @@ By default, you'll get a timestamped pretty log in the console or terminal:
 12:47:56.394 INFO | What hath God wrought?
 ```
 
-Note that the log instance's interface is a bit different than a typical `Console` object — it's a LogLayer `ILogLayer` instance, so instead of passing objects and metadata directly to the logging method, additional methods are chained together to separate message strings from metadata or context objects.
+> [!IMPORTANT]
+>
+> The log instance's interface is a bit different than a typical `Console` object — it's a LogLayer `ILogLayer` instance, so instead of passing objects and metadata directly to the logging method, additional methods are chained together to separate message strings from metadata or context objects.
 
 A quick example:
 
@@ -89,6 +114,79 @@ log.withMetadata({ energy: 2, mood: 3 }).info('vibe check')
 This is a bit of extra work, but it disambiguates your logging intent in such a way that future interoperability with different logging targets is assured.
 
 See the [LogLayer docs](https://loglayer.dev) for a full description of the interface.
+
+### Log Levels
+
+Lognow supports six log levels, from least to most severe:
+
+```ts
+import { log } from 'lognow'
+
+log.trace('Detailed debugging information')
+log.debug('General debugging information')
+log.info('Informational messages')
+log.warn('Warning messages')
+log.error('Error messages')
+log.fatal('Fatal error messages')
+```
+
+By default, only `info` and above are displayed. Use the `verbose` option to show all levels (see [Configuration](#configuration) below).
+
+### Logging Errors
+
+Errors are automatically formatted with stack traces:
+
+```ts
+import { log } from 'lognow'
+
+try {
+  throw new Error('Something went wrong!')
+} catch (error) {
+  log.error('Failed to process request', error)
+}
+```
+
+```txt
+15:09:21.011 ERROR | Failed to process request
+Error: Something went wrong!
+    at Object.<anonymous> (/path/to/file.ts:4:9)
+    ...
+```
+
+### Context vs Metadata
+
+The underlying LogLayer library provides two basic ways to attach data to your logs:
+
+- **`withMetadata()`** - Attaches data to a single log entry
+- **`withContext()`** - Adds context to the logger instance itself, which persists across all subsequent log calls on that instance
+
+```ts
+import { log } from 'lognow'
+
+// Metadata: attached to one log only
+log.withMetadata({ requestId: '123' }).info('Processing request')
+log.info('This log has no metadata')
+
+// Context: modifies the logger instance
+log.withContext({ requestId: '123', userId: '456' })
+log.info('Starting request')
+log.info('Request completed')
+// Both logs will include the context (requestId and userId)
+```
+
+### Multiple Messages
+
+You can pass multiple messages to a single log call, but they must be a primitive type (objects need to be passed as metadata or context):
+
+```ts
+import { log } from 'lognow'
+
+log.info('User logged in', 'Session started', 'Welcome email sent')
+```
+
+```txt
+15:09:21.011 INFO | User logged in Session started Welcome email sent
+```
 
 ### Options
 
@@ -110,11 +208,11 @@ Set to `true` or `false` to enable or disable pretty console logging.
 
 Defaults to `true`.
 
-Alternately, set to any Console-like object to log, or a partial `PrettyBasicTransportConfig` object to override the default configuration. (If you don't define the target explicitly, `process.stdout` is used in node and `console` is used in the browser.)
+Alternately, set to any Console- or Stream-like log target, or a partial `PrettyBasicTransportConfig` object to override the default configuration. (If you don't define a log target explicitly, `process.stdout` is used in Node.js and `console` is used in the browser.)
 
 #### `logJsonToFile`
 
-Set to `true` or `false` to enable or disable file logging. This is identical to the serialized JSON that's sent to the log file when `logJsonToFile` is enabled.
+Set to `true` or `false` to enable or disable file logging. When enabled, logs are written as newline-delimited JSON (JSONL) to disk.
 
 Defaults to `false`.
 
@@ -126,9 +224,11 @@ Alternately, pass a path to a directory to log to the location of your choosing,
 
 #### `logJsonToConsole`
 
-Set to `true` or `false` to enable or disable pretty console logging. This is identical to the serialized JSON that's sent to the log file when `logJsonToFile` is enabled. Alternately, set to any Console-like object to log, or a partial `JsonBasicTransportConfig` object to override the default configuration.
+Set to `true` or `false` to enable or disable JSON console logging. When enabled, logs are written as JSON strings to the console.
 
 Defaults to `false`.
+
+Alternately, set to any Console- or Stream-like log target, or a partial `JsonBasicTransportConfig` object to override the default configuration.
 
 #### `verbose`
 
@@ -195,7 +295,26 @@ Note that only the default log instance's configuration is mutable (via `setDefa
 
 #### Environment configuration
 
-In node-like environments, Lognow respects the [`NO_COLOR`](https://no-color.org/) and [`FORCE_COLOR`](https://force-color.org/) environment variables to disable or enable colorization (with the latter taking precedence if both are set), and `DEBUG` to enable verbose logging. These environment variables override any code-level configuration.
+In Node.js-like environments, Lognow respects several environment variables:
+
+- [`NO_COLOR`](https://no-color.org/) - Disables colorization in console output
+- [`FORCE_COLOR`](https://force-color.org/) - Enables colorization (takes precedence over `NO_COLOR` if both are set)
+- `DEBUG` - Enables verbose logging (equivalent to `verbose: true`)
+
+These environment variables override any code-level configuration.
+
+Example:
+
+```bash
+# Disable colors
+NO_COLOR=1 node your-app.js
+
+# Enable verbose logging
+DEBUG=1 node your-app.js
+
+# Force colors and verbose logging
+FORCE_COLOR=1 DEBUG=1 node your-app.js
+```
 
 ## Examples
 
@@ -215,10 +334,45 @@ log.info('File this away')
 ```
 
 On macOS, this will write to `~/Library/Logs/My Application/`.
+On Linux, logs are written to `~/.local/state/My Application/logs/`.
+On Windows, logs are written to `%LOCALAPPDATA%\My Application\logs\`.
+
+### Custom Log Directory
+
+Specify a custom directory for log files:
+
+```ts
+import { log, setDefaultLogOptions } from 'lognow'
+
+setDefaultLogOptions({
+  logJsonToFile: '/logs',
+  name: 'My Application',
+})
+
+log.info('This will be logged to /logs')
+```
+
+### Dual Output: Console and File
+
+Log to both console and file simultaneously:
+
+```ts
+import { log, setDefaultLogOptions } from 'lognow'
+
+setDefaultLogOptions({
+  logJsonToFile: true, // Structured logs in file
+  logToConsole: true, // Pretty logs in console
+  name: 'My Application',
+})
+
+log.info('Logged to both console and file')
+// Console: "12:47:56.394 INFO [My Application] Logged to both console and file"
+// File: {"level":"info","messages":[...], "name":"My Application",...}
+```
 
 ### Electron
 
-Lognow automatically manages inter-process communication in Electron applications to merge any logs from the render process into your main process' log stream.
+Lognow automatically manages inter-process communication in Electron applications to merge any logs from the renderer process into your main process' log stream.
 
 In your main process, e.g. `main.js`, grab the default log instance like you would in any other context — the only difference is that you explicitly import from the `lognow/electron` export instead:
 
@@ -255,11 +409,19 @@ That's it. When you run the project, logs from both processes will appear in you
 12:47:56.633 INFO [Renderer] Hello from renderer!
 ```
 
+> [!WARNING]
+>
+> Timestamps reflect the time of the log entry in the originating process, not the time of the log entry in the receiving process, so timestamps in the main process' console might appear out of order.
+
 Electron support is designed primarily for use with the default log instance — for now, every log instance in the renderer process automatically sends logs to every log instance in the main process, so you can quickly end up with duplicate logs if you have multiple log instances in the main process.
 
-#### Libraries
+### Libraries
 
-In your library project, you might create a simple `log.ts` file which creates a logger instance used throughout the library:
+If you're building a library that others will use, you can use Lognow with dependency injection to allow consumers to integrate with their own logging systems.
+
+#### Step 1: Create a logger in your library
+
+In your library project, create a simple `log.ts` utility file which creates a logger instance used throughout the library:
 
 `the-library/log.ts`:
 
@@ -268,21 +430,44 @@ import type { ILogBasic, ILogLayer } from 'lognow'
 import { createLogger, injectionHelper } from 'lognow'
 
 /**
- * The default logger instance for the module. Configure log settings here.
+ * The default logger instance for the module.
+ * Configure log settings here.
+ * Exported for use throughout the library.
  */
-export let log = createLogger({ name: 'Library Name' })
+export let log = createLogger({ name: 'YourLibrary' })
 
 /**
- * Set the logger instance for the module. Useful for dependency injection.
- * Export this for library consumers.
- * @param logger - Accepts either a LogLayer instance or a target with typical Console-like logging methods.
+ * Set the logger instance for the module.
+ * Export this for library consumers to inject their own logger.
+ * @param logger - Accepts either a LogLayer instance or a Console- or Stream-like log target
  */
 export function setLogger(logger: ILogBasic | ILogLayer | undefined) {
   log = injectionHelper(logger)
 }
 ```
 
-Then, in a different project that uses the library, you can use `lognow` to create another logger instance and inject it into the library:
+Then use this logger throughout your library:
+
+`the-library/index.ts`:
+
+```ts
+import { log } from './log.js'
+
+/**
+ * A function that uses the library's logger
+ */
+export function greet(name: string) {
+  log.info('Greeting user', name)
+  return `Hello, ${name}!`
+}
+
+// Export the setLogger function so consumers can inject their own logger
+export { setLogger } from './log.js'
+```
+
+#### Step 2: Inject a logger from the consuming application
+
+In a different project that uses the library, you can inject a logger instance:
 
 `the-application.ts`:
 
