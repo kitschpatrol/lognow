@@ -16,14 +16,14 @@ importers:
         specifier: ^5.7.4
         version: 5.7.4(@types/estree@1.0.8)(@types/node@20.19.24)(@typescript-eslint/utils@8.46.2(eslint@9.38.0(jiti@2.6.1))(typescript@5.9.3))(jiti@2.6.1)(postcss-html@1.8.0)(svelte@5.43.2)(typescript@5.9.3)(vitest@4.0.5(@types/debug@4.1.12)(@types/node@20.19.24)(jiti@2.6.1)(yaml@2.8.1))
       '@loglayer/context-manager':
-        specifier: ^1.1.6
-        version: 1.1.6
+        specifier: ^1.1.7
+        version: 1.1.7
       '@loglayer/transport':
-        specifier: ^2.3.4
-        version: 2.3.4
+        specifier: ^2.3.5
+        version: 2.3.5
       '@loglayer/transport-log-file-rotation':
-        specifier: ^2.1.7
-        version: 2.1.7
+        specifier: ^2.1.8
+        version: 2.1.8
       ansi-colors:
         specifier: ^4.1.3
         version: 4.1.3
@@ -40,8 +40,8 @@ importers:
         specifier: ^7.0.0
         version: 7.0.0
       loglayer:
-        specifier: ^6.10.0
-        version: 6.10.0
+        specifier: ^7.1.0
+        version: 7.1.0
       next-json:
         specifier: ^0.5.0
         version: 0.5.0
@@ -63,9 +63,6 @@ importers:
       tsdown:
         specifier: ^0.15.12
         version: 0.15.12(oxc-resolver@11.12.0)(typescript@5.9.3)
-      type-fest:
-        specifier: ^5.1.0
-        version: 5.1.0
       typescript:
         specifier: ~5.9.3
         version: 5.9.3
@@ -776,24 +773,24 @@ packages:
     peerDependencies:
       typescript: ^5.8.3
 
-  '@loglayer/context-manager@1.1.6':
-    resolution: {integrity: sha512-kntdCN9MtNctoMpDBMk9D1begChINbdYJNso5YLB0bbKNIy819rKfarSn7Xmtcq0aBxFUHPp04wj6XnvWseFOQ==}
+  '@loglayer/context-manager@1.1.7':
+    resolution: {integrity: sha512-3aWDBb5l3plFfua8FjM5XcgJjNBmAIM/3915njFRxwtoZ6DSCw7sTdM2Tdn0NLsCErOL/qNS8L3T/RUW1VIGaw==}
     engines: {node: '>=18'}
 
-  '@loglayer/plugin@2.1.6':
-    resolution: {integrity: sha512-jZWnExpiYl+BefpiZC34/Finuu9fucxkPfz6re0xF1cUSOmZjy3fGeQtB+zVFYQz7mf6bWbN8dn5z22cH+Hdug==}
+  '@loglayer/plugin@2.1.7':
+    resolution: {integrity: sha512-z8qWKyAwIQHe3iWQgQ+6p5ksEHufPi/ehYRqbIBKuHbVKksk1WcHm3A4cRz1uDlju8gF15aPJhrofWSgaC/vNw==}
     engines: {node: '>=18'}
 
-  '@loglayer/shared@2.5.3':
-    resolution: {integrity: sha512-KT8ic1wWstCKOjZNR6Vqpk9rK7PPx/QPjGhfqePGYjo6l9R94mSHry+zdtYjIrIPvQHbnzsp/wd6lj6IvD3MvQ==}
+  '@loglayer/shared@2.6.0':
+    resolution: {integrity: sha512-KBKU8gamgBSi8WCknfnIZMoZXcBzFiSdWwlG5k82iyODTdPw9q/fby4GDLkbt3h0NmFw+6fpwt5Cdqx3btPX6w==}
     engines: {node: '>=18'}
 
-  '@loglayer/transport-log-file-rotation@2.1.7':
-    resolution: {integrity: sha512-JB4fOaCxPUUdLO9GrJLnTUCnk+Yn/iY8VdoaZAP18OLMiTUAEqDncoCeMmPVtrj3OgFzohoAOd0EYgqxvZlKBg==}
+  '@loglayer/transport-log-file-rotation@2.1.8':
+    resolution: {integrity: sha512-pm3NpMPV1C00gVBMEeNj12552JF9xue4f9k5kwoAQjs/N8vdY0WujvHTW3B+RzOf9HvSAHle5TLpsHqgc+oqag==}
     engines: {node: '>=18'}
 
-  '@loglayer/transport@2.3.4':
-    resolution: {integrity: sha512-SHvaex987nfqV9hNj/KEMEnE7SwtDa5YwxqXbZNEtWDSWimn6agHyce73/qJC86GVrtOJmLj2HMii9JdKeZozw==}
+  '@loglayer/transport@2.3.5':
+    resolution: {integrity: sha512-lWRf8Mu+6ORKgqh7K76QsuOIggXAsVkMZ5tz7adzJkdGSDdqjokalVykoXSI44wPsVqWDrAU6wFNzHN7hRVi9g==}
     engines: {node: '>=18'}
 
   '@napi-rs/wasm-runtime@0.2.12':
@@ -3260,8 +3257,8 @@ packages:
   lodash@4.17.21:
     resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
 
-  loglayer@6.10.0:
-    resolution: {integrity: sha512-EOxAzIiyzmfdXjCiwLWzPl9Syxt2ds+8w4tkdeC3TzSXnKzPcD4dc6vh8JRBO37BE6kiQhXWXrxJMqZ0BWi1fQ==}
+  loglayer@7.1.0:
+    resolution: {integrity: sha512-39FT5avMkp4DrbI8hlx98xYYhrnEARNH4pqzxiBiblflS/UByA92UV6b9yIxgT4bcWml2KoLn+TV89EC/zfZug==}
     engines: {node: '>=18'}
 
   longest-streak@3.1.0:
@@ -6066,24 +6063,24 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
-  '@loglayer/context-manager@1.1.6':
+  '@loglayer/context-manager@1.1.7':
     dependencies:
-      '@loglayer/shared': 2.5.3
+      '@loglayer/shared': 2.6.0
 
-  '@loglayer/plugin@2.1.6':
+  '@loglayer/plugin@2.1.7':
     dependencies:
-      '@loglayer/shared': 2.5.3
+      '@loglayer/shared': 2.6.0
 
-  '@loglayer/shared@2.5.3': {}
+  '@loglayer/shared@2.6.0': {}
 
-  '@loglayer/transport-log-file-rotation@2.1.7':
+  '@loglayer/transport-log-file-rotation@2.1.8':
     dependencies:
-      '@loglayer/transport': 2.3.4
+      '@loglayer/transport': 2.3.5
       file-stream-rotator: 1.0.0
 
-  '@loglayer/transport@2.3.4':
+  '@loglayer/transport@2.3.5':
     dependencies:
-      '@loglayer/shared': 2.5.3
+      '@loglayer/shared': 2.6.0
 
   '@napi-rs/wasm-runtime@0.2.12':
     dependencies:
@@ -8817,12 +8814,12 @@ snapshots:
 
   lodash@4.17.21: {}
 
-  loglayer@6.10.0:
+  loglayer@7.1.0:
     dependencies:
-      '@loglayer/context-manager': 1.1.6
-      '@loglayer/plugin': 2.1.6
-      '@loglayer/shared': 2.5.3
-      '@loglayer/transport': 2.3.4
+      '@loglayer/context-manager': 1.1.7
+      '@loglayer/plugin': 2.1.7
+      '@loglayer/shared': 2.6.0
+      '@loglayer/transport': 2.3.5
 
   longest-streak@3.1.0: {}
 

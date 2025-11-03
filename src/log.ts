@@ -438,6 +438,6 @@ export function isNoColorSet(): boolean {
 /**
  * Check if the DEBUG environment variable is set
  */
-export function isDebugSet(): boolean {
+function isDebugSet(): boolean {
 	return process.env.DEBUG !== undefined
 }
