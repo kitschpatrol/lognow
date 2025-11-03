@@ -435,15 +435,31 @@ describe('JsonBasicTransport', () => {
 
 describe('Transport integration', () => {
 	it('should support multiple transports', () => {
+		const mockConsole = {
+			debug: vi.fn(),
+			error: vi.fn(),
+			info: vi.fn(),
+			trace: vi.fn(),
+			warn: vi.fn(),
+		}
+
+		const mockJsonConsole = {
+			debug: vi.fn(),
+			error: vi.fn(),
+			info: vi.fn(),
+			trace: vi.fn(),
+			warn: vi.fn(),
+		}
+
 		const logger = createLogger({
-			logJsonToConsole: true,
-			logToConsole: true,
+			logJsonToConsole: mockJsonConsole,
+			logToConsole: mockConsole,
 			name: 'multi-transport',
 		})
 
-		expect(() => {
-			logger.info('Multiple transports')
-		}).not.toThrow()
+		logger.info('Multiple transports')
+		expect(mockConsole.info).toHaveBeenCalled()
+		expect(mockJsonConsole.info).toHaveBeenCalled()
 	})
 
 	it('should allow disabling transports', () => {
@@ -462,35 +478,44 @@ describe('Transport integration', () => {
 
 describe('Custom transport targets', () => {
 	it('should support process.stdout', () => {
+		const mockStream = {
+			write: vi.fn(),
+		}
+
 		const logger = createLogger({
-			logToConsole: process.stdout,
+			logToConsole: mockStream,
 			name: 'stdout-test',
 		})
 
-		expect(() => {
-			logger.info('To stdout')
-		}).not.toThrow()
+		logger.info('To stdout')
+		expect(mockStream.write).toHaveBeenCalled()
 	})
 
 	it('should support process.stderr', () => {
+		const mockStream = {
+			write: vi.fn(),
+		}
+
 		const logger = createLogger({
-			logToConsole: process.stderr,
+			logToConsole: mockStream,
 			name: 'stderr-test',
 		})
 
-		expect(() => {
-			logger.error('To stderr')
-		}).not.toThrow()
+		logger.error('To stderr')
+		expect(mockStream.write).toHaveBeenCalled()
 	})
 
 	it('should support custom stream', () => {
+		const mockStream = {
+			write: vi.fn(),
+		}
+
 		const logger = createLogger({
-			logToConsole: process.stdout,
+			logToConsole: mockStream,
 			name: 'custom-stream',
 		})
 
-		expect(() => {
-			logger.info('Custom stream test')
-		}).not.toThrow()
+		logger.info('Custom stream test')
+		expect(mockStream.write).toHaveBeenCalled()
 	})
 })

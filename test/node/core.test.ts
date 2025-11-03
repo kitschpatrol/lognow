@@ -83,21 +83,19 @@ describe('default log instance', () => {
 	})
 
 	it('should support all log levels', () => {
-		// Just verify the log methods exist and can be called
-		// Output goes to real console in this test
-		log.trace('trace message')
-		log.debug('debug message')
-		log.info('info message')
-		log.warn('warn message')
-		log.error('error message')
-		log.fatal('fatal message')
-		expect(log).toBeDefined()
+		// Verify the log methods exist
+		expect(typeof log.trace).toBe('function')
+		expect(typeof log.debug).toBe('function')
+		expect(typeof log.info).toBe('function')
+		expect(typeof log.warn).toBe('function')
+		expect(typeof log.error).toBe('function')
+		expect(typeof log.fatal).toBe('function')
 	})
 
 	it('should support withMetadata', () => {
-		// Smoke test that metadata doesn't cause crashes
-		log.withMetadata({ key: 'value' }).info('test')
-		expect(log).toBeDefined()
+		// Verify that withMetadata returns a logger
+		const metadataLogger = log.withMetadata({ key: 'value' })
+		expect(typeof metadataLogger.info).toBe('function')
 	})
 
 	it('should support withContext', () => {

@@ -30,5 +30,6 @@ export default defineConfig({
 				},
 			},
 		],
+		silent: 'passed-only', // Suppress console output during tests
 	},
 })
