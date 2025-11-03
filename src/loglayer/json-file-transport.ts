@@ -1,11 +1,18 @@
 import type { LogLayerTransportParams } from '@loglayer/transport'
 import type { LogFileRotationTransportConfig } from '@loglayer/transport-log-file-rotation'
 import { LogFileRotationTransport } from '@loglayer/transport-log-file-rotation'
+import { defu } from 'defu'
 import { paramsToJsonString } from './json-shared'
 
 function isEmptyObject(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null && Object.keys(value).length === 0
 }
+
+/**
+ * Configuration for the JSON file transport
+ * @public
+ */
+export type JsonFileTransportConfig = Partial<LogFileRotationTransportConfig>
 
 /**
  * Semi-flattened JSON transport for file logging, designed for integration with
@@ -17,8 +24,14 @@ function isEmptyObject(value: unknown): value is Record<string, unknown> {
  * Messages are kept as arrays.
  */
 export class JsonFileTransport extends LogFileRotationTransport {
-	constructor(params: LogFileRotationTransportConfig) {
-		super(params)
+	constructor(params: JsonFileTransportConfig) {
+		const defaultParams: LogFileRotationTransportConfig = {
+			filename: 'default-%DATE%.log',
+		}
+		// eslint-disable-next-line ts/no-unsafe-type-assertion
+		const resolvedParams = defu(params, defaultParams) as LogFileRotationTransportConfig
+
+		super(resolvedParams)
 
 		// Certain options are not supported
 		if (

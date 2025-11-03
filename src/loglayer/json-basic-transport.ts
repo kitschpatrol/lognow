@@ -1,16 +1,17 @@
 import type { LogLayerTransportConfig, LogLayerTransportParams } from '@loglayer/transport'
 import type { InspectOptions } from 'node-inspect-extracted'
 import { BaseTransport, LogLevel } from '@loglayer/transport'
+import { defu } from 'defu'
 import type { ILogBasic, LogBasicTypedTarget } from '../log'
-import { createLogBasicTypedTarget, pickLogTarget } from '../log'
+import { createLogBasicTypedTarget, defaultInspector, pickLogTarget } from '../log'
 import { paramsToJsonString } from './json-shared'
 
 // Dance to make the config interface convertible to a type
 // eslint-disable-next-line ts/consistent-type-definitions
-interface JsonBasicTransportConfigInterface extends LogLayerTransportConfig<ILogBasic> {
+interface JsonBasicTransportConfigInterface extends Partial<LogLayerTransportConfig<ILogBasic>> {
 	colorize?: boolean
-	getTerminalWidth: () => number
-	inspect: (object: unknown, options?: InspectOptions) => string
+	getTerminalWidth?: () => number
+	inspect?: (object: unknown, options?: InspectOptions) => string
 	pretty?: boolean
 }
 
@@ -20,15 +21,15 @@ interface JsonBasicTransportConfigInterface extends LogLayerTransportConfig<ILog
  */
 export type JsonBasicTransportConfig = JsonBasicTransportConfigInterface
 
-const JSON_BASIC_TRANSPORT_CONFIG_DEFAULTS: Omit<Required<JsonBasicTransportConfig>, 'inspect'> = {
+const JSON_BASIC_TRANSPORT_CONFIG_DEFAULTS: Required<JsonBasicTransportConfig> = {
 	colorize: false,
 	consoleDebug: false,
 	enabled: true,
 	getTerminalWidth: () => Number.MAX_SAFE_INTEGER,
 	id: 'json-basic-transport',
-	// Overridden by the logger instance...
-	level: 'trace',
-	logger: pickLogTarget(true),
+	inspect: defaultInspector,
+	level: 'trace', // Overridden by the logger instance...
+	logger: pickLogTarget(),
 	pretty: false,
 }
 
@@ -43,10 +44,11 @@ export class JsonBasicTransport extends BaseTransport<ILogBasic> {
 	private readonly typedTarget: LogBasicTypedTarget
 
 	constructor(config: JsonBasicTransportConfig) {
-		const resolvedConfig = {
-			...JSON_BASIC_TRANSPORT_CONFIG_DEFAULTS,
-			...config,
-		}
+		// eslint-disable-next-line ts/no-unsafe-type-assertion
+		const resolvedConfig = defu(
+			config,
+			JSON_BASIC_TRANSPORT_CONFIG_DEFAULTS,
+		) as Required<JsonBasicTransportConfig>
 		super(resolvedConfig)
 
 		// Store configuration

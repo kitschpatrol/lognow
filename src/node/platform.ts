@@ -1,4 +1,5 @@
 import type { LogLayerTransport } from 'loglayer'
+import { defu } from 'defu'
 import filenamify from 'filenamify'
 import os from 'node:os'
 import path from 'node:path'
@@ -7,6 +8,7 @@ import { inspect as nodeInspect } from 'node:util'
 import { readPackageUpSync } from 'read-package-up'
 import terminalSize from 'terminal-size'
 import type { PlatformAdapter } from '../log.js'
+import type { JsonFileTransportConfig } from '../loglayer/json-file-transport.js'
 import { JsonFileTransport } from '../loglayer/json-file-transport.js'
 
 /**
@@ -55,26 +57,40 @@ const fileTransportsByPath = new Map<string, LogLayerTransport>()
 /**
  * Create a file transport for the given name and log directory.
  * @param name - The name of the log file.
- * @param logDirectory - The directory to log to.
+ * @param logDirectoryOrOptions - The directory to log to, or a JsonFileTransportConfig object (which might override name).
  * @returns The file transport.
  */
-export function createFileTransport(name = 'default', logDirectory?: string): LogLayerTransport {
+export function createFileTransport(
+	name = 'default',
+	logDirectoryOrOptions?: JsonFileTransportConfig | string,
+): LogLayerTransport {
 	const cleanName = filenamify(name, { replacement: '-' })
 
-	const filename = path.join(
-		logDirectory ?? getPlatformLogPath(cleanName),
-		`${cleanName}-%DATE%.log`,
-	)
+	// Ensure filename is used for map key and that any other options don't overwrite it
+	const { filename: filenameFromOptions, ...restOfOptions } =
+		typeof logDirectoryOrOptions === 'object' ? logDirectoryOrOptions : {}
+
+	const filename =
+		typeof filenameFromOptions === 'string'
+			? filenameFromOptions
+			: path.join(
+					typeof logDirectoryOrOptions === 'string'
+						? logDirectoryOrOptions
+						: getPlatformLogPath(cleanName),
+					`${cleanName}-%DATE%.log`,
+				)
 
 	if (!fileTransportsByPath.has(filename)) {
 		fileTransportsByPath.set(
 			filename,
-			new JsonFileTransport({
-				compressOnRotate: true,
-				dateFormat: 'YMD',
-				filename,
-				frequency: 'daily',
-			}),
+			new JsonFileTransport(
+				defu(restOfOptions, {
+					compressOnRotate: true,
+					dateFormat: 'YMD',
+					filename,
+					frequency: 'daily',
+				}),
+			),
 		)
 	}
 

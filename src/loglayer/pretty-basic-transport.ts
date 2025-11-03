@@ -6,16 +6,20 @@ import type {
 import type { InspectOptions } from 'node-inspect-extracted'
 import { BaseTransport, LogLevel } from '@loglayer/transport'
 import c from 'ansi-colors'
+import { defu } from 'defu'
 import wrapAnsi from 'wrap-ansi'
 import type { ILogBasic, LogBasicTypedTarget } from '../log'
-import { createLogBasicTypedTarget, pickLogTarget } from '../log'
+import { createLogBasicTypedTarget, defaultInspector, pickLogTarget } from '../log'
 
 // Dance to make the config interface convertible to a type
 // eslint-disable-next-line ts/consistent-type-definitions
-interface PrettyBasicTransportConfigInterface extends LogLayerTransportConfig<ILogBasic> {
+interface PrettyBasicTransportConfigInterface extends Partial<LogLayerTransportConfig<ILogBasic>> {
 	colorize?: boolean
-	getTerminalWidth: () => number
-	inspect: (object: unknown, options?: InspectOptions) => string
+	getTerminalWidth?: () => number
+	inspect?: (object: unknown, options?: InspectOptions) => string
+	showLevel?: boolean
+	showName?: boolean
+	showTime?: boolean
 }
 
 /**
@@ -24,18 +28,18 @@ interface PrettyBasicTransportConfigInterface extends LogLayerTransportConfig<IL
  */
 export type PrettyBasicTransportConfig = PrettyBasicTransportConfigInterface
 
-const PRETTY_BASIC_TRANSPORT_CONFIG_DEFAULTS: Omit<
-	Required<PrettyBasicTransportConfig>,
-	'inspect'
-> = {
+const PRETTY_BASIC_TRANSPORT_CONFIG_DEFAULTS: Required<PrettyBasicTransportConfig> = {
 	colorize: true,
 	consoleDebug: false,
 	enabled: true,
 	getTerminalWidth: () => Number.MAX_SAFE_INTEGER,
 	id: 'pretty-basic-transport',
-	// Overridden by the logger instance...
-	level: 'trace',
-	logger: pickLogTarget(true),
+	inspect: defaultInspector,
+	level: 'trace', // Overridden by the logger instance...
+	logger: pickLogTarget(),
+	showLevel: true,
+	showName: true,
+	showTime: true,
 }
 
 const MAX_WIDTH = 120
@@ -53,10 +57,12 @@ export class PrettyBasicTransport extends BaseTransport<ILogBasic> {
 	 * @param config - Configuration options for the transport
 	 */
 	constructor(config: PrettyBasicTransportConfig) {
-		const resolvedConfig = {
-			...PRETTY_BASIC_TRANSPORT_CONFIG_DEFAULTS,
-			...config,
-		}
+		// eslint-disable-next-line ts/no-unsafe-type-assertion
+		const resolvedConfig = defu(
+			config,
+			PRETTY_BASIC_TRANSPORT_CONFIG_DEFAULTS,
+		) as Required<PrettyBasicTransportConfig>
+
 		super(resolvedConfig)
 
 		// Store configuration
@@ -103,10 +109,16 @@ export class PrettyBasicTransport extends BaseTransport<ILogBasic> {
 			timestamp?: string | undefined
 		}
 
-		const localTimeString = formatTime(new Date(timestamp ?? Date.now()), this.config.colorize)
-		const logLevelString = getLogLevelString(params.logLevel, this.config.colorize)
-		const namePrefix = getNamePrefix(name, parentNames, this.config.colorize)
-		const messages = this.styleMessages(params.messages)
+		const localTimeString = this.config.showTime
+			? formatTime(new Date(timestamp ?? Date.now()), this.config.colorize)
+			: undefined
+		const logLevelString = this.config.showLevel
+			? getLogLevelString(params.logLevel, this.config.colorize)
+			: undefined
+		const namePrefix = this.config.showName
+			? getNamePrefix(name, parentNames, this.config.colorize)
+			: undefined
+		const messages = params.messages.length > 0 ? this.styleMessages(params.messages) : undefined
 
 		// TODO slow to call this every time?
 		const maxWidth = Math.min(this.config.getTerminalWidth(), MAX_WIDTH)
@@ -128,10 +140,14 @@ export class PrettyBasicTransport extends BaseTransport<ILogBasic> {
 
 		const restOfContextObject = Object.keys(restOfContext).length === 0 ? undefined : restOfContext
 
-		const prefixAndMessages = wrapAnsi(
-			[localTimeString, logLevelString, namePrefix, messages].join(' '),
-			maxWidth,
+		const prefixAndMessageParts = [localTimeString, logLevelString, namePrefix, messages].filter(
+			Boolean,
 		)
+
+		const prefixAndMessages =
+			prefixAndMessageParts.length > 0
+				? wrapAnsi(prefixAndMessageParts.join(' '), maxWidth)
+				: undefined
 
 		// Type narrowing based on the discriminated union
 		switch (this.typedTarget.type) {
@@ -139,12 +155,12 @@ export class PrettyBasicTransport extends BaseTransport<ILogBasic> {
 			case 'ConsoleLike': {
 				// This.typedTarget.target is narrowed to Console | ConsoleLike
 
-				const extraParts = [errorObject, metadataObject, restOfContextObject].filter(Boolean)
-				//
-				// .flatMap((part) => [part, '\n'])
-				// .slice(0, -1)
-
-				const logParts = [prefixAndMessages, ...(extraParts.length > 0 ? [] : []), ...extraParts]
+				const logParts = [
+					prefixAndMessages,
+					errorObject,
+					metadataObject,
+					restOfContextObject,
+				].filter(Boolean)
 
 				switch (params.logLevel) {
 					case 'debug':
@@ -209,14 +225,18 @@ export class PrettyBasicTransport extends BaseTransport<ILogBasic> {
 					: undefined
 
 				// Add down arrow if the message is empty and there are other parts
-				const isObjectOnly =
-					messages.length === 0 &&
+				const isObjectOnlyWithPrefix =
+					// Messages empty
+					(messages === undefined || messages.length === 0) &&
+					// Prefix not empty
+					prefixAndMessages !== undefined &&
+					// Other object is present
 					(errorObject !== undefined ||
 						metadataObject !== undefined ||
 						restOfContextObject !== undefined)
 
 				const completeMessage = [
-					isObjectOnly ? [prefixAndMessages, '↴'].join(' ') : prefixAndMessages,
+					isObjectOnlyWithPrefix ? [prefixAndMessages, '↴'].join(' ') : prefixAndMessages,
 					errorString,
 					metadataString,
 					restOfContextString,

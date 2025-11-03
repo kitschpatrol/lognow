@@ -6,8 +6,12 @@
 import type { LoggerlessTransport } from '@loglayer/transport'
 import type { ILogLayer, LogLayerTransport } from 'loglayer'
 import type { InspectOptions } from 'node-inspect-extracted'
+import { defu } from 'defu'
 import { LogLayer, LogLevel, MockLogLayer } from 'loglayer'
 import { serializeError } from 'serialize-error'
+import type { JsonBasicTransportConfig } from './loglayer/json-basic-transport'
+import type { JsonFileTransportConfig } from './loglayer/json-file-transport'
+import type { PrettyBasicTransportConfig } from './loglayer/pretty-basic-transport'
 import { HierarchicalContextManager } from './loglayer/hierarchical-context-manager'
 import { JsonBasicTransport } from './loglayer/json-basic-transport'
 import { PrettyBasicTransport } from './loglayer/pretty-basic-transport'
@@ -34,36 +38,27 @@ type StreamStderr = typeof process.stderr
 export type ILogBasic = Console | ConsoleLike | StreamLike | StreamStderr | StreamStdout
 
 /**
- * Helper function to pick a log target based on the platform context, or pass through an explicit target.
- * @param target - The target to pick.
+ * Helper function to pick a log target based on the platform context.
  * @returns The picked log target.
  */
-export function pickLogTarget(target: boolean | ILogBasic): ILogBasic {
-	if (typeof target === 'boolean') {
-		if (target) {
-			// Use stdout by default in a node environment, or console by default in a browser environment.
-			if (typeof process !== 'undefined') {
-				return process.stdout
-			}
-			return console
-		}
-
-		// Should be unreachable
-		throw new Error('Invalid target')
+export function pickLogTarget(): ILogBasic {
+	// Use stdout by default in a node environment, or console by default in a browser environment.
+	if (typeof process !== 'undefined') {
+		return process.stdout
 	}
-	return target
+	return console
 }
 
 export type LogOptions = {
-	/** Log to the console in JSON format. Useful for debugging structured logging. */
-	logJsonToConsole?: boolean | ILogBasic
-	/** Log to a typical log file path. If a string is passed, log to the given directory path. Logs are gzipped and rotated daily, and are never removed. */
-	logJsonToFile?: boolean | string
-	/** Log to the console in a pretty and human-readable format. */
-	logToConsole?: boolean | ILogBasic
+	/** Log to the console in JSON format. Useful for debugging structured logging. Pass a boolean to enable / disable the default transport configuration, an ILogBasic to target a specific log target, or a partial JsonBasicTransportConfig to override the default configuration. */
+	logJsonToConsole?: boolean | ILogBasic | JsonBasicTransportConfig
+	/** Log to a typical log file path. Pass a boolean to enable / disable the default configuration. Pass a directory path string to save the log to a specific paths. By default, logs are gzipped and rotated daily, and are never removed. Pass a partial JsonFileTransportConfig to override the default configuration. */
+	logJsonToFile?: boolean | JsonFileTransportConfig | string
+	/** Log to the console in a pretty and human-readable format. Pass a boolean to enable / disable the default transport configuration, an ILogBasic to target a specific log target, or a partial PrettyBasicTransportConfig to override the default configuration. */
+	logToConsole?: boolean | ILogBasic | PrettyBasicTransportConfig
 	/** The name of the logger, also used as the log file name if file logging is enabled. */
 	name?: string
-	/** TODO */
+	/** A shortcut for setting the log level. If `true`, all logs are shown regardless of level. If `false`, only `info` and higher logs are shown. */
 	verbose?: boolean
 }
 
@@ -75,7 +70,10 @@ type RequiredExcept<T, K extends keyof T> = Pick<T, K> & Required<Omit<T, K>>
 export type PlatformAdapter = {
 	createElectronListener?: (logger: ILogLayer) => void
 	createElectronTransport?: () => LoggerlessTransport
-	createFileTransport?: (name?: string, logDirectory?: string) => LogLayerTransport
+	createFileTransport?: (
+		name?: string,
+		logDirectoryOrOptions?: JsonFileTransportConfig | string,
+	) => LogLayerTransport
 	getName: () => string | undefined
 	getTerminalWidth: () => number
 	inspect: (object: unknown, options?: InspectOptions) => string
@@ -118,48 +116,69 @@ export function getChildLogger(logger: ILogLayer, name?: string): ILogLayer {
 
 /**
  * Helper function to create a logger with a given options.
+ * Or, pass a string argument as a shortcut to setting the logger
+ * name.
  */
-export function createLogger(options?: LogOptions): ILogLayer {
-	const resolvedOptions = { ...DEFAULT_LOG_OPTIONS, ...options }
+export function createLogger(optionsOrName?: LogOptions | string): ILogLayer {
+	const optionsObject = typeof optionsOrName === 'string' ? { name: optionsOrName } : optionsOrName
+	// eslint-disable-next-line ts/no-unsafe-type-assertion
+	const resolvedOptions = defu(optionsObject, DEFAULT_LOG_OPTIONS) as RequiredExcept<
+		LogOptions,
+		'name'
+	>
 
 	const transports: LogLayerTransport[] = []
 
 	// Pretty transport
 	if (resolvedOptions.logToConsole) {
 		transports.push(
-			new PrettyBasicTransport({
-				getTerminalWidth: platformAdapter.getTerminalWidth,
-				inspect: platformAdapter.inspect,
-				logger: pickLogTarget(resolvedOptions.logToConsole),
-			}),
+			new PrettyBasicTransport(
+				defu(
+					isILogBasic(resolvedOptions.logToConsole)
+						? { logger: resolvedOptions.logToConsole }
+						: typeof resolvedOptions.logToConsole === 'boolean'
+							? { logger: pickLogTarget() }
+							: resolvedOptions.logToConsole,
+					{
+						getTerminalWidth: platformAdapter.getTerminalWidth,
+						inspect: platformAdapter.inspect,
+					},
+				) as PrettyBasicTransportConfig,
+			),
 		)
 	}
 
 	// JSON transport
 	if (resolvedOptions.logJsonToConsole) {
 		transports.push(
-			new JsonBasicTransport({
-				getTerminalWidth: platformAdapter.getTerminalWidth,
-				inspect: platformAdapter.inspect,
-				logger: pickLogTarget(resolvedOptions.logJsonToConsole),
-			}),
+			new JsonBasicTransport(
+				defu(
+					isILogBasic(resolvedOptions.logJsonToConsole)
+						? { logger: resolvedOptions.logJsonToConsole }
+						: typeof resolvedOptions.logJsonToConsole === 'boolean'
+							? { logger: pickLogTarget() }
+							: resolvedOptions.logJsonToConsole,
+					{
+						getTerminalWidth: platformAdapter.getTerminalWidth,
+						inspect: platformAdapter.inspect,
+					},
+				) as JsonBasicTransportConfig,
+			),
 		)
 	}
 
 	// File transport
 	if (typeof resolvedOptions.logJsonToFile === 'string' || resolvedOptions.logJsonToFile) {
 		if (platformAdapter.createFileTransport === undefined) {
-			throw new Error(
-				'File logging is only supported in Node.js environments. Import the `lognow/node` entry point instead.',
-			)
+			throw new Error('File logging is only supported in Node.js environments.')
 		}
 
 		transports.push(
 			platformAdapter.createFileTransport(
 				resolvedOptions.name,
-				typeof resolvedOptions.logJsonToFile === 'string'
-					? resolvedOptions.logJsonToFile
-					: undefined,
+				typeof resolvedOptions.logJsonToFile === 'boolean'
+					? undefined
+					: resolvedOptions.logJsonToFile,
 			),
 		)
 	}
@@ -319,6 +338,21 @@ export type LogBasicTypedTarget =
 	| { target: StreamStdout; type: 'StreamStdout' }
 
 /**
+ * Type guard to check if a value is an ILogBasic instance.
+ * Returns true if the instance matches any of the ILogBasic union types:
+ * Console, ConsoleLike, StreamLike, StreamStderr, or StreamStdout.
+ */
+function isILogBasic(instance: unknown): instance is ILogBasic {
+	return (
+		isStreamStdout(instance) ||
+		isStreamStderr(instance) ||
+		isConsole(instance) ||
+		isConsoleLike(instance) ||
+		isStreamLike(instance)
+	)
+}
+
+/**
  * Helper function to create a typed target from an ILogBasic instance
  */
 export function createLogBasicTypedTarget(instance: ILogBasic): LogBasicTypedTarget {
@@ -373,7 +407,19 @@ export const log = new Proxy(
  * @param options - The options to configure the logger with.
  */
 export function setDefaultLogOptions(options: LogOptions): void {
-	currentOptions = { ...currentOptions, ...options }
+	currentOptions = defu(options, currentOptions)
 	// Will be lazily recreated on next access through the proxy
 	_log = undefined
+}
+
+/**
+ * Replaced by platform adapter, defined as placeholder for a complete default object
+ */
+export function defaultInspector(object: unknown): string {
+	try {
+		const formattedString = JSON.stringify(object, undefined, 2)
+		return formattedString
+	} catch {
+		return 'Could not inspect object'
+	}
 }

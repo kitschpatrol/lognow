@@ -110,7 +110,7 @@ Set to `true` or `false` to enable or disable pretty console logging.
 
 Defaults to `true`.
 
-Alternately, set to any Console-like object to log . (If you don't define the target explicitly, `process.stdout` is used in node and `console` is used in the browser.)
+Alternately, set to any Console-like object to log, or a partial `PrettyBasicTransportConfig` object to override the default configuration. (If you don't define the target explicitly, `process.stdout` is used in node and `console` is used in the browser.)
 
 #### `logJsonToFile`
 
@@ -122,11 +122,11 @@ Logs are stored in the platform-standard location. The files are gzipped and rot
 
 Complex metadata or context objects not natively representable within the JSON specification are serialized on a best-effort basis, with emphasis on being human-readable rather than being perfectly reconstructible as JavaScript.
 
-Alternately, pass a path to a directory to log to the location of your choosing.
+Alternately, pass a path to a directory to log to the location of your choosing, or a partial `JsonFileTransportConfig` object to override the default configuration.
 
 #### `logJsonToConsole`
 
-Set to `true` or `false` to enable or disable pretty console logging. This is identical to the serialized JSON that's sent to the log file when `logJsonToFile` is enabled.
+Set to `true` or `false` to enable or disable pretty console logging. This is identical to the serialized JSON that's sent to the log file when `logJsonToFile` is enabled. Alternately, set to any Console-like object to log, or a partial `JsonBasicTransportConfig` object to override the default configuration.
 
 Defaults to `false`.
 
