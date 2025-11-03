@@ -127,6 +127,10 @@ export function createLogger(optionsOrName?: LogOptions | string): ILogLayer {
 		'name'
 	>
 
+	if (isDebugSet()) {
+		resolvedOptions.verbose = true
+	}
+
 	const transports: LogLayerTransport[] = []
 
 	// Pretty transport
@@ -422,4 +426,18 @@ export function defaultInspector(object: unknown): string {
 	} catch {
 		return 'Could not inspect object'
 	}
+}
+
+/**
+ * Check if the NO_COLOR environment variable is set
+ */
+export function isNoColorSet(): boolean {
+	return process.env.NO_COLOR !== undefined
+}
+
+/**
+ * Check if the DEBUG environment variable is set
+ */
+export function isDebugSet(): boolean {
+	return process.env.DEBUG !== undefined
 }

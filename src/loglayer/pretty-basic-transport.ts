@@ -9,7 +9,7 @@ import c from 'ansi-colors'
 import { defu } from 'defu'
 import wrapAnsi from 'wrap-ansi'
 import type { ILogBasic, LogBasicTypedTarget } from '../log'
-import { createLogBasicTypedTarget, defaultInspector, pickLogTarget } from '../log'
+import { createLogBasicTypedTarget, defaultInspector, isNoColorSet, pickLogTarget } from '../log'
 
 // Dance to make the config interface convertible to a type
 // eslint-disable-next-line ts/consistent-type-definitions
@@ -62,6 +62,10 @@ export class PrettyBasicTransport extends BaseTransport<ILogBasic> {
 			config,
 			PRETTY_BASIC_TRANSPORT_CONFIG_DEFAULTS,
 		) as Required<PrettyBasicTransportConfig>
+
+		if (isNoColorSet()) {
+			resolvedConfig.colorize = false
+		}
 
 		super(resolvedConfig)
 

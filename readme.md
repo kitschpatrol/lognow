@@ -193,6 +193,10 @@ Will log:
 
 Note that only the default log instance's configuration is mutable (via `setDefaultLogOptions()`). Custom logs should be recreated with `createLogger()` if you need to change configuration.
 
+#### Environment configuration
+
+In node-like environments, Lognow respects the [`NO_COLOR`](https://no-color.org/) environment variable to disable colorization, and `DEBUG` to enable verbose logging. These environment variables override any code-level configuration.
+
 ## Examples
 
 ### Log to a File
