@@ -236,7 +236,7 @@ export function createLogger(optionsOrName?: LogOptions | string): ILogLayer {
  * }
  * ```
  */
-export function injectionHelper(logger: ILogBasic | ILogLayer | undefined): ILogLayer {
+export function injectionHelper(logger?: ILogBasic | ILogLayer): ILogLayer {
 	if (logger === undefined) {
 		return new MockLogLayer()
 	}
