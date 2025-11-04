@@ -1,5 +1,4 @@
 onlyBuiltDependencies:
   - electron
   - esbuild
-  - puppeteer
   - unrs-resolver

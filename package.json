@@ -74,7 +74,7 @@
 		"loglayer": "^7.1.0"
 	},
 	"devDependencies": {
-		"@kitschpatrol/shared-config": "^5.7.4",
+		"@kitschpatrol/shared-config": "^5.8.0",
 		"@loglayer/context-manager": "^1.1.7",
 		"@loglayer/transport": "^2.3.5",
 		"@loglayer/transport-log-file-rotation": "^2.1.8",
