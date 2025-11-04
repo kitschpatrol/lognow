@@ -74,6 +74,7 @@ export type PlatformAdapter = {
 		name?: string,
 		logDirectoryOrOptions?: JsonFileTransportConfig | string,
 	) => LogLayerTransport
+	getFileTransportDestinations?: () => string[]
 	getName: () => string | undefined
 	getTerminalWidth: () => number
 	inspect: (object: unknown, options?: InspectOptions) => string
@@ -464,4 +465,12 @@ export function isForceColorSet(): boolean {
  */
 function isDebugSet(): boolean {
 	return isEnvDefined('DEBUG')
+}
+
+/**
+ * Get the destination(s) of the active JSON file transport(s).
+ * Only available after the first log has been written.
+ */
+export function getJsonFileTransportDestinations(): string[] {
+	return platformAdapter.getFileTransportDestinations?.() ?? []
 }

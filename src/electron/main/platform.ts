@@ -3,7 +3,11 @@ import { ipcMain } from 'electron'
 import { NJSON } from 'next-json'
 import { inspect as nodeInspect } from 'node:util'
 import type { ILogLayer, PlatformAdapter } from '../../log'
-import { createFileTransport, getTerminalWidth } from '../../node/platform'
+import {
+	createFileTransport,
+	getFileTransportDestinations,
+	getTerminalWidth,
+} from '../../node/platform'
 
 function getName(): string | undefined {
 	return 'Main'
@@ -27,6 +31,7 @@ function createElectronListener(logger: ILogLayer): void {
 export const electronMainPlatformAdapter: PlatformAdapter = {
 	createElectronListener,
 	createFileTransport,
+	getFileTransportDestinations,
 	getName,
 	getTerminalWidth,
 	inspect: nodeInspect,

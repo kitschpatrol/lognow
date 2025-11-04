@@ -7,6 +7,7 @@ import process from 'node:process'
 import { inspect as nodeInspect } from 'node:util'
 import { readPackageUpSync } from 'read-package-up'
 import terminalSize from 'terminal-size'
+import untildify from 'untildify'
 import type { PlatformAdapter } from '../log.js'
 import type { JsonFileTransportConfig } from '../loglayer/json-file-transport.js'
 import { JsonFileTransport } from '../loglayer/json-file-transport.js'
@@ -52,10 +53,26 @@ function getName(): string | undefined {
 }
 
 // File transports must be reused, so we cache them by path
-const fileTransportsByPath = new Map<string, LogLayerTransport>()
+const fileTransportsByPath = new Map<string, JsonFileTransport>()
+
+/**
+ * Get the destinations of the active file transports.
+ * Exported for reuse in Electron platform adapter.
+ * @returns The destinations of the file transports.
+ */
+export function getFileTransportDestinations(): string[] {
+	return [...fileTransportsByPath.values()]
+		.map(
+			// @ts-expect-error - Private
+			// eslint-disable-next-line ts/no-unsafe-type-assertion, ts/no-unsafe-member-access
+			(transport) => transport.stream?.currentFile as string | undefined,
+		)
+		.filter((file): file is string => file !== undefined)
+}
 
 /**
  * Create a file transport for the given name and log directory.
+ * Exported for reuse in Electron platform adapter.
  * @param name - The name of the log file.
  * @param logDirectoryOrOptions - The directory to log to, or a JsonFileTransportConfig object (which might override name).
  * @returns The file transport.
@@ -70,7 +87,10 @@ export function createFileTransport(
 	const { filename: filenameFromOptions, ...restOfOptions } =
 		typeof logDirectoryOrOptions === 'object' ? logDirectoryOrOptions : {}
 
-	const filename =
+	// JsonFileTransport will also expand a tilde in the filename,
+	// but we do it here as well to ensure the map keys are roughly
+	// consistent with the stream target
+	const filename = untildify(
 		typeof filenameFromOptions === 'string'
 			? filenameFromOptions
 			: path.join(
@@ -78,7 +98,8 @@ export function createFileTransport(
 						? logDirectoryOrOptions
 						: getPlatformLogPath(cleanName),
 					`${cleanName}-%DATE%.log`,
-				)
+				),
+	)
 
 	if (!fileTransportsByPath.has(filename)) {
 		fileTransportsByPath.set(
@@ -99,6 +120,7 @@ export function createFileTransport(
 
 /**
  * Get the terminal width.
+ * Exported for reuse in Electron platform adapter.
  * @returns The terminal width.
  */
 export function getTerminalWidth(): number {
@@ -108,6 +130,7 @@ export function getTerminalWidth(): number {
 
 export const nodePlatformAdapter: PlatformAdapter = {
 	createFileTransport,
+	getFileTransportDestinations,
 	getName,
 	getTerminalWidth,
 	inspect: nodeInspect,

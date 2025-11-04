@@ -13,6 +13,7 @@ export {
 	createLogger,
 	DEFAULT_LOG_OPTIONS,
 	getChildLogger,
+	getJsonFileTransportDestinations,
 	injectionHelper,
 	log,
 	setDefaultLogOptions,

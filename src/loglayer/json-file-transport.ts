@@ -2,6 +2,7 @@ import type { LogLayerTransportParams } from '@loglayer/transport'
 import type { LogFileRotationTransportConfig } from '@loglayer/transport-log-file-rotation'
 import { LogFileRotationTransport } from '@loglayer/transport-log-file-rotation'
 import { defu } from 'defu'
+import untildify from 'untildify'
 import { paramsToJsonString } from './json-shared'
 
 function isEmptyObject(value: unknown): value is Record<string, unknown> {
@@ -30,6 +31,9 @@ export class JsonFileTransport extends LogFileRotationTransport {
 		}
 		// eslint-disable-next-line ts/no-unsafe-type-assertion
 		const resolvedParams = defu(params, defaultParams) as LogFileRotationTransportConfig
+
+		// Expand tilde in filename
+		resolvedParams.filename = untildify(resolvedParams.filename)
 
 		super(resolvedParams)
 
