@@ -4,6 +4,7 @@ export default defineConfig([
 	{
 		dts: false,
 		entry: 'src/node/index.ts',
+		fixedExtension: false,
 		outDir: 'dist/node',
 		platform: 'node',
 	},
@@ -25,6 +26,7 @@ export default defineConfig([
 		dts: false,
 		entry: 'src/electron/main/index.ts',
 		external: ['electron'],
+		fixedExtension: false,
 		outDir: 'dist/electron/main',
 		platform: 'node',
 	},

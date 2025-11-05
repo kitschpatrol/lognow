@@ -26,7 +26,7 @@
 		".": {
 			"node": {
 				"types": "./dist/node/index.d.ts",
-				"import": "./dist/node/index.mjs"
+				"import": "./dist/node/index.js"
 			},
 			"browser": {
 				"types": "./dist/browser/index.d.ts",
@@ -40,7 +40,7 @@
 		"./electron": {
 			"node": {
 				"types": "./dist/electron/main/index.d.ts",
-				"import": "./dist/electron/main/index.mjs"
+				"import": "./dist/electron/main/index.js"
 			},
 			"browser": {
 				"types": "./dist/electron/renderer/index.d.ts",
@@ -83,7 +83,7 @@
 		"bumpp": "^10.3.1",
 		"defu": "^6.1.4",
 		"electron": ">=36.0.0",
-		"filenamify": "^7.0.0",
+		"filenamify": "^7.0.1",
 		"next-json": "^0.5.0",
 		"node-inspect-extracted": "^3.2.2",
 		"read-package-up": "^11.0.0",
