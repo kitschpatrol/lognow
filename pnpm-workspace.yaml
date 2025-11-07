@@ -1,4 +1,10 @@
+ignoredBuiltDependencies:
+  - rollup
+
 onlyBuiltDependencies:
   - electron
   - esbuild
   - unrs-resolver
+
+overrides:
+  normalize-package-data: ^8.0.0

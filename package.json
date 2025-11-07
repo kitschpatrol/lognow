@@ -74,11 +74,11 @@
 		"loglayer": "^7.1.0"
 	},
 	"devDependencies": {
-		"@kitschpatrol/shared-config": "^5.8.1",
+		"@kitschpatrol/shared-config": "^5.8.3",
 		"@loglayer/context-manager": "^1.1.7",
 		"@loglayer/transport": "^2.3.5",
 		"@loglayer/transport-log-file-rotation": "^2.1.8",
-		"@vitest/browser-playwright": "^4.0.7",
+		"@vitest/browser-playwright": "^4.0.8",
 		"ansi-colors": "^4.1.3",
 		"bumpp": "^10.3.1",
 		"defu": "^6.1.4",
@@ -90,10 +90,10 @@
 		"safe-stable-stringify": "^2.5.0",
 		"serialize-error": "^12.0.0",
 		"terminal-size": "^4.0.0",
-		"tsdown": "^0.16.0",
+		"tsdown": "^0.16.1",
 		"typescript": "~5.9.3",
 		"untildify": "^6.0.0",
-		"vitest": "^4.0.7",
+		"vitest": "^4.0.8",
 		"wrap-ansi": "^9.0.2"
 	},
 	"packageManager": "pnpm@10.20.0",
