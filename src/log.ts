@@ -105,12 +105,10 @@ export const DEFAULT_LOG_OPTIONS: RequiredExcept<LogOptions, 'name'> = {
  * `HierarchicalContextManager` to maintain a hierarchy of ancestor logger names.
  * Based on convention of storing the log name in the context.name value.
  */
-export function getChildLogger(logger: ILogLayer, name?: string): ILogLayer {
+export function getChildLogger<T extends ILogLayer<T>>(logger: T, name?: string): T {
 	const childLogger = logger.child()
 	if (name) {
-		childLogger.withContext({
-			name,
-		})
+		childLogger.withContext({ name })
 	}
 	return childLogger
 }

@@ -44,7 +44,7 @@ export class JsonFileTransport extends LogFileRotationTransport {
 			this.fieldNames.timestamp !== 'timestamp' ||
 			// @ts-expect-error - Private
 			// eslint-disable-next-line ts/no-unsafe-member-access
-			!(this.fieldNames.message === 'message' || this.fieldNames.message === 'messages') ||
+			(this.fieldNames.message !== 'message' && this.fieldNames.message !== 'messages') ||
 			// @ts-expect-error - Private
 			// eslint-disable-next-line ts/no-unsafe-member-access
 			this.fieldNames.level !== 'level'

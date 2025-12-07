@@ -6,5 +6,18 @@ onlyBuiltDependencies:
   - esbuild
   - unrs-resolver
 
+# Required by @kitschpatrol/shared-config
+publicHoistPattern:
+  - '@kitschpatrol/repo-config'
+  - '@kitschpatrol/typescript-config'
+  - 'case-police'
+  - '*cspell*'
+  - '*eslint*'
+  - '*knip*'
+  - '*mdat*'
+  - '*prettier*'
+  - '*remark*'
+  - '*stylelint*'
+
 overrides:
   normalize-package-data: ^8.0.0

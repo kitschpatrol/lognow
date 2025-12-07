@@ -552,9 +552,9 @@ I found that it's hard to improve on node's native inspect implementation for ha
 
 #### Serializing complex objects for file logs
 
-Many packages exist for serializing complex JavaScript objects into valid JSON, but few are equipped to handle esoteric data types and fewer still emphasize human readability of the output over being parsable back into JavaScript.
+Many packages exist for serializing complex JavaScript objects into valid JSON, but few are equipped to handle esoteric data types and fewer still emphasize human readability of the output over being evaluable as JavaScript.
 
-Human readability seems more important than parsability for the kind of context and metadata objects we're likely to want to log.
+Human readability seems more important than perfect round-trip evaluation for the kind of context and metadata objects we're likely to want to log. (Of course the logs remain parsable, but complex objects like functions and circular references are rendered as strings.)
 
 I found that [safe-stable-stringify](https://github.com/BridgeAR/safe-stable-stringify) does a nice job of this in combination with the [serialize-error](https://github.com/sindresorhus/serialize-error) package for Error object serialization.
 
