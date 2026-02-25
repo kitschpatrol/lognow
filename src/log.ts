@@ -42,19 +42,19 @@ export type ILogBasic = Console | ConsoleLike | StreamLike | StreamStderr | Stre
  * @returns The picked log target.
  */
 export function pickLogTarget(): ILogBasic {
-	// Use stdout by default in a node environment, or console by default in a browser environment.
+	// Use stderr by default in a node environment, or console by default in a browser environment.
 	if (typeof process !== 'undefined') {
-		return process.stdout
+		return process.stderr
 	}
 	return console
 }
 
 export type LogOptions = {
-	/** Log to the console in JSON format. Useful for debugging structured logging. Pass a boolean to enable / disable the default transport configuration, an ILogBasic to target a specific log target, or a partial JsonBasicTransportConfig to override the default configuration. */
+	/** Log to the console in JSON format. Useful for debugging structured logging. Pass a `boolean` to enable / disable the default transport configuration, an `ILogBasic` to target a specific log target, or a partial `JsonBasicTransportConfig` to override the default configuration. */
 	logJsonToConsole?: boolean | ILogBasic | JsonBasicTransportConfig
-	/** Log to a typical log file path. Pass a boolean to enable / disable the default configuration. Pass a directory path string to save the log to a specific paths. By default, logs are gzipped and rotated daily, and are never removed. Pass a partial JsonFileTransportConfig to override the default configuration. */
+	/** Log to a typical log file path. Pass a `boolean` to enable / disable the default configuration. Pass a directory path string to save the log to a specific paths. By default, logs are gzipped and rotated daily, and are never removed. Pass a partial `JsonFileTransportConfig` to override the default configuration. */
 	logJsonToFile?: boolean | JsonFileTransportConfig | string
-	/** Log to the console in a pretty and human-readable format. Pass a boolean to enable / disable the default transport configuration, an ILogBasic to target a specific log target, or a partial PrettyBasicTransportConfig to override the default configuration. */
+	/** Log to the console in a pretty and human-readable format. Pass a boolean to enable / disable the default transport configuration, an `ILogBasic` to target a specific log target, or a partial `PrettyBasicTransportConfig` to override the default configuration. */
 	logToConsole?: boolean | ILogBasic | PrettyBasicTransportConfig
 	/** The name of the logger, also used as the log file name if file logging is enabled. */
 	name?: string

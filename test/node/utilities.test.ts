@@ -12,9 +12,9 @@ import {
 } from '../../src/log.js'
 
 describe('pickLogTarget', () => {
-	it('should return process.stdout in Node environment', () => {
+	it('should return process.stderr in Node environment', () => {
 		const target = pickLogTarget()
-		expect(target).toBe(process.stdout)
+		expect(target).toBe(process.stderr)
 	})
 })
 

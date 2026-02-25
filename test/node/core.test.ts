@@ -179,6 +179,11 @@ describe('injectionHelper', () => {
 		const logger = injectionHelper(process.stdout)
 		expect(logger).toBeDefined()
 	})
+
+	it('should wrap process.stderr', () => {
+		const logger = injectionHelper(process.stderr)
+		expect(logger).toBeDefined()
+	})
 })
 
 describe('error handling', () => {
