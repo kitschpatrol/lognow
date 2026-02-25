@@ -157,8 +157,8 @@ Error: Something went wrong!
 
 The underlying LogLayer library provides two basic ways to attach data to your logs:
 
-- **`withMetadata()`** - Attaches data to a single log entry
-- **`withContext()`** - Adds context to the logger instance itself, which persists across all subsequent log calls on that instance
+- **`withMetadata()`** - Ephemeral: Attaches data to a single log entry
+- **`withContext()`** - Persistent: Adds context to the logger instance itself, which persists across all subsequent log calls on that instance
 
 ```ts
 import { log } from 'lognow'
@@ -208,7 +208,7 @@ Set to `true` or `false` to enable or disable pretty console logging.
 
 Defaults to `true`.
 
-Alternately, set to any Console- or Stream-like log target, or a partial `PrettyBasicTransportConfig` object to override the default configuration. (If you don't define a log target explicitly, `process.stdout` is used in Node.js and `console` is used in the browser.)
+Alternately, set to any Console- or Stream-like log target, or a partial `PrettyBasicTransportConfig` object to override the default configuration. (If you don't define a log target explicitly, `process.stderr` is used in Node.js and `console` is used in the browser.)
 
 #### `logJsonToFile`
 
@@ -333,9 +333,11 @@ setDefaultLogOptions({
 log.info('File this away')
 ```
 
-On macOS, this will write to `~/Library/Logs/My Application/`.
-On Linux, logs are written to `~/.local/state/My Application/logs/`.
-On Windows, logs are written to `%LOCALAPPDATA%\My Application\logs\`.
+| Platform | Default Log Location                  |
+| -------- | ------------------------------------- |
+| macOS    | `~/Library/Logs/My Application/`      |
+| Linux    | `~/.local/state/My Application/logs/` |
+| Windows  | `%LOCALAPPDATA%\My Application\logs\` |
 
 ### Custom Log Directory
 
@@ -490,7 +492,7 @@ setLogger(getChildLogger(log, 'child'))
 greet()
 ```
 
-If the library consumer doesn't want to use `lognow`, they can still inject a `Console`- or `WritableStream`-like logger instance into the library to receive basic messages without additional dependencies:
+If the library consumer doesn't want to use `lognow`or `LogLayer`, they can still inject a `Console`- or `WritableStream`-like logger instance into the library to receive basic messages _without_ additional dependencies:
 
 `the-application.ts`:
 
