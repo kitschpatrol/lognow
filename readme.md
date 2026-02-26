@@ -49,8 +49,24 @@ Node 20.19.0+, or any recent web browser.
 
 ### Installation
 
+#### Local
+
 ```sh
 npm install lognow
+```
+
+#### CDN
+
+A bundled and minified ES module is available on CDNs:
+
+```ts
+import { log } from 'https://cdn.jsdelivr.net/npm/lognow'
+```
+
+or
+
+```ts
+import { log } from 'https://unpkg.com/lognow'
 ```
 
 ### Quick Start
