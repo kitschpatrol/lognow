@@ -1,3 +1,5 @@
+import { generateDtsBundle } from 'dts-bundle-generator'
+import { writeFileSync } from 'node:fs'
 import { defineConfig } from 'tsdown'
 
 export default defineConfig([
@@ -24,6 +26,40 @@ export default defineConfig([
 		entry: 'src/browser/index.ts',
 		fixedExtension: false,
 		format: 'esm',
+		hooks: {
+			'build:done'() {
+				// Tsdown's type bundling doesn't work since we can't separately externalize
+				// type definitions and source code, but `dts-bundle-generator` seems to
+				// work fine.
+				const result = generateDtsBundle(
+					[
+						{
+							filePath: './src/browser/index.ts',
+							libraries: {
+								inlinedLibraries: [
+									'@loglayer/context-manager',
+									'@loglayer/plugin',
+									'@loglayer/shared',
+									'@loglayer/transport-log-file-rotation',
+									'@loglayer/transport',
+									'loglayer',
+									'node-inspect-extracted',
+								],
+							},
+							output: {
+								noBanner: true,
+							},
+						},
+					],
+					{
+						preferredConfigPath: './tsconfig.build.json',
+					},
+				)
+
+				// GenerateDtsBundle returns string[] (one per entry point)
+				writeFileSync('./dist/standalone/index.d.ts', result[0])
+			},
+		},
 		minify: true,
 		noExternal: [
 			'@loglayer/context-manager',

@@ -1,6 +1,6 @@
 import type { LogLayerTransportConfig, LogLayerTransportParams } from '@loglayer/transport'
-// import type { InspectOptions } from 'node-inspect-extracted'
-import type { InspectOptions } from 'node:util'
+import type { InspectOptions } from 'node-inspect-extracted'
+// import type { InspectOptions } from 'node:util'
 import { BaseTransport, LogLevel } from '@loglayer/transport'
 import { defu } from 'defu'
 import type { ILogBasic, LogBasicTypedTarget } from '../log'

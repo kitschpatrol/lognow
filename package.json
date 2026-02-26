@@ -56,6 +56,7 @@
 			"import": "./dist/electron/preload/index.js"
 		},
 		"./standalone": {
+			"types": "./dist/standalone/index.d.ts",
 			"import": "./dist/standalone/index.js"
 		}
 	},
@@ -65,7 +66,7 @@
 		"dist/*"
 	],
 	"scripts": {
-		"build": "tsdown && attw -P --profile esm-only --exclude-entrypoints lognow/standalone && publint",
+		"build": "tsdown && attw -P --profile esm-only && publint",
 		"clean": "git rm -f pnpm-lock.yaml ; git clean -fdX",
 		"fix": "ksc fix",
 		"lint": "ksc lint",
@@ -97,6 +98,7 @@
 		"@kitschpatrol/shared-config": "^6.0.0",
 		"@vitest/browser-playwright": "^4.0.18",
 		"bumpp": "^10.4.1",
+		"dts-bundle-generator": "^9.5.1",
 		"electron": ">=39.7.0",
 		"publint": "^0.3.17",
 		"tsdown": "^0.20.3",

@@ -3,8 +3,8 @@ import type {
 	LogLayerTransportParams,
 	LogLevelType,
 } from '@loglayer/transport'
-// import type { InspectOptions } from 'node-inspect-extracted'
-import type { InspectOptions } from 'node:util'
+import type { InspectOptions } from 'node-inspect-extracted'
+// import type { InspectOptions } from 'node:util'
 import { BaseTransport, LogLevel } from '@loglayer/transport'
 import c from 'ansi-colors'
 import { defu } from 'defu'
