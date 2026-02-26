@@ -17,7 +17,7 @@ import { JsonBasicTransport } from './loglayer/json-basic-transport'
 import { PrettyBasicTransport } from './loglayer/pretty-basic-transport'
 import { timestampPlugin } from './loglayer/timestamp-context-plugin'
 
-export type { ILogLayer } from 'loglayer'
+export type { ILogLayer }
 
 type ConsoleLike = {
 	debug(...data: unknown[]): void

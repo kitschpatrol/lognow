@@ -212,7 +212,7 @@ Alternately, set to any Console- or Stream-like log target, or a partial `Pretty
 
 #### `logJsonToFile`
 
-Set to `true` or `false` to enable or disable file logging. When enabled, logs are written as newline-delimited JSON (JSONL) to disk.
+Set to `true` or `false` to enable or disable file logging. When enabled, logs are written as newline-delimited JSON objects (JSONL) to disk.
 
 Defaults to `false`.
 
@@ -419,7 +419,7 @@ Electron support is designed primarily for use with the default log instance —
 
 ### Libraries
 
-If you're building a library that others will use, you can use Lognow with dependency injection to allow consumers to integrate with their own logging systems.
+If you're building a library that others will use, you can use Lognow with dependency injection to allow consumers to integrate their own logging systems.
 
 #### Step 1: Create a logger in your library
 
