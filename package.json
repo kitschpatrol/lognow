@@ -1,6 +1,6 @@
 {
 	"name": "lognow",
-	"version": "0.5.0",
+	"version": "0.5.1",
 	"description": "Quick and clean universal logging.",
 	"keywords": [
 		"logging",
