@@ -11,16 +11,6 @@ importers:
 
   .:
     dependencies:
-      '@types/node':
-        specifier: ^20.19.33
-        version: 20.19.33
-      loglayer:
-        specifier: ^9.1.0
-        version: 9.1.0
-    devDependencies:
-      '@kitschpatrol/shared-config':
-        specifier: ^6.0.0
-        version: 6.0.0(@pnpm/logger@1001.0.1)(@types/estree@1.0.8)(@types/node@20.19.33)(@typescript-eslint/utils@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3))(jiti@2.6.1)(postcss-html@1.8.1)(stylelint-order@7.0.1(stylelint@17.4.0(typescript@5.9.3)))(svelte@5.53.5)(typescript@5.9.3)(vitest@4.0.18)
       '@loglayer/context-manager':
         specifier: ^2.0.2
         version: 2.0.2
@@ -30,24 +20,21 @@ importers:
       '@loglayer/transport-log-file-rotation':
         specifier: ^3.0.2
         version: 3.0.2
-      '@vitest/browser-playwright':
-        specifier: ^4.0.18
-        version: 4.0.18(playwright@1.58.2)(vite@7.3.1(@types/node@20.19.33)(jiti@2.6.1)(yaml@2.8.2))(vitest@4.0.18)
+      '@types/node':
+        specifier: ^20.19.33
+        version: 20.19.33
       ansi-colors:
         specifier: ^4.1.3
         version: 4.1.3
-      bumpp:
-        specifier: ^10.4.1
-        version: 10.4.1
       defu:
         specifier: ^6.1.4
         version: 6.1.4
-      electron:
-        specifier: '>=39.7.0'
-        version: 40.6.1
       filenamify:
         specifier: ^7.0.1
         version: 7.0.1
+      loglayer:
+        specifier: ^9.1.0
+        version: 9.1.0
       next-json:
         specifier: ^0.5.1
         version: 0.5.1
@@ -66,21 +53,34 @@ importers:
       terminal-size:
         specifier: ^4.0.1
         version: 4.0.1
+      untildify:
+        specifier: ^6.0.0
+        version: 6.0.0
+      wrap-ansi:
+        specifier: ^10.0.0
+        version: 10.0.0
+    devDependencies:
+      '@kitschpatrol/shared-config':
+        specifier: ^6.0.0
+        version: 6.0.0(@pnpm/logger@1001.0.1)(@types/estree@1.0.8)(@types/node@20.19.33)(@typescript-eslint/utils@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3))(jiti@2.6.1)(postcss-html@1.8.1)(stylelint-order@7.0.1(stylelint@17.4.0(typescript@5.9.3)))(svelte@5.53.5)(typescript@5.9.3)(vitest@4.0.18)
+      '@vitest/browser-playwright':
+        specifier: ^4.0.18
+        version: 4.0.18(playwright@1.58.2)(vite@7.3.1(@types/node@20.19.33)(jiti@2.6.1)(yaml@2.8.2))(vitest@4.0.18)
+      bumpp:
+        specifier: ^10.4.1
+        version: 10.4.1
+      electron:
+        specifier: '>=39.7.0'
+        version: 40.6.1
       tsdown:
         specifier: ^0.20.3
         version: 0.20.3(oxc-resolver@11.19.0)(synckit@0.11.12)(typescript@5.9.3)
       typescript:
         specifier: ~5.9.3
         version: 5.9.3
-      untildify:
-        specifier: ^6.0.0
-        version: 6.0.0
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@20.19.33)(@vitest/browser-playwright@4.0.18)(jiti@2.6.1)(yaml@2.8.2)
-      wrap-ansi:
-        specifier: ^10.0.0
-        version: 10.0.0
 
 packages:
 
