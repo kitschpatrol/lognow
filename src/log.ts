@@ -17,6 +17,7 @@ import { JsonBasicTransport } from './loglayer/json-basic-transport'
 import { PrettyBasicTransport } from './loglayer/pretty-basic-transport'
 import { timestampPlugin } from './loglayer/timestamp-context-plugin'
 
+// eslint-disable-next-line unicorn/prefer-export-from
 export type { ILogLayer }
 
 type ConsoleLike = {

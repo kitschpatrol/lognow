@@ -3,46 +3,46 @@ import { defineConfig } from 'tsdown'
 export default defineConfig([
 	// Node
 	{
+		dts: true,
 		entry: 'src/node/index.ts',
 		fixedExtension: false,
 		outDir: 'dist/node',
 		platform: 'node',
 		tsconfig: 'tsconfig.build.json',
-		dts: true,
 	},
 	// Browser
 	{
+		dts: true,
 		entry: 'src/browser/index.ts',
 		minify: true,
 		outDir: 'dist/browser',
 		platform: 'browser',
 		tsconfig: 'tsconfig.build.json',
-		dts: true,
 	},
 	// Electron
 	{
+		dts: true,
 		entry: 'src/electron/renderer/index.ts',
 		external: ['electron'],
 		outDir: 'dist/electron/renderer',
 		platform: 'browser',
 		tsconfig: 'tsconfig.build.json',
-		dts: true,
 	},
 	{
+		dts: true,
 		entry: 'src/electron/main/index.ts',
 		external: ['electron'],
 		fixedExtension: false,
 		outDir: 'dist/electron/main',
-		tsconfig: 'tsconfig.build.json',
-		dts: true,
 		platform: 'node',
+		tsconfig: 'tsconfig.build.json',
 	},
 	{
+		dts: true,
 		entry: 'src/electron/preload/index.ts',
 		external: ['electron'],
 		outDir: 'dist/electron/preload',
-		tsconfig: 'tsconfig.build.json',
-		dts: true,
 		platform: 'browser',
+		tsconfig: 'tsconfig.build.json',
 	},
 ])
