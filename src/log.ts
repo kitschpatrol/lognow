@@ -5,7 +5,8 @@
 
 import type { LoggerlessTransport } from '@loglayer/transport'
 import type { ILogLayer, LogLayerTransport } from 'loglayer'
-import type { InspectOptions } from 'node-inspect-extracted'
+// import type { InspectOptions } from 'node-inspect-extracted'
+import type { InspectOptions } from 'node:util'
 import { defu } from 'defu'
 import { LogLayer, LogLevel, MockLogLayer } from 'loglayer'
 import { serializeError } from 'serialize-error'

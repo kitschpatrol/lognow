@@ -14,10 +14,30 @@ export default defineConfig([
 	{
 		dts: true,
 		entry: 'src/browser/index.ts',
-		minify: true,
 		outDir: 'dist/browser',
 		platform: 'browser',
 		tsconfig: 'tsconfig.build.json',
+	},
+	// Browser Standalone (Bundled for CDNs)
+	{
+		dts: false,
+		entry: 'src/browser/index.ts',
+		fixedExtension: false,
+		format: 'esm',
+		minify: true,
+		noExternal: [
+			'@loglayer/context-manager',
+			'@loglayer/transport',
+			'node-inspect-extracted',
+			'ansi-colors',
+			'defu',
+			'loglayer',
+			'safe-stable-stringify',
+			'serialize-error',
+			'wrap-ansi',
+		],
+		outDir: 'dist/standalone',
+		platform: 'browser',
 	},
 	// Electron
 	{
