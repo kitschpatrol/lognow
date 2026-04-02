@@ -11,7 +11,7 @@ import {
 	isNoColorSet,
 	pickLogTarget,
 } from '../log'
-import { paramsToJsonString } from './json-shared'
+import { paramsToJsonString, paramsToLogEntry } from './json-shared'
 
 // Dance to make the config interface convertible to a type
 // eslint-disable-next-line ts/consistent-type-definitions
@@ -94,10 +94,9 @@ export class JsonBasicTransport extends BaseTransport<ILogBasic> {
 			return params.messages
 		}
 
-		const jsonString = paramsToJsonString(params)
 		const logString =
 			this.config.pretty || this.config.colorize
-				? this.config.inspect(JSON.parse(jsonString), {
+				? this.config.inspect(paramsToLogEntry(params), {
 						breakLength: this.config.pretty
 							? Math.min(this.config.getTerminalWidth(), MAX_WIDTH)
 							: Number.MAX_SAFE_INTEGER,
@@ -105,7 +104,7 @@ export class JsonBasicTransport extends BaseTransport<ILogBasic> {
 						compact: !this.config.pretty,
 						depth: Infinity,
 					})
-				: jsonString
+				: paramsToJsonString(params)
 
 		// Type narrowing based on the discriminated union
 		switch (this.typedTarget.type) {

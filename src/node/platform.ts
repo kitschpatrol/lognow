@@ -39,17 +39,21 @@ function getPlatformLogPath(name?: string): string {
 	return path.join(env.XDG_STATE_HOME ?? path.join(homedir, '.local', 'state'), resolvedName)
 }
 
+// Cache the package name since it never changes at runtime.
+let cachedName: string | undefined
+let nameResolved = false
+
 /**
  * Helper function to get the name of the package. Based on the package.json file.
  */
 function getName(): string | undefined {
-	// Detect electron main process
-	if (process.env.ELECTRON_MAIN) {
-		return 'Main'
-	}
+	if (nameResolved) return cachedName
 
-	const packageJson = readPackageUpSync()
-	return packageJson?.packageJson.name
+	// Detect electron main process
+	cachedName = process.env.ELECTRON_MAIN ? 'Main' : readPackageUpSync()?.packageJson.name
+
+	nameResolved = true
+	return cachedName
 }
 
 // File transports must be reused, so we cache them by path
@@ -61,11 +65,11 @@ const fileTransportsByPath = new Map<string, JsonFileTransport>()
  * @returns The destinations of the file transports.
  */
 export function getFileTransportDestinations(): string[] {
-	// TODO clean this up?
-	// @ts-expect-error - Private access
-	// eslint-disable-next-line ts/no-unsafe-type-assertion, ts/no-unsafe-member-access
 	return Array.from(
 		fileTransportsByPath.values(),
+		// TODO clean this up?
+		// @ts-expect-error - Private access
+		// eslint-disable-next-line ts/no-unsafe-type-assertion, ts/no-unsafe-member-access
 		(transport) => transport.stream?.currentFile as string | undefined,
 	).filter((file): file is string => file !== undefined)
 }
@@ -118,14 +122,21 @@ export function createFileTransport(
 	return fileTransportsByPath.get(filename)!
 }
 
+// Cache terminal width to avoid expensive per-call system queries.
+// On macOS with redirected streams, terminalSize() opens /dev/tty synchronously.
+let cachedTerminalWidth = terminalSize().columns
+
+process.on('SIGWINCH', () => {
+	cachedTerminalWidth = terminalSize().columns
+})
+
 /**
  * Get the terminal width.
  * Exported for reuse in Electron platform adapter.
  * @returns The terminal width.
  */
 export function getTerminalWidth(): number {
-	// TODO reconsider
-	return terminalSize().columns
+	return cachedTerminalWidth
 }
 
 export const nodePlatformAdapter: PlatformAdapter = {

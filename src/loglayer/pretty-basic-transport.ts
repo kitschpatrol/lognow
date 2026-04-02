@@ -17,6 +17,7 @@ import {
 	isNoColorSet,
 	pickLogTarget,
 } from '../log'
+import { hasOwnProperties } from './json-shared'
 
 // Dance to make the config interface convertible to a type
 // eslint-disable-next-line ts/consistent-type-definitions
@@ -149,11 +150,11 @@ export class PrettyBasicTransport extends BaseTransport<ILogBasic> {
 			// eslint-disable-next-line ts/no-unnecessary-condition
 			params.metadata === null ||
 			params.metadata === undefined ||
-			Object.keys(params.metadata).length === 0
+			!hasOwnProperties(params.metadata as Record<string, unknown>)
 				? undefined
 				: params.metadata
 
-		const restOfContextObject = Object.keys(restOfContext).length === 0 ? undefined : restOfContext
+		const restOfContextObject = hasOwnProperties(restOfContext) ? restOfContext : undefined
 
 		const prefixAndMessageParts = [localTimeString, logLevelString, namePrefix, messages].filter(
 			Boolean,
@@ -311,11 +312,11 @@ export class PrettyBasicTransport extends BaseTransport<ILogBasic> {
 }
 
 function formatTime(date: Date, colorize: boolean): string {
-	const hours = date.getHours().toString().padStart(2, '0')
-	const minutes = date.getMinutes().toString().padStart(2, '0')
-	const seconds = date.getSeconds().toString().padStart(2, '0')
-	const milliseconds = date.getMilliseconds().toString().padStart(3, '0')
-	const timeString = `${hours}:${minutes}:${seconds}.${milliseconds}`
+	const h = date.getHours()
+	const m = date.getMinutes()
+	const s = date.getSeconds()
+	const ms = date.getMilliseconds()
+	const timeString = `${h < 10 ? '0' : ''}${h}:${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}.${ms < 10 ? '00' : ms < 100 ? '0' : ''}${ms}`
 	return colorize ? c.gray(timeString) : timeString
 }
 

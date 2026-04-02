@@ -9,4 +9,5 @@ export default knipConfig({
 		'src/electron/preload/index.ts',
 		'test/assets/nightmare-object.ts',
 	],
+	ignoreDependencies: ['@playwright/test'],
 })

@@ -387,6 +387,7 @@ export function createLogBasicTypedTarget(instance: ILogBasic): LogBasicTypedTar
 
 let _log: ILogLayer | undefined
 let currentOptions: LogOptions = DEFAULT_LOG_OPTIONS
+let boundMethodCache = new Map<PropertyKey, unknown>()
 
 /**
  * The default singleton logger instance.
@@ -400,8 +401,15 @@ export const log = new Proxy(
 	{
 		get(_, property: keyof ILogLayer) {
 			_log ??= createLogger(currentOptions)
+			const cached = boundMethodCache.get(property)
+			if (cached !== undefined) return cached
 			const value = _log[property]
-			return typeof value === 'function' ? value.bind(_log) : value
+			if (typeof value === 'function') {
+				const bound = value.bind(_log)
+				boundMethodCache.set(property, bound)
+				return bound
+			}
+			return value
 		},
 	},
 ) satisfies ILogLayer
@@ -415,6 +423,7 @@ export function setDefaultLogOptions(options: LogOptions): void {
 	currentOptions = defu(options, currentOptions)
 	// Will be lazily recreated on next access through the proxy
 	_log = undefined
+	boundMethodCache = new Map()
 }
 
 /**

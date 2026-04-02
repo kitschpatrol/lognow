@@ -3,6 +3,16 @@ import { stringify as safeStableStringify } from 'safe-stable-stringify'
 import { serializeError } from 'serialize-error'
 
 /**
+ * Check if object has a property
+ */
+export function hasOwnProperties(object: Record<string, unknown>): boolean {
+	// Optimization
+	// eslint-disable-next-line guard-for-in, no-unreachable-loop, ts/naming-convention
+	for (const _ in object) return true
+	return false
+}
+
+/**
  * Options for paramsToJsonString function
  * @public
  */
@@ -12,13 +22,12 @@ export type ParamsToJsonStringOptions = {
 }
 
 /**
- * Much mirrored from FileRotationTransport
+ * Build a structured log entry object from transport params.
  */
-export function paramsToJsonString(
+export function paramsToLogEntry(
 	params: LogLayerTransportParams,
 	options?: ParamsToJsonStringOptions,
-): string {
-	// Defaults match FileRotationTransport
+): Record<string, unknown> {
 	const { staticData, timestampFn = () => new Date().toISOString() } = options ?? {}
 
 	const { name, parentNames, timestamp, ...restOfContext } = (params.context ?? {}) as {
@@ -38,13 +47,13 @@ export function paramsToJsonString(
 		// eslint-disable-next-line ts/no-unnecessary-condition
 		params.metadata === null ||
 		params.metadata === undefined ||
-		Object.keys(params.metadata).length === 0
+		!hasOwnProperties(params.metadata as Record<string, unknown>)
 			? undefined
 			: params.metadata
 
-	const restOfContextObject = Object.keys(restOfContext).length === 0 ? undefined : restOfContext
+	const restOfContextObject = hasOwnProperties(restOfContext) ? restOfContext : undefined
 
-	const logEntry = {
+	const logEntry: Record<string, unknown> = {
 		context: restOfContextObject,
 		error: errorObject,
 		level: params.logLevel,
@@ -56,7 +65,22 @@ export function paramsToJsonString(
 		...(staticData ? (typeof staticData === 'function' ? staticData() : staticData) : {}),
 	}
 
-	return safeStableStringify(logEntry, replacer) ?? ''
+	// Strip undefined values so inspect() doesn't render them
+	for (const key in logEntry) {
+		if (logEntry[key] === undefined) delete logEntry[key]
+	}
+
+	return logEntry
+}
+
+/**
+ * Much mirrored from FileRotationTransport
+ */
+export function paramsToJsonString(
+	params: LogLayerTransportParams,
+	options?: ParamsToJsonStringOptions,
+): string {
+	return safeStableStringify(paramsToLogEntry(params, options), replacer) ?? ''
 }
 
 function replacer(this: unknown, _: unknown, value: unknown) {

@@ -6,3 +6,5 @@ pnpm-lock.yaml
 package-lock.json
 
 # Customizations
+test/benchmarks/baseline.json
+.claude/settings.local.json
