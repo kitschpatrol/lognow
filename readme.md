@@ -10,6 +10,7 @@
 
 [![NPM Package lognow](https://img.shields.io/npm/v/lognow.svg)](https://npmjs.com/package/lognow)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![CI](https://github.com/kitschpatrol/lognow/actions/workflows/ci.yml/badge.svg)](https://github.com/kitschpatrol/lognow/actions/workflows/ci.yml)
 
 <!-- /badges -->
 
@@ -448,16 +449,17 @@ import type { ILogBasic, ILogLayer } from 'lognow'
 import { createLogger, injectionHelper } from 'lognow'
 
 /**
- * The default logger instance for the module.
- * Configure log settings here.
+ * The default logger instance for the module. Configure log settings here.
  * Exported for use throughout the library.
  */
 export let log = createLogger({ name: 'YourLibrary' })
 
 /**
- * Set the logger instance for the module.
- * Export this for library consumers to inject their own logger.
- * @param logger - Accepts either a LogLayer instance or a Console- or Stream-like log target
+ * Set the logger instance for the module. Export this for library consumers to
+ * inject their own logger.
+ *
+ * @param logger - Accepts either a LogLayer instance or a Console- or
+ *   Stream-like log target
  */
 export function setLogger(logger?: ILogBasic | ILogLayer) {
   log = injectionHelper(logger)

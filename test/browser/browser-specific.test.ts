@@ -4,6 +4,8 @@
 
 import { describe, expect, it, vi } from 'vitest'
 import { createLogger } from '../../src/browser/index.js'
+
+const NODE_ONLY_REGEX = /only supported in Node.js/
 import {
 	getCallString,
 	isBrowserConsoleObject,
@@ -91,7 +93,7 @@ describe('browser-specific: no file system', () => {
 				logJsonToFile: true,
 				name: 'file-test',
 			})
-		}).toThrow(/only supported in Node.js/)
+		}).toThrow(NODE_ONLY_REGEX)
 	})
 
 	it('should throw error when passing file path', () => {
@@ -100,7 +102,7 @@ describe('browser-specific: no file system', () => {
 				logJsonToFile: '/some/path',
 				name: 'file-path',
 			})
-		}).toThrow(/only supported in Node.js/)
+		}).toThrow(NODE_ONLY_REGEX)
 	})
 
 	it('should throw error when passing file config', () => {
@@ -111,7 +113,7 @@ describe('browser-specific: no file system', () => {
 				},
 				name: 'file-config',
 			})
-		}).toThrow(/only supported in Node.js/)
+		}).toThrow(NODE_ONLY_REGEX)
 	})
 })
 

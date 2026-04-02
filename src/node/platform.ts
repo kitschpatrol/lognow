@@ -61,13 +61,13 @@ const fileTransportsByPath = new Map<string, JsonFileTransport>()
  * @returns The destinations of the file transports.
  */
 export function getFileTransportDestinations(): string[] {
-	return [...fileTransportsByPath.values()]
-		.map(
-			// @ts-expect-error - Private
-			// eslint-disable-next-line ts/no-unsafe-type-assertion, ts/no-unsafe-member-access
-			(transport) => transport.stream?.currentFile as string | undefined,
-		)
-		.filter((file): file is string => file !== undefined)
+	// TODO clean this up?
+	// @ts-expect-error - Private access
+	// eslint-disable-next-line ts/no-unsafe-type-assertion, ts/no-unsafe-member-access
+	return Array.from(
+		fileTransportsByPath.values(),
+		(transport) => transport.stream?.currentFile as string | undefined,
+	).filter((file): file is string => file !== undefined)
 }
 
 /**

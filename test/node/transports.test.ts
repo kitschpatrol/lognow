@@ -7,6 +7,8 @@ import { JsonBasicTransport } from '../../src/loglayer/json-basic-transport.js'
 import { PrettyBasicTransport } from '../../src/loglayer/pretty-basic-transport.js'
 import { createLogger } from '../../src/node/index.js'
 
+const TIMESTAMP_REGEX = /\d{2}:\d{2}:\d{2}\.\d{3}/
+
 describe('PrettyBasicTransport', () => {
 	it('should create a pretty transport', () => {
 		const transport = new PrettyBasicTransport({
@@ -58,7 +60,7 @@ describe('PrettyBasicTransport', () => {
 
 		expect(output.length).toBeGreaterThan(0)
 		// Should not contain timestamp pattern (HH:MM:SS.mmm)
-		expect(output[0]).not.toMatch(/\d{2}:\d{2}:\d{2}\.\d{3}/)
+		expect(output[0]).not.toMatch(TIMESTAMP_REGEX)
 	})
 
 	it('should respect showLevel option', () => {
