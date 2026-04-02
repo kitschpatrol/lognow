@@ -136,7 +136,6 @@ export class PrettyBasicTransport extends BaseTransport<ILogBasic> {
 			: undefined
 		const messages = params.messages.length > 0 ? this.styleMessages(params.messages) : undefined
 
-		// TODO slow to call this every time?
 		const maxWidth = Math.min(this.config.getTerminalWidth(), MAX_WIDTH)
 
 		const errorObject =
@@ -160,10 +159,14 @@ export class PrettyBasicTransport extends BaseTransport<ILogBasic> {
 			Boolean,
 		)
 
-		const prefixAndMessages =
-			prefixAndMessageParts.length > 0
-				? wrapAnsi(prefixAndMessageParts.join(' '), maxWidth)
-				: undefined
+		let prefixAndMessages: string | undefined
+		if (prefixAndMessageParts.length > 0) {
+			const joined = prefixAndMessageParts.join(' ')
+			// Skip expensive wrapAnsi when the string is short enough that
+			// wrapping can't occur. ANSI escapes inflate .length but are
+			// zero-width, so if .length <= maxWidth it definitely fits.
+			prefixAndMessages = joined.length <= maxWidth ? joined : wrapAnsi(joined, maxWidth)
+		}
 
 		// Type narrowing based on the discriminated union
 		switch (this.typedTarget.type) {
@@ -320,33 +323,28 @@ function formatTime(date: Date, colorize: boolean): string {
 	return colorize ? c.gray(timeString) : timeString
 }
 
+// Pre-compute colorized level strings to avoid ANSI function calls per log
+const LOG_LEVEL_STRINGS_COLOR: Record<string, string> = {
+	debug: c.bold.green('DEBUG'),
+	error: c.bold.red('ERROR'),
+	fatal: c.bold.red('FATAL'),
+	info: c.bold.blue('INFO '),
+	trace: c.bold.gray('TRACE'),
+	warn: c.bold.yellow('WARN '),
+}
+
+const LOG_LEVEL_STRINGS_PLAIN: Record<string, string> = {
+	debug: 'DEBUG',
+	error: 'ERROR',
+	fatal: 'FATAL',
+	info: 'INFO ',
+	trace: 'TRACE',
+	warn: 'WARN ',
+}
+
 function getLogLevelString(level: LogLevelType, colorize: boolean): string {
-	switch (level) {
-		case 'debug':
-		case LogLevel.debug: {
-			return colorize ? c.bold.green('DEBUG') : 'DEBUG'
-		}
-		case 'error':
-		case LogLevel.error: {
-			return colorize ? c.bold.red('ERROR') : 'ERROR'
-		}
-		case 'fatal':
-		case LogLevel.fatal: {
-			return colorize ? c.bold.red('FATAL') : 'FATAL'
-		}
-		case 'info':
-		case LogLevel.info: {
-			return colorize ? c.bold.blue('INFO ') : 'INFO '
-		}
-		case LogLevel.trace:
-		case 'trace': {
-			return colorize ? c.bold.gray('TRACE') : 'TRACE'
-		}
-		case LogLevel.warn:
-		case 'warn': {
-			return colorize ? c.bold.yellow('WARN ') : 'WARN '
-		}
-	}
+	// eslint-disable-next-line ts/no-unnecessary-condition
+	return (colorize ? LOG_LEVEL_STRINGS_COLOR[level] : LOG_LEVEL_STRINGS_PLAIN[level]) ?? ''
 }
 
 function getNamePrefix(
@@ -357,8 +355,12 @@ function getNamePrefix(
 	if (name === undefined && parentNames === undefined) {
 		return '|'
 	}
-	const result = [...(parentNames ?? []), ...(name ? [name] : [])]
-		.map((name) => `[${name}]`)
-		.join('')
+
+	let result = ''
+	if (parentNames) {
+		for (const p of parentNames) result += `[${p}]`
+	}
+	if (name) result += `[${name}]`
+
 	return colorize ? c.bold.gray(result) : result
 }

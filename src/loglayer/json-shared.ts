@@ -76,7 +76,11 @@ export function paramsToJsonString(
 	params: LogLayerTransportParams,
 	options?: ParamsToJsonStringOptions,
 ): string {
-	return safeStableStringify(paramsToLogEntry(params, options), replacer) ?? ''
+	const logEntry = paramsToLogEntry(params, options)
+	// Only use the error-serializing replacer when an error is present
+	return (
+		(logEntry.error ? safeStableStringify(logEntry, replacer) : safeStableStringify(logEntry)) ?? ''
+	)
 }
 
 function replacer(this: unknown, _: unknown, value: unknown) {
