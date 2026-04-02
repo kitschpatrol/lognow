@@ -53,24 +53,20 @@ export function paramsToLogEntry(
 
 	const restOfContextObject = hasOwnProperties(restOfContext) ? restOfContext : undefined
 
-	const logEntry: Record<string, unknown> = {
-		context: restOfContextObject,
-		error: errorObject,
-		level: params.logLevel,
-		messages: params.messages,
-		metadata: metadataObject,
-		name,
-		parentNames,
-		timestamp: timestamp ?? timestampFn(),
-		...(staticData ? (typeof staticData === 'function' ? staticData() : staticData) : {}),
-	}
-
 	// Strip undefined values so inspect() doesn't render them
-	for (const key in logEntry) {
-		if (logEntry[key] === undefined) delete logEntry[key]
-	}
-
-	return logEntry
+	return Object.fromEntries(
+		Object.entries({
+			context: restOfContextObject,
+			error: errorObject,
+			level: params.logLevel,
+			messages: params.messages,
+			metadata: metadataObject,
+			name,
+			parentNames,
+			timestamp: timestamp ?? timestampFn(),
+			...(staticData ? (typeof staticData === 'function' ? staticData() : staticData) : {}),
+		}).filter(([, v]) => v !== undefined),
+	)
 }
 
 /**
