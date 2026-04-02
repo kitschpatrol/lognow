@@ -67,6 +67,8 @@
 		"dist/*"
 	],
 	"scripts": {
+		"bench": "vitest bench --project node --compare test/benchmarks/baseline.json",
+		"bench:baseline": "vitest bench --project node --outputJson test/benchmarks/baseline.json",
 		"build": "tsdown && attw -P --profile esm-only && publint",
 		"clean": "git rm -f pnpm-lock.yaml ; git clean -fdX",
 		"fix": "ksc fix",
@@ -97,6 +99,7 @@
 	"devDependencies": {
 		"@arethetypeswrong/cli": "^0.18.2",
 		"@kitschpatrol/shared-config": "^7.0.0",
+		"@playwright/test": "^1.59.1",
 		"@vitest/browser-playwright": "^4.1.2",
 		"bumpp": "^11.0.1",
 		"dts-bundle-generator": "^9.5.1",

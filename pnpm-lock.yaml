@@ -66,6 +66,9 @@ importers:
       '@kitschpatrol/shared-config':
         specifier: ^7.0.0
         version: 7.0.0(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@pnpm/logger@1001.0.1)(@types/estree@1.0.8)(@types/node@20.17.58)(@typescript-eslint/utils@8.58.0(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3))(jiti@2.6.1)(postcss-html@1.8.1)(stylelint-order@8.1.1(stylelint@17.6.0(typescript@5.9.3)))(svelte@5.55.1)(typescript@5.9.3)(vitest@4.1.2)
+      '@playwright/test':
+        specifier: ^1.59.1
+        version: 1.59.1
       '@vitest/browser-playwright':
         specifier: ^4.1.2
         version: 4.1.2(playwright@1.59.1)(vite@8.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@20.17.58)(jiti@2.6.1)(yaml@2.8.3))(vitest@4.1.2)
@@ -1213,6 +1216,11 @@ packages:
   '@pkgr/core@0.2.9':
     resolution: {integrity: sha512-QNqXyfVS2wm9hweSYD2O7F0G06uurj9kZ96TRQE5Y9hU7+tgdZwIkbAKc5Ocy1HxEY2kuDQa6cQ1WRs/O5LFKA==}
     engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
+
+  '@playwright/test@1.59.1':
+    resolution: {integrity: sha512-PG6q63nQg5c9rIi4/Z5lR5IVF7yU5MqmKaPOe0HSc0O2cX1fPi96sUQu5j7eo4gKCkB2AnNGoWt7y4/Xx3Kcqg==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   '@pnpm/config.env-replace@1.1.0':
     resolution: {integrity: sha512-htyl8TWnKL7K/ESFa1oW2UB5lVDxuF5DpM7tBi6Hu2LNL3mWkIzNLG6N4zoCUP1lCKNxWy/3iu8mS8MvToGd6w==}
@@ -7220,6 +7228,10 @@ snapshots:
     optional: true
 
   '@pkgr/core@0.2.9': {}
+
+  '@playwright/test@1.59.1':
+    dependencies:
+      playwright: 1.59.1
 
   '@pnpm/config.env-replace@1.1.0': {}
 
