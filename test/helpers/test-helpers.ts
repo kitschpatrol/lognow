@@ -54,6 +54,7 @@ function stripTimestamp(object: Record<string, unknown>): Record<string, unknown
 							// eslint-disable-next-line ts/no-unsafe-type-assertion
 							return stripTimestamp(item as Record<string, unknown>)
 						}
+
 						// eslint-disable-next-line ts/no-unsafe-return
 						return item
 					}),

@@ -22,6 +22,19 @@ export default defineConfig([
 	},
 	// Browser Standalone (Bundled for CDNs)
 	{
+		deps: {
+			alwaysBundle: [
+				'@loglayer/context-manager',
+				'@loglayer/transport',
+				'node-inspect-extracted',
+				'ansi-colors',
+				'defu',
+				'loglayer',
+				'safe-stable-stringify',
+				'serialize-error',
+				'wrap-ansi',
+			],
+		},
 		dts: false,
 		entry: 'src/browser/index.ts',
 		fixedExtension: false,
@@ -61,42 +74,37 @@ export default defineConfig([
 			},
 		},
 		minify: true,
-		noExternal: [
-			'@loglayer/context-manager',
-			'@loglayer/transport',
-			'node-inspect-extracted',
-			'ansi-colors',
-			'defu',
-			'loglayer',
-			'safe-stable-stringify',
-			'serialize-error',
-			'wrap-ansi',
-		],
 		outDir: 'dist/standalone',
 		platform: 'browser',
 	},
 	// Electron
 	{
+		deps: {
+			neverBundle: ['electron'],
+		},
 		dts: true,
 		entry: 'src/electron/renderer/index.ts',
-		external: ['electron'],
 		outDir: 'dist/electron/renderer',
 		platform: 'browser',
 		tsconfig: 'tsconfig.build.json',
 	},
 	{
+		deps: {
+			neverBundle: ['electron'],
+		},
 		dts: true,
 		entry: 'src/electron/main/index.ts',
-		external: ['electron'],
 		fixedExtension: false,
 		outDir: 'dist/electron/main',
 		platform: 'node',
 		tsconfig: 'tsconfig.build.json',
 	},
 	{
+		deps: {
+			neverBundle: ['electron'],
+		},
 		dts: true,
 		entry: 'src/electron/preload/index.ts',
-		external: ['electron'],
 		outDir: 'dist/electron/preload',
 		platform: 'browser',
 		tsconfig: 'tsconfig.build.json',

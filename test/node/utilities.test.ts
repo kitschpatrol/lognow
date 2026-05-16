@@ -3,7 +3,6 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import type { ILogBasic } from '../../src/log.js'
 import {
 	createLogBasicTypedTarget,
 	isForceColorSet,
@@ -56,7 +55,7 @@ describe('createLogBasicTypedTarget', () => {
 			},
 		}
 
-		const typed = createLogBasicTypedTarget(consoleLike as ILogBasic)
+		const typed = createLogBasicTypedTarget(consoleLike)
 		expect(typed.type).toBe('ConsoleLike')
 	})
 
@@ -67,7 +66,7 @@ describe('createLogBasicTypedTarget', () => {
 			},
 		}
 
-		const typed = createLogBasicTypedTarget(streamLike as ILogBasic)
+		const typed = createLogBasicTypedTarget(streamLike)
 		expect(typed.type).toBe('StreamLike')
 	})
 
@@ -340,7 +339,9 @@ describe('memory and performance', () => {
 		expect(children.length).toBe(100)
 
 		// Use them
-		for (const child of children) child.info('test')
+		for (const child of children) {
+			child.info('test')
+		}
 
 		// They should be garbage collectable
 		expect(children[0]).toBeDefined()

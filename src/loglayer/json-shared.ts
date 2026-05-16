@@ -8,12 +8,16 @@ import { serializeError } from 'serialize-error'
 export function hasOwnProperties(object: Record<string, unknown>): boolean {
 	// Optimization
 	// eslint-disable-next-line guard-for-in, no-unreachable-loop, ts/naming-convention
-	for (const _ in object) return true
+	for (const _ in object) {
+		return true
+	}
+
 	return false
 }
 
 /**
  * Options for paramsToJsonString function
+ *
  * @public
  */
 export type ParamsToJsonStringOptions = {
@@ -47,7 +51,7 @@ export function paramsToLogEntry(
 		// eslint-disable-next-line ts/no-unnecessary-condition
 		params.metadata === null ||
 		params.metadata === undefined ||
-		!hasOwnProperties(params.metadata as Record<string, unknown>)
+		!hasOwnProperties(params.metadata)
 			? undefined
 			: params.metadata
 
@@ -87,5 +91,6 @@ function replacer(this: unknown, _: unknown, value: unknown) {
 	if (value instanceof Error) {
 		return serializeError(value)
 	}
+
 	return value
 }

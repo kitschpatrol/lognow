@@ -2,11 +2,11 @@ import type { IContextManager, OnChildLoggerCreatedParams } from '@loglayer/cont
 import { DefaultContextManager } from '@loglayer/context-manager'
 
 /**
- * Maintains a hierarchy of parent context "name" values when child loggers are created.
- * Similar to how log names are treated in tslog. This is an alternative to LogLayer's `prefix` approach,
- * which pollutes the log message string.
- * A `parentName` value is added. If the parent context does not have a `name`
- * context value, it's represented as a null value in the array.
+ * Maintains a hierarchy of parent context "name" values when child loggers are
+ * created. Similar to how log names are treated in tslog. This is an
+ * alternative to LogLayer's `prefix` approach, which pollutes the log message
+ * string. A `parentName` value is added. If the parent context does not have a
+ * `name` context value, it's represented as a null value in the array.
  */
 export class HierarchicalContextManager extends DefaultContextManager {
 	clone(): IContextManager {

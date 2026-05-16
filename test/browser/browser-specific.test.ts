@@ -644,7 +644,9 @@ describe('browser-specific: memory management', () => {
 		)
 
 		expect(loggers.length).toBe(100)
-		for (const logger of loggers) logger.info('test')
+		for (const logger of loggers) {
+			logger.info('test')
+		}
 
 		expect(mockConsole.info).toHaveBeenCalledTimes(100)
 	})

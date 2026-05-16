@@ -13,12 +13,11 @@ import type { JsonFileTransportConfig } from '../loglayer/json-file-transport.js
 import { JsonFileTransport } from '../loglayer/json-file-transport.js'
 
 /**
- * Helper function to get the platform-specific log path. Based on the platform,
- * the log path is different.
+ * Helper function to get the platform-specific log path.
  *
- * - macOS: `~/Library/Logs/app`
- * - Windows: `%LOCALAPPDATA%\app\Log`
- * - Linux/UNIX: `~/.local/state/app`
+ * - On macOS: `~/Library/Logs/app`
+ * - On Windows: `%LOCALAPPDATA%\app\Log`
+ * - On Linux/UNIX: `~/.local/state/app`
  */
 function getPlatformLogPath(name?: string): string {
 	const homedir = os.homedir()
@@ -44,10 +43,13 @@ let cachedName: string | undefined
 let nameResolved = false
 
 /**
- * Helper function to get the name of the package. Based on the package.json file.
+ * Helper function to get the name of the package. Based on the package.json
+ * file.
  */
 function getName(): string | undefined {
-	if (nameResolved) return cachedName
+	if (nameResolved) {
+		return cachedName
+	}
 
 	// Detect electron main process
 	cachedName = process.env.ELECTRON_MAIN ? 'Main' : readPackageUpSync()?.packageJson.name
@@ -60,8 +62,9 @@ function getName(): string | undefined {
 const fileTransportsByPath = new Map<string, JsonFileTransport>()
 
 /**
- * Get the destinations of the active file transports.
- * Exported for reuse in Electron platform adapter.
+ * Get the destinations of the active file transports. Exported for reuse in
+ * Electron platform adapter.
+ *
  * @returns The destinations of the file transports.
  */
 export function getFileTransportDestinations(): string[] {
@@ -75,10 +78,13 @@ export function getFileTransportDestinations(): string[] {
 }
 
 /**
- * Create a file transport for the given name and log directory.
- * Exported for reuse in Electron platform adapter.
+ * Create a file transport for the given name and log directory. Exported for
+ * reuse in Electron platform adapter.
+ *
  * @param name - The name of the log file.
- * @param logDirectoryOrOptions - The directory to log to, or a JsonFileTransportConfig object (which might override name).
+ * @param logDirectoryOrOptions - The directory to log to, or a
+ *   JsonFileTransportConfig object (which might override name).
+ *
  * @returns The file transport.
  */
 export function createFileTransport(
@@ -131,8 +137,8 @@ process.on('SIGWINCH', () => {
 })
 
 /**
- * Get the terminal width.
- * Exported for reuse in Electron platform adapter.
+ * Get the terminal width. Exported for reuse in Electron platform adapter.
+ *
  * @returns The terminal width.
  */
 export function getTerminalWidth(): number {

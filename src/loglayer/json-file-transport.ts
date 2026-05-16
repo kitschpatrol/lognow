@@ -11,17 +11,17 @@ function isEmptyObject(value: unknown): value is Record<string, unknown> {
 
 /**
  * Configuration for the JSON file transport
+ *
  * @public
  */
 export type JsonFileTransportConfig = Partial<LogFileRotationTransportConfig>
 
 /**
  * Semi-flattened JSON transport for file logging, designed for integration with
- * the lognow package. Privileges name, parentNames, and timestamp as top-level keys.
- * Any other context values are nested under a `context` key.
- * Metadata is nested under a `metadata` key.
- * Error is nested under an `error` key, and are serialized using serialize-error.
- * Keys are omitted if they are undefined.
+ * the lognow package. Privileges name, parentNames, and timestamp as top-level
+ * keys. Any other context values are nested under a `context` key. Metadata is
+ * nested under a `metadata` key. Error is nested under an `error` key, and are
+ * serialized using serialize-error. Keys are omitted if they are undefined.
  * Messages are kept as arrays.
  */
 export class JsonFileTransport extends LogFileRotationTransport {

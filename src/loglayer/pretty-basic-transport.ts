@@ -32,6 +32,7 @@ interface PrettyBasicTransportConfigInterface extends Partial<LogLayerTransportC
 
 /**
  * Configuration for the pretty basic transport
+ *
  * @public
  */
 export type PrettyBasicTransportConfig = PrettyBasicTransportConfigInterface
@@ -62,6 +63,7 @@ export class PrettyBasicTransport extends BaseTransport<ILogBasic> {
 	private readonly typedTarget: LogBasicTypedTarget
 	/**
 	 * Creates a new SimplePrettyTerminalTransport instance.
+	 *
 	 * @param config - Configuration options for the transport
 	 */
 	constructor(config: PrettyBasicTransportConfig) {
@@ -149,7 +151,7 @@ export class PrettyBasicTransport extends BaseTransport<ILogBasic> {
 			// eslint-disable-next-line ts/no-unnecessary-condition
 			params.metadata === null ||
 			params.metadata === undefined ||
-			!hasOwnProperties(params.metadata as Record<string, unknown>)
+			!hasOwnProperties(params.metadata)
 				? undefined
 				: params.metadata
 
@@ -214,8 +216,10 @@ export class PrettyBasicTransport extends BaseTransport<ILogBasic> {
 						break
 					}
 				}
+
 				break
 			}
+
 			case 'StreamLike':
 			case 'StreamStderr':
 			case 'StreamStdout': {
@@ -280,18 +284,23 @@ export class PrettyBasicTransport extends BaseTransport<ILogBasic> {
 		if (value === undefined) {
 			return this.config.colorize ? c.gray('undefined') : 'undefined'
 		}
+
 		if (value === null) {
 			return this.config.colorize ? c.gray('null') : 'null'
 		}
+
 		if (typeof value === 'boolean') {
 			return this.config.colorize ? c.cyan(value.toString()) : value.toString()
 		}
+
 		if (typeof value === 'number') {
 			return this.config.colorize ? c.yellow(value.toString()) : value.toString()
 		}
+
 		if (typeof value === 'string') {
 			return value
 		}
+
 		if (typeof value === 'function') {
 			return this.config.colorize ? c.green(value.name) : value.name
 		}
@@ -358,9 +367,14 @@ function getNamePrefix(
 
 	let result = ''
 	if (parentNames) {
-		for (const p of parentNames) result += `[${p}]`
+		for (const p of parentNames) {
+			result += `[${p}]`
+		}
 	}
-	if (name) result += `[${name}]`
+
+	if (name) {
+		result += `[${name}]`
+	}
 
 	return colorize ? c.bold.gray(result) : result
 }

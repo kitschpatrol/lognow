@@ -24,6 +24,7 @@ interface JsonBasicTransportConfigInterface extends Partial<LogLayerTransportCon
 
 /**
  * Configuration for the JSON basic transport
+ *
  * @public
  */
 export type JsonBasicTransportConfig = JsonBasicTransportConfigInterface
@@ -145,8 +146,10 @@ export class JsonBasicTransport extends BaseTransport<ILogBasic> {
 						break
 					}
 				}
+
 				break
 			}
+
 			case 'StreamLike':
 			case 'StreamStderr':
 			case 'StreamStdout': {
