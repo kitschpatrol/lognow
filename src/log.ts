@@ -226,7 +226,7 @@ export function createLogger(optionsOrName?: LogOptions | string): ILogLayer {
 		transport: transports,
 	}).withContextManager(new HierarchicalContextManager())
 
-	if (resolvedOptions.name !== undefined) {
+	if (resolvedOptions.name !== undefined && resolvedOptions.name.length > 0) {
 		logLayer.withContext({
 			name: resolvedOptions.name,
 		})

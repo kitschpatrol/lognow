@@ -114,6 +114,31 @@ describe('PrettyBasicTransport', () => {
 		expect(output[0]).not.toContain('[test-logger]')
 	})
 
+	it('should render an empty name as no name prefix', () => {
+		const output: string[] = []
+		const mockStream = {
+			write(chunk: string) {
+				output.push(chunk)
+			},
+		}
+
+		const transport = new PrettyBasicTransport({
+			colorize: false,
+			logger: mockStream,
+			showLevel: false,
+			showTime: false,
+		})
+
+		transport.shipToLogger({
+			context: { name: '' },
+			logLevel: 'info',
+			messages: ['No name prefix'],
+		})
+
+		expect(output.length).toBeGreaterThan(0)
+		expect(output[0]).not.toContain('[]')
+	})
+
 	it('should handle colorize option', () => {
 		const mockWrite = vi.fn()
 		const mockStream = { write: mockWrite }
@@ -205,6 +230,34 @@ describe('PrettyBasicTransport', () => {
 		})
 
 		expect(mockWrite).toHaveBeenCalled()
+	})
+
+	it('should not render an empty metadata object', () => {
+		const output: string[] = []
+		const mockStream = {
+			write(chunk: string) {
+				output.push(chunk)
+			},
+		}
+
+		const transport = new PrettyBasicTransport({
+			colorize: false,
+			logger: mockStream,
+			showLevel: false,
+			showTime: false,
+		})
+
+		transport.shipToLogger({
+			context: {},
+			logLevel: 'info',
+			messages: ['msg'],
+			metadata: {},
+		})
+
+		expect(output.length).toBeGreaterThan(0)
+		expect(output[0]).toContain('msg')
+		// An empty metadata object must be omitted, not dumped as `{}`.
+		expect(output[0]).not.toContain('{}')
 	})
 
 	it('should handle error objects', () => {

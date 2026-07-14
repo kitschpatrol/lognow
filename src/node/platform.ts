@@ -51,12 +51,9 @@ function getName(): string | undefined {
 		return cachedName
 	}
 
-	// Detect electron main process
-	const electronMain = process.env.ELECTRON_MAIN
-	cachedName =
-		electronMain !== undefined && electronMain.length > 0
-			? 'Main'
-			: readPackageUpSync()?.packageJson.name
+	// Detect electron main process by presence of the env var (even if empty)
+	const isElectronMain = process.env.ELECTRON_MAIN !== undefined
+	cachedName = isElectronMain ? 'Main' : readPackageUpSync()?.packageJson.name
 
 	nameResolved = true
 	return cachedName

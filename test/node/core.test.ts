@@ -11,7 +11,7 @@ import {
 	log,
 	setDefaultLogOptions,
 } from '../../src/node/index.js'
-import { getCallString, stripDynamic } from '../helpers/test-helpers.js'
+import { getCallString, parseAndStripTimestamp, stripDynamic } from '../helpers/test-helpers.js'
 
 describe('createLogger', () => {
 	it('should create a logger instance', () => {
@@ -51,17 +51,25 @@ describe('createLogger', () => {
 		const originalDebug = process.env.DEBUG
 		process.env.DEBUG = '1'
 
-		const logger = createLogger({ logToConsole: false })
-		expect(logger).toBeDefined()
-		// With DEBUG set, trace logs should work
-		expect(() => {
-			logger.trace('debug test')
-		}).not.toThrow()
+		try {
+			const mockConsole = {
+				debug: vi.fn(),
+				error: vi.fn(),
+				info: vi.fn(),
+				trace: vi.fn(),
+				warn: vi.fn(),
+			}
 
-		if (originalDebug === undefined) {
-			delete process.env.DEBUG
-		} else {
-			process.env.DEBUG = originalDebug
+			// Without verbose, trace is below the default (info) level; DEBUG forces verbose.
+			const logger = createLogger({ logToConsole: mockConsole })
+			logger.trace('debug test')
+			expect(mockConsole.trace).toHaveBeenCalled()
+		} finally {
+			if (originalDebug === undefined) {
+				delete process.env.DEBUG
+			} else {
+				process.env.DEBUG = originalDebug
+			}
 		}
 	})
 
@@ -73,6 +81,60 @@ describe('createLogger', () => {
 	it('should support logToConsole option', () => {
 		const logger = createLogger({ logToConsole: false })
 		expect(logger).toBeDefined()
+	})
+
+	it('should treat an empty name as unset', () => {
+		const mockConsole = {
+			debug: vi.fn(),
+			error: vi.fn(),
+			info: vi.fn(),
+			trace: vi.fn(),
+			warn: vi.fn(),
+		}
+
+		const logger = createLogger({
+			logJsonToConsole: mockConsole,
+			logToConsole: false,
+			name: '',
+		})
+
+		expect(logger.getContext()).not.toHaveProperty('name')
+
+		logger.info('no name')
+		expect(mockConsole.info).toHaveBeenCalled()
+		expect(parseAndStripTimestamp(getCallString(mockConsole.info))).not.toHaveProperty('name')
+	})
+})
+
+describe('transport selection', () => {
+	it('should add the pretty transport unless logToConsole is false', () => {
+		expect(
+			createLogger({ logToConsole: false }).getLoggerInstance('pretty-basic-transport'),
+		).toBeUndefined()
+		expect(
+			createLogger({ logToConsole: true }).getLoggerInstance('pretty-basic-transport'),
+		).toBeDefined()
+		expect(
+			createLogger({ logToConsole: process.stderr }).getLoggerInstance('pretty-basic-transport'),
+		).toBeDefined()
+	})
+
+	it('should add the JSON console transport only when logJsonToConsole is not false', () => {
+		expect(
+			createLogger({ logJsonToConsole: false, logToConsole: false }).getLoggerInstance(
+				'json-basic-transport',
+			),
+		).toBeUndefined()
+		expect(
+			createLogger({ logJsonToConsole: true, logToConsole: false }).getLoggerInstance(
+				'json-basic-transport',
+			),
+		).toBeDefined()
+		expect(
+			createLogger({ logJsonToConsole: process.stderr, logToConsole: false }).getLoggerInstance(
+				'json-basic-transport',
+			),
+		).toBeDefined()
 	})
 })
 
@@ -142,6 +204,14 @@ describe('getChildLogger', () => {
 
 		expect(child).toBeDefined()
 	})
+
+	it('should treat an empty name the same as no name', () => {
+		const parent = createLogger({ logToConsole: false, name: 'parent' })
+		const childNoName = getChildLogger(parent)
+		const childEmptyName = getChildLogger(parent, '')
+
+		expect(childEmptyName.getContext()).toStrictEqual(childNoName.getContext())
+	})
 })
 
 describe('injectionHelper', () => {
@@ -183,6 +253,29 @@ describe('injectionHelper', () => {
 	it('should wrap process.stderr', () => {
 		const logger = injectionHelper(process.stderr)
 		expect(logger).toBeDefined()
+	})
+})
+
+describe('electron main detection', () => {
+	it('should treat a present-but-empty ELECTRON_MAIN as electron main', async () => {
+		const original = process.env.ELECTRON_MAIN
+		process.env.ELECTRON_MAIN = ''
+		vi.resetModules()
+
+		try {
+			// Fresh import so the module-level name cache re-resolves against the env.
+			const { createLogger: freshCreateLogger } = await import('../../src/node/index.js')
+			const logger = freshCreateLogger({ logToConsole: false })
+			expect(logger.getContext().name).toBe('Main')
+		} finally {
+			if (original === undefined) {
+				delete process.env.ELECTRON_MAIN
+			} else {
+				process.env.ELECTRON_MAIN = original
+			}
+
+			vi.resetModules()
+		}
 	})
 })
 

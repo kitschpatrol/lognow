@@ -21,7 +21,7 @@
 		"email": "eric@ericmika.com",
 		"url": "https://ericmika.com"
 	},
-	"sideEffects": false,
+	"sideEffects": true,
 	"type": "module",
 	"exports": {
 		".": {

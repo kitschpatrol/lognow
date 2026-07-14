@@ -115,6 +115,15 @@ describe('browser-specific: no file system', () => {
 			})
 		}).toThrow(NODE_ONLY_REGEX)
 	})
+
+	it('should not throw when file logging is disabled', () => {
+		expect(() => {
+			createLogger({
+				logJsonToFile: false,
+				name: 'no-file',
+			})
+		}).not.toThrow()
+	})
 })
 
 describe('browser-specific: console objects', () => {
