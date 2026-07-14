@@ -5,6 +5,7 @@
 import { setPlatformAdapter } from '../log.js'
 import { nodePlatformAdapter } from './platform.js'
 
+// eslint-disable-next-line unicorn/no-top-level-side-effects
 setPlatformAdapter(nodePlatformAdapter)
 
 // Re-export everything from core

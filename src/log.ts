@@ -80,7 +80,7 @@ export type LogOptions = {
 	 * The name of the logger, also used as the log file name if file logging is
 	 * enabled.
 	 */
-	name?: string
+	name?: string | undefined
 	/**
 	 * A shortcut for setting the log level. If `true`, all logs are shown
 	 * regardless of level. If `false`, only `info` and higher logs are shown.
@@ -136,7 +136,7 @@ export const DEFAULT_LOG_OPTIONS: RequiredExcept<LogOptions, 'name'> = {
  */
 export function getChildLogger<T extends ILogLayer<T>>(logger: T, name?: string): T {
 	const childLogger = logger.child()
-	if (name) {
+	if (name !== undefined && name.length > 0) {
 		childLogger.withContext({ name })
 	}
 
@@ -149,7 +149,7 @@ export function getChildLogger<T extends ILogLayer<T>>(logger: T, name?: string)
  */
 export function createLogger(optionsOrName?: LogOptions | string): ILogLayer {
 	const optionsObject = typeof optionsOrName === 'string' ? { name: optionsOrName } : optionsOrName
-	// eslint-disable-next-line ts/no-unsafe-type-assertion
+
 	const resolvedOptions = defu(optionsObject, DEFAULT_LOG_OPTIONS) as RequiredExcept<
 		LogOptions,
 		'name'
@@ -162,7 +162,7 @@ export function createLogger(optionsOrName?: LogOptions | string): ILogLayer {
 	const transports: LogLayerTransport[] = []
 
 	// Pretty transport
-	if (resolvedOptions.logToConsole) {
+	if (resolvedOptions.logToConsole !== false) {
 		transports.push(
 			new PrettyBasicTransport(
 				defu(
@@ -181,7 +181,7 @@ export function createLogger(optionsOrName?: LogOptions | string): ILogLayer {
 	}
 
 	// JSON transport
-	if (resolvedOptions.logJsonToConsole) {
+	if (resolvedOptions.logJsonToConsole !== false) {
 		transports.push(
 			new JsonBasicTransport(
 				defu(
@@ -200,7 +200,7 @@ export function createLogger(optionsOrName?: LogOptions | string): ILogLayer {
 	}
 
 	// File transport
-	if (typeof resolvedOptions.logJsonToFile === 'string' || resolvedOptions.logJsonToFile) {
+	if (resolvedOptions.logJsonToFile !== false) {
 		if (platformAdapter.createFileTransport === undefined) {
 			throw new Error('File logging is only supported in Node.js environments.')
 		}
@@ -333,7 +333,7 @@ function isConsole(instance: unknown): instance is Console {
 	return (
 		typeof instance === 'object' &&
 		instance !== null &&
-		(instance === globalThis.console ||
+		(instance === console ||
 			(instance as { constructor?: { name?: string } }).constructor?.name === 'Console')
 	)
 }
@@ -431,28 +431,24 @@ let boundMethodCache = new Map<PropertyKey, unknown>()
  * `setDefaultLogOptions` function. This is provided for convenience and quick
  * prototypes. Libraries should manage their own instance.
  */
-export const log = new Proxy(
-	// eslint-disable-next-line ts/no-unsafe-type-assertion
-	{} as ILogLayer,
-	{
-		get(_, property: keyof ILogLayer) {
-			_log ??= createLogger(currentOptions)
-			const cached = boundMethodCache.get(property)
-			if (cached !== undefined) {
-				return cached
-			}
+export const log = new Proxy({} as ILogLayer, {
+	get(_, property: keyof ILogLayer) {
+		_log ??= createLogger(currentOptions)
+		const cached = boundMethodCache.get(property)
+		if (cached !== undefined) {
+			return cached
+		}
 
-			const value = _log[property]
-			if (typeof value === 'function') {
-				const bound = value.bind(_log)
-				boundMethodCache.set(property, bound)
-				return bound
-			}
+		const value = _log[property]
+		if (typeof value === 'function') {
+			const bound = value.bind(_log)
+			boundMethodCache.set(property, bound)
+			return bound
+		}
 
-			return value
-		},
+		return value
 	},
-) satisfies ILogLayer
+}) satisfies ILogLayer
 
 /**
  * Configure the default singleton logger instance with custom options. If
@@ -484,10 +480,6 @@ export function defaultInspector(object: unknown): string {
 function isEnvDefined(value: string): boolean {
 	if (typeof process !== 'undefined') {
 		return process.env[value] !== undefined
-	}
-
-	if (typeof globalThis !== 'undefined' && 'process' in globalThis && 'env' in globalThis.process) {
-		return globalThis.process.env[value] !== undefined
 	}
 
 	// eslint-disable-next-line unicorn/prefer-global-this

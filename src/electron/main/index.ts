@@ -5,6 +5,7 @@
 import { setPlatformAdapter } from '../../log.js'
 import { electronMainPlatformAdapter } from './platform.js'
 
+// eslint-disable-next-line unicorn/no-top-level-side-effects
 setPlatformAdapter(electronMainPlatformAdapter)
 
 // Re-export everything from core

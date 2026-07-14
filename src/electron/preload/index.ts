@@ -10,4 +10,5 @@ export function preload() {
 }
 
 // Run automatically, tsk tsk
+// eslint-disable-next-line unicorn/no-top-level-side-effects
 preload()

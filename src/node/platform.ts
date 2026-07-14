@@ -52,7 +52,11 @@ function getName(): string | undefined {
 	}
 
 	// Detect electron main process
-	cachedName = process.env.ELECTRON_MAIN ? 'Main' : readPackageUpSync()?.packageJson.name
+	const electronMain = process.env.ELECTRON_MAIN
+	cachedName =
+		electronMain !== undefined && electronMain.length > 0
+			? 'Main'
+			: readPackageUpSync()?.packageJson.name
 
 	nameResolved = true
 	return cachedName
@@ -72,7 +76,7 @@ export function getFileTransportDestinations(): string[] {
 		fileTransportsByPath.values(),
 		// TODO clean this up?
 		// @ts-expect-error - Private access
-		// eslint-disable-next-line ts/no-unsafe-type-assertion, ts/no-unsafe-member-access
+		// eslint-disable-next-line ts/no-unsafe-member-access
 		(transport) => transport.stream?.currentFile as string | undefined,
 	).filter((file): file is string => file !== undefined)
 }
@@ -132,6 +136,7 @@ export function createFileTransport(
 // On macOS with redirected streams, terminalSize() opens /dev/tty synchronously.
 let cachedTerminalWidth = terminalSize().columns
 
+// eslint-disable-next-line unicorn/no-top-level-side-effects
 process.on('SIGWINCH', () => {
 	cachedTerminalWidth = terminalSize().columns
 })

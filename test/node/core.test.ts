@@ -198,9 +198,8 @@ describe('error handling', () => {
 
 	it('should serialize complex errors', () => {
 		const logger = createLogger({ logToConsole: false })
-		const error = new Error('Complex error')
 		const cause = new Error('Cause error')
-		error.cause = cause
+		const error = new Error('Complex error', { cause })
 
 		expect(() => {
 			logger

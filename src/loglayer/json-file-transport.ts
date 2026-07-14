@@ -29,7 +29,7 @@ export class JsonFileTransport extends LogFileRotationTransport {
 		const defaultParams: LogFileRotationTransportConfig = {
 			filename: 'default-%DATE%.log',
 		}
-		// eslint-disable-next-line ts/no-unsafe-type-assertion
+
 		const resolvedParams = defu(params, defaultParams) as LogFileRotationTransportConfig
 
 		// Expand tilde in filename
@@ -60,7 +60,7 @@ export class JsonFileTransport extends LogFileRotationTransport {
 		}
 	}
 
-	shipToLogger(params: LogLayerTransportParams) {
+	override shipToLogger(params: LogLayerTransportParams) {
 		const logString = `${paramsToJsonString(params, {
 			// @ts-expect-error - Private
 			// eslint-disable-next-line ts/no-unsafe-assignment
@@ -74,7 +74,7 @@ export class JsonFileTransport extends LogFileRotationTransport {
 		}`
 
 		// @ts-expect-error - Accessing private properties for batching logic
-		if (this.batchEnabled) {
+		if (this.batchEnabled === true) {
 			// @ts-expect-error - Private
 			// eslint-disable-next-line ts/no-unsafe-call, ts/no-unsafe-member-access
 			this.batchQueue.push(logString)

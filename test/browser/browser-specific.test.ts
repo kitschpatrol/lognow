@@ -5,7 +5,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { createLogger } from '../../src/browser/index.js'
 
-const NODE_ONLY_REGEX = /only supported in Node.js/
+const NODE_ONLY_REGEX = /only supported in Node.js/v
 import {
 	getCallString,
 	isBrowserConsoleObject,
@@ -141,7 +141,7 @@ describe('browser-specific: console objects', () => {
 
 	it('should work with global console', () => {
 		const logger = createLogger({
-			logToConsole: globalThis.console,
+			logToConsole: console,
 			name: 'global-console',
 		})
 
@@ -373,9 +373,8 @@ describe('browser-specific: async operations', () => {
 
 		const mockFetch = Promise.resolve({ status: 200 })
 
-		await mockFetch.then((response) => {
-			logger.withMetadata(response).info('Fetch complete')
-		})
+		const response = await mockFetch
+		logger.withMetadata(response).info('Fetch complete')
 
 		expect(mockConsole.info).toHaveBeenCalled()
 		const call = getCallString(mockConsole.info)
@@ -418,15 +417,11 @@ describe('browser-specific: async operations', () => {
 		const logger = createLogger({ logToConsole: mockConsole, name: 'promise' })
 
 		await Promise.resolve()
-			.then(() => {
-				logger.info('First')
-			})
-			.then(() => {
-				logger.info('Second')
-			})
-			.then(() => {
-				logger.info('Third')
-			})
+		logger.info('First')
+		await Promise.resolve()
+		logger.info('Second')
+		await Promise.resolve()
+		logger.info('Third')
 
 		expect(mockConsole.info).toHaveBeenCalledTimes(3)
 		expect(stripDynamic(getCallString(mockConsole.info, 0))).toMatchInlineSnapshot(
@@ -617,11 +612,10 @@ describe('browser-specific: performance', () => {
 
 		const logger = createLogger({ logToConsole: mockConsole, name: 'concurrent' })
 
-		const promises = Array.from({ length: 50 }, async (_, i) =>
-			Promise.resolve().then(() => {
-				logger.info(`Async ${i}`)
-			}),
-		)
+		const promises = Array.from({ length: 50 }, async (_, i) => {
+			await Promise.resolve()
+			logger.info(`Async ${i}`)
+		})
 
 		await Promise.all(promises)
 

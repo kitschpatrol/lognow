@@ -7,7 +7,7 @@ import { JsonBasicTransport } from '../../src/loglayer/json-basic-transport.js'
 import { PrettyBasicTransport } from '../../src/loglayer/pretty-basic-transport.js'
 import { createLogger } from '../../src/node/index.js'
 
-const TIMESTAMP_REGEX = /\d{2}:\d{2}:\d{2}\.\d{3}/
+const TIMESTAMP_REGEX = /\d{2}:\d{2}:\d{2}\.\d{3}/v
 
 describe('PrettyBasicTransport', () => {
 	it('should create a pretty transport', () => {
@@ -295,7 +295,7 @@ describe('JsonBasicTransport', () => {
 
 		expect(output.length).toBeGreaterThan(0)
 		expect(() => {
-			JSON.parse(output[0])
+			JSON.parse(output[0]!)
 		}).not.toThrow()
 	})
 
@@ -319,7 +319,7 @@ describe('JsonBasicTransport', () => {
 		})
 
 		expect(output.length).toBeGreaterThan(0)
-		const parsed: unknown = JSON.parse(output[0])
+		const parsed: unknown = JSON.parse(output[0]!)
 
 		expect(parsed).toHaveProperty('level', 'info')
 		expect(parsed).toHaveProperty('messages')
@@ -410,7 +410,7 @@ describe('JsonBasicTransport', () => {
 
 		expect(output.length).toBeGreaterThan(0)
 		expect(() => {
-			JSON.parse(output[0])
+			JSON.parse(output[0]!)
 		}).not.toThrow()
 	})
 

@@ -43,17 +43,10 @@ export function paramsToLogEntry(
 	const errorObject =
 		!('error' in params) || params.error === null || params.error === undefined
 			? undefined
-			: // eslint-disable-next-line ts/no-unsafe-type-assertion
-				(params.error as unknown as Error)
+			: (params.error as unknown as Error)
 
 	const metadataObject =
-		!('metadata' in params) ||
-		// eslint-disable-next-line ts/no-unnecessary-condition
-		params.metadata === null ||
-		params.metadata === undefined ||
-		!hasOwnProperties(params.metadata)
-			? undefined
-			: params.metadata
+		!('metadata' in params) || !hasOwnProperties(params.metadata) ? undefined : params.metadata
 
 	const restOfContextObject = hasOwnProperties(restOfContext) ? restOfContext : undefined
 
@@ -68,7 +61,7 @@ export function paramsToLogEntry(
 			name,
 			parentNames,
 			timestamp: timestamp ?? timestampFn(),
-			...(staticData ? (typeof staticData === 'function' ? staticData() : staticData) : {}),
+			...(staticData && (typeof staticData === 'function' ? staticData() : staticData)),
 		}).filter(([, v]) => v !== undefined),
 	)
 }
@@ -83,7 +76,9 @@ export function paramsToJsonString(
 	const logEntry = paramsToLogEntry(params, options)
 	// Only use the error-serializing replacer when an error is present
 	return (
-		(logEntry.error ? safeStableStringify(logEntry, replacer) : safeStableStringify(logEntry)) ?? ''
+		(logEntry.error === undefined
+			? safeStableStringify(logEntry)
+			: safeStableStringify(logEntry, replacer)) ?? ''
 	)
 }
 

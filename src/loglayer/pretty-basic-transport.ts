@@ -67,7 +67,6 @@ export class PrettyBasicTransport extends BaseTransport<ILogBasic> {
 	 * @param config - Configuration options for the transport
 	 */
 	constructor(config: PrettyBasicTransportConfig) {
-		// eslint-disable-next-line ts/no-unsafe-type-assertion
 		const resolvedConfig = defu(
 			config,
 			PRETTY_BASIC_TRANSPORT_CONFIG_DEFAULTS,
@@ -94,11 +93,7 @@ export class PrettyBasicTransport extends BaseTransport<ILogBasic> {
 		// Tried to use `asChromeConsoleLogArguments` from
 		// https://github.com/xpl/ansicolor, but Chrome already renders ANSI colors
 		// correctly, and it had some bugs in Safari
-		if (
-			this.typedTarget.type === 'Console' &&
-			'window' in globalThis &&
-			'chrome' in globalThis.window
-		) {
+		if (this.typedTarget.type === 'Console' && 'window' in globalThis && 'chrome' in globalThis) {
 			c.enabled = true
 		}
 	}
@@ -143,17 +138,10 @@ export class PrettyBasicTransport extends BaseTransport<ILogBasic> {
 		const errorObject =
 			!('error' in params) || params.error === null || params.error === undefined
 				? undefined
-				: // eslint-disable-next-line ts/no-unsafe-type-assertion
-					(params.error as unknown as Error)
+				: (params.error as unknown as Error)
 
 		const metadataObject =
-			!('metadata' in params) ||
-			// eslint-disable-next-line ts/no-unnecessary-condition
-			params.metadata === null ||
-			params.metadata === undefined ||
-			!hasOwnProperties(params.metadata)
-				? undefined
-				: params.metadata
+			!('metadata' in params) || !hasOwnProperties(params.metadata) ? undefined : params.metadata
 
 		const restOfContextObject = hasOwnProperties(restOfContext) ? restOfContext : undefined
 
@@ -352,7 +340,6 @@ const LOG_LEVEL_STRINGS_PLAIN: Record<string, string> = {
 }
 
 function getLogLevelString(level: LogLevelType, colorize: boolean): string {
-	// eslint-disable-next-line ts/no-unnecessary-condition
 	return (colorize ? LOG_LEVEL_STRINGS_COLOR[level] : LOG_LEVEL_STRINGS_PLAIN[level]) ?? ''
 }
 
@@ -372,7 +359,7 @@ function getNamePrefix(
 		}
 	}
 
-	if (name) {
+	if (name !== undefined && name.length > 0) {
 		result += `[${name}]`
 	}
 

@@ -18,12 +18,12 @@ function createElectronListener(logger: ILogLayer): void {
 		const params = NJSON.parse<LogLayerTransportParams>(message)
 
 		logger.raw({
-			context: params.context,
 			// eslint-disable-next-line ts/no-unsafe-assignment
 			error: params.error,
 			logLevel: params.logLevel,
 			messages: params.messages,
-			metadata: params.metadata,
+			...(params.context && { context: params.context }),
+			...(params.metadata && { metadata: params.metadata }),
 		})
 	})
 }

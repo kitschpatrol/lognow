@@ -70,7 +70,12 @@ export default defineConfig([
 				)
 
 				// GenerateDtsBundle returns string[] (one per entry point)
-				writeFileSync('./dist/standalone/index.d.ts', result[0])
+				const [dtsContent] = result
+				if (dtsContent === undefined) {
+					throw new Error('dts-bundle-generator returned no output')
+				}
+
+				writeFileSync('./dist/standalone/index.d.ts', dtsContent)
 			},
 		},
 		minify: true,

@@ -245,7 +245,7 @@ describe('edge cases and special scenarios', () => {
 		const { createLogger } = await import('../../src/node/index.js')
 		const logger = createLogger({ logToConsole: false })
 
-		const regex = /test/gi
+		const regex = /test/giv
 		expect(() => {
 			logger.withMetadata({ regex: regex.toString() }).info('Regex')
 		}).not.toThrow()
@@ -257,7 +257,7 @@ describe('edge cases and special scenarios', () => {
 
 		const map = new Map([['key', 'value']])
 		expect(() => {
-			logger.withMetadata({ map: [...map.entries()] }).info('Map')
+			logger.withMetadata({ map: [...map] }).info('Map')
 		}).not.toThrow()
 	})
 
@@ -307,11 +307,10 @@ describe('concurrency and async', () => {
 		const { createLogger } = await import('../../src/node/index.js')
 		const logger = createLogger({ logToConsole: false })
 
-		const promises = Array.from({ length: 100 }, async (_, i) =>
-			Promise.resolve().then(() => {
-				logger.info(`Message ${i}`)
-			}),
-		)
+		const promises = Array.from({ length: 100 }, async (_, i) => {
+			await Promise.resolve()
+			logger.info(`Message ${i}`)
+		})
 
 		await expect(Promise.all(promises)).resolves.toBeDefined()
 	})

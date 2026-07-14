@@ -9,7 +9,7 @@ import { DefaultContextManager } from '@loglayer/context-manager'
  * `name` context value, it's represented as a null value in the array.
  */
 export class HierarchicalContextManager extends DefaultContextManager {
-	clone(): IContextManager {
+	override clone(): IContextManager {
 		const clone = new HierarchicalContextManager()
 		clone.setContext({
 			...this.getContext(),
@@ -18,7 +18,7 @@ export class HierarchicalContextManager extends DefaultContextManager {
 		return clone
 	}
 
-	onChildLoggerCreated(params: OnChildLoggerCreatedParams) {
+	override onChildLoggerCreated(params: OnChildLoggerCreatedParams) {
 		super.onChildLoggerCreated(params)
 
 		// eslint-disable-next-line ts/no-unsafe-assignment, unicorn/no-null

@@ -389,6 +389,8 @@ log.info('Logged to both console and file')
 
 ### Electron
 
+_See a complete working [Electron + Lognow template project](https://github.com/kitschpatrol/create-project/tree/main/templates/electron) from [kitschpatrol/create-project](https://github.com/kitschpatrol/create-project)._
+
 Lognow automatically manages inter-process communication in Electron applications to merge any logs from the renderer process into your main process' log stream.
 
 In your main process, e.g. `main.js`, grab the default log instance like you would in any other context — the only difference is that you explicitly import from the `lognow/electron` export instead:
@@ -433,6 +435,8 @@ That's it. When you run the project, logs from both processes will appear in you
 Electron support is designed primarily for use with the default log instance — for now, every log instance in the renderer process automatically sends logs to every log instance in the main process, so you can quickly end up with duplicate logs if you have multiple log instances in the main process.
 
 ### Libraries
+
+_See a complete working [TypeScript library + Lognow template project](https://github.com/kitschpatrol/create-project/tree/main/templates/library) from [kitschpatrol/create-project](https://github.com/kitschpatrol/create-project)._
 
 If you're building a library that others will use, you can use Lognow with dependency injection to allow consumers to integrate their own logging systems.
 

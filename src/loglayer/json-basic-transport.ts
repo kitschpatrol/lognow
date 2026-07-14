@@ -52,7 +52,6 @@ export class JsonBasicTransport extends BaseTransport<ILogBasic> {
 	private readonly typedTarget: LogBasicTypedTarget
 
 	constructor(config: JsonBasicTransportConfig) {
-		// eslint-disable-next-line ts/no-unsafe-type-assertion
 		const resolvedConfig = defu(
 			config,
 			JSON_BASIC_TRANSPORT_CONFIG_DEFAULTS,

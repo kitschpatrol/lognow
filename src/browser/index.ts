@@ -7,6 +7,7 @@ import { setPlatformAdapter } from '../log.js'
 export type { ILogBasic, ILogLayer, LogOptions } from '../log.js'
 import { browserPlatformAdapter } from './platform'
 
+// eslint-disable-next-line unicorn/no-top-level-side-effects
 setPlatformAdapter(browserPlatformAdapter)
 
 export {

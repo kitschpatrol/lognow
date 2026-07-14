@@ -12,11 +12,11 @@ export function stripDynamic(string_: string): string {
 		string_
 			// Remove ANSI color codes
 			// eslint-disable-next-line no-control-regex
-			.replaceAll(/\u001B\[\d+m/g, '')
+			.replaceAll(/\u{1B}\[\d+m/gv, '')
 			// Remove timestamps (ISO format)
-			.replaceAll(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/g, 'TIMESTAMP')
+			.replaceAll(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/gv, 'TIMESTAMP')
 			// Remove time prefixes (HH:MM:SS.mmm)
-			.replaceAll(/\d{2}:\d{2}:\d{2}\.\d{3}/g, 'TIME')
+			.replaceAll(/\d{2}:\d{2}:\d{2}\.\d{3}/gv, 'TIME')
 	)
 }
 
@@ -40,8 +40,12 @@ function stripTimestamp(object: Record<string, unknown>): Record<string, unknown
 			}
 
 			// Recursively process nested objects
-			if (value && typeof value === 'object' && !Array.isArray(value)) {
-				// eslint-disable-next-line ts/no-unsafe-type-assertion
+			if (
+				value !== null &&
+				value !== undefined &&
+				typeof value === 'object' &&
+				!Array.isArray(value)
+			) {
 				return [key, stripTimestamp(value as Record<string, unknown>)]
 			}
 
@@ -50,8 +54,12 @@ function stripTimestamp(object: Record<string, unknown>): Record<string, unknown
 				return [
 					key,
 					value.map((item) => {
-						if (item && typeof item === 'object' && !Array.isArray(item)) {
-							// eslint-disable-next-line ts/no-unsafe-type-assertion
+						if (
+							item !== null &&
+							item !== undefined &&
+							typeof item === 'object' &&
+							!Array.isArray(item)
+						) {
 							return stripTimestamp(item as Record<string, unknown>)
 						}
 
@@ -71,19 +79,23 @@ function stripTimestamp(object: Record<string, unknown>): Record<string, unknown
  * Helper to safely extract string from mock call
  */
 export function getCallString(mockFn: Mock, callIndex = 0): string {
+	const call = mockFn.mock.calls[callIndex]
+	if (call === undefined) {
+		throw new Error(`No mock call at index ${callIndex}`)
+	}
+
 	// eslint-disable-next-line ts/no-unsafe-return
-	return mockFn.mock.calls[callIndex][0]
+	return call[0]
 }
 
 /**
  * Helper to check if an object is a browser console object
  */
 export function isBrowserConsoleObject(object: unknown): object is Console {
-	if (!object || typeof object !== 'object') {
+	if (object === null || object === undefined || typeof object !== 'object') {
 		return false
 	}
 
-	// eslint-disable-next-line ts/no-unsafe-type-assertion
 	const consoleObject = object as Record<string, unknown>
 
 	// Check for essential Console methods
