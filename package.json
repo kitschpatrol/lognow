@@ -103,7 +103,7 @@
 		"@vitest/browser-playwright": "^4.1.10",
 		"bumpp": "^11.1.0",
 		"dts-bundle-generator": "^9.5.1",
-		"electron": "38.7.0",
+		"electron": "39.8.5",
 		"publint": "^0.3.21",
 		"shx": "^0.4.0",
 		"tsdown": "^0.22.3",
@@ -111,7 +111,7 @@
 		"vitest": "^4.1.10"
 	},
 	"peerDependencies": {
-		"electron": ">=39.7.0"
+		"electron": ">=39.8.5"
 	},
 	"peerDependenciesMeta": {
 		"electron": {
