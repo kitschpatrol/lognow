@@ -141,7 +141,9 @@ export class PrettyBasicTransport extends BaseTransport<ILogBasic> {
 				: (params.error as unknown as Error)
 
 		const metadataObject =
-			!('metadata' in params) || !hasOwnProperties(params.metadata) ? undefined : params.metadata
+			params.metadata === undefined || !hasOwnProperties(params.metadata)
+				? undefined
+				: params.metadata
 
 		const restOfContextObject = hasOwnProperties(restOfContext) ? restOfContext : undefined
 
