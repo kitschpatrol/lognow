@@ -134,7 +134,7 @@ export const DEFAULT_LOG_OPTIONS: RequiredExcept<LogOptions, 'name'> = {
  * names. Based on convention of storing the log name in the context.name
  * value.
  */
-export function getChildLogger<T extends ILogLayer<T>>(logger: T, name?: string): T {
+export function getChildLogger<T>(logger: ILogLayer<T>, name?: string): ILogLayer<T> {
 	const childLogger = logger.child()
 	if (name !== undefined && name.length > 0) {
 		childLogger.withContext({ name })

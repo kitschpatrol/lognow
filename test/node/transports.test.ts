@@ -348,7 +348,7 @@ describe('JsonBasicTransport', () => {
 
 		expect(output.length).toBeGreaterThan(0)
 		expect(() => {
-			JSON.parse(output[0]!)
+			JSON.parse(output[0] ?? '')
 		}).not.toThrow()
 	})
 
@@ -372,7 +372,7 @@ describe('JsonBasicTransport', () => {
 		})
 
 		expect(output.length).toBeGreaterThan(0)
-		const parsed: unknown = JSON.parse(output[0]!)
+		const parsed: unknown = JSON.parse(output[0] ?? '')
 
 		expect(parsed).toHaveProperty('level', 'info')
 		expect(parsed).toHaveProperty('messages')
@@ -463,7 +463,7 @@ describe('JsonBasicTransport', () => {
 
 		expect(output.length).toBeGreaterThan(0)
 		expect(() => {
-			JSON.parse(output[0]!)
+			JSON.parse(output[0] ?? '')
 		}).not.toThrow()
 	})
 

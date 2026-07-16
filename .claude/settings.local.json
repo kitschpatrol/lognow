@@ -4,7 +4,14 @@
       "mcp__context7__resolve-library-id",
       "mcp__context7__query-docs",
       "Bash(pnpm install:*)",
-      "Bash(pnpm vitest:*)"
+      "Bash(pnpm vitest:*)",
+      "Bash(pnpm ksc-typescript *)",
+      "Bash(pnpm ksc-eslint *)",
+      "Bash(pnpm ksc *)",
+      "Bash(sed -i '' 's|'\\\\''./src/loglayer/json-file-transport.js'\\\\''|'\\\\''/Users/mika/Desktop/lognow/src/loglayer/json-file-transport.js'\\\\''|' __TRACKED_VAR__/batch-check.ts)",
+      "Bash(pnpm exec *)",
+      "Bash(git -C /Users/mika/Desktop/lognow show 50687e7550928ee64eb59861f5b37f6d0b83505e --stat)",
+      "Bash(git -C /Users/mika/Desktop/lognow show 50687e7550928ee64eb59861f5b37f6d0b83505e)"
     ]
   },
   "enabledMcpjsonServers": [

@@ -5,6 +5,7 @@
 import { setPlatformAdapter } from '../../log.js'
 import { electronMainPlatformAdapter } from './platform.js'
 
+// The platform adapter must be registered when this entry point is imported
 // eslint-disable-next-line unicorn/no-top-level-side-effects
 setPlatformAdapter(electronMainPlatformAdapter)
 

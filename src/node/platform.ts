@@ -131,12 +131,7 @@ export function createFileTransport(
 
 // Cache terminal width to avoid expensive per-call system queries.
 // On macOS with redirected streams, terminalSize() opens /dev/tty synchronously.
-let cachedTerminalWidth = terminalSize().columns
-
-// eslint-disable-next-line unicorn/no-top-level-side-effects
-process.on('SIGWINCH', () => {
-	cachedTerminalWidth = terminalSize().columns
-})
+let cachedTerminalWidth: number | undefined
 
 /**
  * Get the terminal width. Exported for reuse in Electron platform adapter.
@@ -144,6 +139,13 @@ process.on('SIGWINCH', () => {
  * @returns The terminal width.
  */
 export function getTerminalWidth(): number {
+	if (cachedTerminalWidth === undefined) {
+		cachedTerminalWidth = terminalSize().columns
+		process.on('SIGWINCH', () => {
+			cachedTerminalWidth = terminalSize().columns
+		})
+	}
+
 	return cachedTerminalWidth
 }
 

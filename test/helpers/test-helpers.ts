@@ -40,12 +40,7 @@ function stripTimestamp(object: Record<string, unknown>): Record<string, unknown
 			}
 
 			// Recursively process nested objects
-			if (
-				value !== null &&
-				value !== undefined &&
-				typeof value === 'object' &&
-				!Array.isArray(value)
-			) {
+			if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
 				return [key, stripTimestamp(value as Record<string, unknown>)]
 			}
 
@@ -54,12 +49,7 @@ function stripTimestamp(object: Record<string, unknown>): Record<string, unknown
 				return [
 					key,
 					value.map((item) => {
-						if (
-							item !== null &&
-							item !== undefined &&
-							typeof item === 'object' &&
-							!Array.isArray(item)
-						) {
+						if (typeof item === 'object' && item !== null && !Array.isArray(item)) {
 							return stripTimestamp(item as Record<string, unknown>)
 						}
 
@@ -79,20 +69,19 @@ function stripTimestamp(object: Record<string, unknown>): Record<string, unknown
  * Helper to safely extract string from mock call
  */
 export function getCallString(mockFn: Mock, callIndex = 0): string {
-	const call = mockFn.mock.calls[callIndex]
-	if (call === undefined) {
-		throw new Error(`No mock call at index ${callIndex}`)
+	const argument: unknown = mockFn.mock.calls[callIndex]?.[0]
+	if (typeof argument !== 'string') {
+		throw new TypeError(`Expected a string as the first argument of mock call ${callIndex}`)
 	}
 
-	// eslint-disable-next-line ts/no-unsafe-return
-	return call[0]
+	return argument
 }
 
 /**
  * Helper to check if an object is a browser console object
  */
 export function isBrowserConsoleObject(object: unknown): object is Console {
-	if (object === null || object === undefined || typeof object !== 'object') {
+	if (typeof object !== 'object' || object === null) {
 		return false
 	}
 

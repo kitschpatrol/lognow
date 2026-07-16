@@ -217,7 +217,11 @@ describe('browser: error handling', () => {
 		const logger = createLogger({ name: 'dom-errors' })
 
 		// Create a DOMException-like error
-		const domError = new DOMException('DOM Exception', 'NotFoundError')
+		class NotFoundError extends Error {
+			override name = 'NotFoundError'
+		}
+
+		const domError = new NotFoundError('DOM Exception')
 
 		expect(() => {
 			logger.withError(domError).error('DOM error')

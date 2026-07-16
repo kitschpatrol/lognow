@@ -5,7 +5,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { createLogger } from '../../src/browser/index.js'
 
-const NODE_ONLY_REGEX = /only supported in Node.js/v
+const NODE_ONLY_REGEX = /only supported in Node\.js/v
 import {
 	getCallString,
 	isBrowserConsoleObject,
