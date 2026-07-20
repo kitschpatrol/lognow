@@ -82,6 +82,14 @@ export type LogOptions = {
 	 */
 	name?: string | undefined
 	/**
+	 * Electron main process only: receive logs forwarded from renderer processes
+	 * into this logger. Enabled by default on the default `log` singleton; custom
+	 * loggers must opt in explicitly. Enabling this on multiple loggers
+	 * duplicates renderer logs across them. Has no effect outside the Electron
+	 * main process.
+	 */
+	receiveRendererLogs?: boolean
+	/**
 	 * A shortcut for setting the log level. If `true`, all logs are shown
 	 * regardless of level. If `false`, only `info` and higher logs are shown.
 	 */
@@ -94,8 +102,7 @@ type RequiredExcept<T, K extends keyof T> = Pick<T, K> & Required<Omit<T, K>>
  * Platform-specific adapter interface
  */
 export type PlatformAdapter = {
-	createElectronListener?: (logger: ILogLayer) => void
-	createElectronTransport?: () => LoggerlessTransport
+	createElectronTransport?: () => LoggerlessTransport | undefined
 	createFileTransport?: (
 		name?: string,
 		logDirectoryOrOptions?: JsonFileTransportConfig | string,
@@ -104,6 +111,7 @@ export type PlatformAdapter = {
 	getName: () => string | undefined
 	getTerminalWidth: () => number
 	inspect: (object: unknown, options?: InspectOptions) => string
+	registerRendererLogReceiver?: (logger: ILogLayer) => void
 }
 
 let platformAdapter: PlatformAdapter
@@ -125,6 +133,7 @@ export const DEFAULT_LOG_OPTIONS: RequiredExcept<LogOptions, 'name'> = {
 	get name() {
 		return platformAdapter.getName()
 	},
+	receiveRendererLogs: false,
 	verbose: false,
 }
 
@@ -215,9 +224,10 @@ export function createLogger(optionsOrName?: LogOptions | string): ILogLayer {
 		)
 	}
 
-	// Electron transport
-	if (platformAdapter.createElectronTransport) {
-		transports.push(platformAdapter.createElectronTransport())
+	// Electron transport, added only when the preload bridge is detected
+	const electronTransport = platformAdapter.createElectronTransport?.()
+	if (electronTransport !== undefined) {
+		transports.push(electronTransport)
 	}
 
 	const logLayer = new LogLayer({
@@ -238,8 +248,8 @@ export function createLogger(optionsOrName?: LogOptions | string): ILogLayer {
 		logLayer.setLevel(LogLevel.info)
 	}
 
-	if (platformAdapter.createElectronListener) {
-		platformAdapter.createElectronListener(logLayer)
+	if (resolvedOptions.receiveRendererLogs) {
+		platformAdapter.registerRendererLogReceiver?.(logLayer)
 	}
 
 	return logLayer
@@ -423,7 +433,9 @@ export function createLogBasicTypedTarget(instance: ILogBasic): LogBasicTypedTar
 // Default singleton logger instance, for convenience
 
 let _log: ILogLayer | undefined
-let currentOptions: LogOptions = DEFAULT_LOG_OPTIONS
+// The singleton receives renderer logs by default (unlike custom loggers,
+// which must opt in) — createLogger fills in the rest from DEFAULT_LOG_OPTIONS
+let currentOptions: LogOptions = { receiveRendererLogs: true }
 let boundMethodCache = new Map<PropertyKey, unknown>()
 
 /**

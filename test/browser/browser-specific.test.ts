@@ -86,6 +86,34 @@ describe('browser-specific: window global', () => {
 	})
 })
 
+describe('browser-specific: electron bridge', () => {
+	it('should forward logs to the preload bridge when present', () => {
+		const sendToMain = vi.fn()
+		// Simulate the bridge normally exposed by the preload script
+		// eslint-disable-next-line unicorn/no-global-object-property-assignment
+		;(globalThis as Record<string, unknown>).__lognow__ = { sendToMain }
+
+		try {
+			const logger = createLogger({ logToConsole: false })
+			logger.info('To main')
+
+			expect(sendToMain).toHaveBeenCalledTimes(1)
+			expect(sendToMain.mock.calls[0]?.[0]).toContain('To main')
+			// The default name comes from the platform when bridged
+			expect(logger.getContext()).toHaveProperty('name', 'Renderer')
+		} finally {
+			delete (globalThis as Record<string, unknown>).__lognow__
+		}
+	})
+
+	it('should degrade gracefully without the bridge', () => {
+		const logger = createLogger({ logToConsole: false })
+		expect(() => {
+			logger.info('No bridge')
+		}).not.toThrow()
+	})
+})
+
 describe('browser-specific: no file system', () => {
 	it('should throw error when trying to use file logging', () => {
 		expect(() => {

@@ -11,7 +11,15 @@
       "Bash(sed -i '' 's|'\\\\''./src/loglayer/json-file-transport.js'\\\\''|'\\\\''/Users/mika/Desktop/lognow/src/loglayer/json-file-transport.js'\\\\''|' __TRACKED_VAR__/batch-check.ts)",
       "Bash(pnpm exec *)",
       "Bash(git -C /Users/mika/Desktop/lognow show 50687e7550928ee64eb59861f5b37f6d0b83505e --stat)",
-      "Bash(git -C /Users/mika/Desktop/lognow show 50687e7550928ee64eb59861f5b37f6d0b83505e)"
+      "Bash(git -C /Users/mika/Desktop/lognow show 50687e7550928ee64eb59861f5b37f6d0b83505e)",
+      "Bash(echo \"exit: $?\")",
+      "WebFetch(domain:registry.npmjs.org)",
+      "Bash(pnpm build *)",
+      "Bash(npx attw *)",
+      "Bash(node -e ' *)",
+      "Read(//Users/mika/Code/cma-ten-kings/**)",
+      "Bash(pnpm why *)",
+      "Bash(rg -rn \"isElectron\\\\s*[:=]\" /Users/mika/Code/cma-ten-kings/src/lib)"
     ]
   },
   "enabledMcpjsonServers": [

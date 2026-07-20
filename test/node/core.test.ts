@@ -256,24 +256,79 @@ describe('injectionHelper', () => {
 	})
 })
 
+function stubElectronMain() {
+	Object.defineProperty(process.versions, 'electron', {
+		configurable: true,
+		value: '39.0.0',
+	})
+	;(process as NodeJS.Process & { type?: string }).type = 'browser'
+}
+
+function restoreElectronMain() {
+	Reflect.deleteProperty(process.versions, 'electron')
+	Reflect.deleteProperty(process, 'type')
+}
+
 describe('electron main detection', () => {
-	it('should treat a present-but-empty ELECTRON_MAIN as electron main', async () => {
-		const original = process.env.ELECTRON_MAIN
-		process.env.ELECTRON_MAIN = ''
+	it('should default to the Main name in the electron main process', async () => {
+		stubElectronMain()
 		vi.resetModules()
+		vi.doMock('electron', () => ({ ipcMain: { on: vi.fn() } }))
 
 		try {
-			// Fresh import so the module-level name cache re-resolves against the env.
+			// Fresh import so the module-level name cache re-resolves against the stubs.
 			const { createLogger: freshCreateLogger } = await import('../../src/node/index.js')
 			const logger = freshCreateLogger({ logToConsole: false })
 			expect(logger.getContext().name).toBe('Main')
 		} finally {
-			if (original === undefined) {
-				delete process.env.ELECTRON_MAIN
-			} else {
-				process.env.ELECTRON_MAIN = original
+			restoreElectronMain()
+			vi.doUnmock('electron')
+			vi.resetModules()
+		}
+	})
+
+	it('should forward renderer logs to loggers that opt in via receiveRendererLogs', async () => {
+		const on = vi.fn()
+		stubElectronMain()
+		vi.resetModules()
+		vi.doMock('electron', () => ({ ipcMain: { on } }))
+
+		try {
+			const { createLogger: freshCreateLogger } = await import('../../src/node/index.js')
+			const { NJSON: njson } = await import('next-json')
+
+			const mockConsole = {
+				debug: vi.fn(),
+				error: vi.fn(),
+				info: vi.fn(),
+				trace: vi.fn(),
+				warn: vi.fn(),
 			}
 
+			const optedOut = freshCreateLogger({ logToConsole: mockConsole })
+			const optedIn = freshCreateLogger({ logToConsole: mockConsole, receiveRendererLogs: true })
+			expect(optedOut).toBeDefined()
+			expect(optedIn).toBeDefined()
+
+			// The IPC listener registers in a microtask after module load
+			await vi.waitFor(() => {
+				expect(on).toHaveBeenCalledTimes(1)
+			})
+
+			const [channel, listener] = on.mock.calls[0] as [
+				string,
+				(event: unknown, message: string) => void,
+			]
+			expect(channel).toBe('lognow-electron-channel')
+
+			listener(undefined, njson.stringify({ logLevel: 'info', messages: ['From renderer'] }))
+
+			// Only the opted-in logger re-emits the message — no duplication
+			expect(mockConsole.info).toHaveBeenCalledTimes(1)
+			expect(getCallString(mockConsole.info)).toContain('From renderer')
+		} finally {
+			restoreElectronMain()
+			vi.doUnmock('electron')
 			vi.resetModules()
 		}
 	})

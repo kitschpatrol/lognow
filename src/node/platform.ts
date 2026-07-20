@@ -1,6 +1,8 @@
-import type { LogLayerTransport } from 'loglayer'
+import type { LogLayerTransportParams } from '@loglayer/transport'
+import type { ILogLayer, LogLayerTransport } from 'loglayer'
 import { defu } from 'defu'
 import filenamify from 'filenamify'
+import { NJSON } from 'next-json'
 import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
@@ -10,7 +12,22 @@ import terminalSize from 'terminal-size'
 import untildify from 'untildify'
 import type { PlatformAdapter } from '../log.js'
 import type { JsonFileTransportConfig } from '../loglayer/json-file-transport.js'
+import { LOGNOW_ELECTRON_IPC_CHANNEL } from '../electron-bridge.js'
 import { JsonFileTransport } from '../loglayer/json-file-transport.js'
+
+/**
+ * Detect the Electron main process at runtime. False in plain Node.js, Electron
+ * renderers, utility processes, and `ELECTRON_RUN_AS_NODE` children.
+ */
+function isElectronMain(): boolean {
+	// Index access sidesteps Electron's ambient types, which claim these are
+	// always present — at runtime they only exist inside Electron
+	const { type, versions } = process as unknown as {
+		type?: string
+		versions: Record<string, string | undefined>
+	}
+	return versions.electron !== undefined && type === 'browser'
+}
 
 /**
  * Helper function to get the platform-specific log path.
@@ -51,9 +68,7 @@ function getName(): string | undefined {
 		return cachedName
 	}
 
-	// Detect electron main process by presence of the env var (even if empty)
-	const isElectronMain = process.env.ELECTRON_MAIN !== undefined
-	cachedName = isElectronMain ? 'Main' : readPackageUpSync()?.packageJson.name
+	cachedName = isElectronMain() ? 'Main' : readPackageUpSync()?.packageJson.name
 
 	nameResolved = true
 	return cachedName
@@ -63,12 +78,11 @@ function getName(): string | undefined {
 const fileTransportsByPath = new Map<string, JsonFileTransport>()
 
 /**
- * Get the destinations of the active file transports. Exported for reuse in
- * Electron platform adapter.
+ * Get the destinations of the active file transports.
  *
  * @returns The destinations of the file transports.
  */
-export function getFileTransportDestinations(): string[] {
+function getFileTransportDestinations(): string[] {
 	return Array.from(
 		fileTransportsByPath.values(),
 		// TODO clean this up?
@@ -79,8 +93,7 @@ export function getFileTransportDestinations(): string[] {
 }
 
 /**
- * Create a file transport for the given name and log directory. Exported for
- * reuse in Electron platform adapter.
+ * Create a file transport for the given name and log directory.
  *
  * @param name - The name of the log file.
  * @param logDirectoryOrOptions - The directory to log to, or a
@@ -88,7 +101,7 @@ export function getFileTransportDestinations(): string[] {
  *
  * @returns The file transport.
  */
-export function createFileTransport(
+function createFileTransport(
 	name = 'default',
 	logDirectoryOrOptions?: JsonFileTransportConfig | string,
 ): LogLayerTransport {
@@ -134,11 +147,11 @@ export function createFileTransport(
 let cachedTerminalWidth: number | undefined
 
 /**
- * Get the terminal width. Exported for reuse in Electron platform adapter.
+ * Get the terminal width.
  *
  * @returns The terminal width.
  */
-export function getTerminalWidth(): number {
+function getTerminalWidth(): number {
 	if (cachedTerminalWidth === undefined) {
 		cachedTerminalWidth = terminalSize().columns
 		process.on('SIGWINCH', () => {
@@ -149,10 +162,55 @@ export function getTerminalWidth(): number {
 	return cachedTerminalWidth
 }
 
+// Loggers that opted in to receiving renderer logs via `receiveRendererLogs`
+const rendererLogReceivers = new Set<ILogLayer>()
+let droppedMessageWarningShown = false
+
+function registerRendererLogReceiver(logger: ILogLayer): void {
+	if (isElectronMain()) {
+		rendererLogReceivers.add(logger)
+	}
+}
+
+// Register the IPC listener once when running in the Electron main process.
+// The dynamic import keeps `electron` out of plain Node.js module graphs
+// (statically importing it there throws, since the npm `electron` package is
+// just a path stub outside the Electron binary).
+if (isElectronMain()) {
+	void import('electron').then(({ ipcMain }) => {
+		ipcMain.on(LOGNOW_ELECTRON_IPC_CHANNEL, (_, message: string) => {
+			if (rendererLogReceivers.size === 0) {
+				if (!droppedMessageWarningShown) {
+					droppedMessageWarningShown = true
+					console.warn(
+						'[lognow] Received a renderer log, but no main process logger is set up to receive it. Use the default `log` instance in the main process, or create a logger with `receiveRendererLogs: true`.',
+					)
+				}
+
+				return
+			}
+
+			const params = NJSON.parse<LogLayerTransportParams>(message)
+
+			for (const logger of rendererLogReceivers) {
+				logger.raw({
+					// eslint-disable-next-line ts/no-unsafe-assignment
+					error: params.error,
+					logLevel: params.logLevel,
+					messages: params.messages,
+					...(params.context && { context: params.context }),
+					...(params.metadata && { metadata: params.metadata }),
+				})
+			}
+		})
+	})
+}
+
 export const nodePlatformAdapter: PlatformAdapter = {
 	createFileTransport,
 	getFileTransportDestinations,
 	getName,
 	getTerminalWidth,
 	inspect: nodeInspect,
+	registerRendererLogReceiver,
 }

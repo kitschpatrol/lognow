@@ -30,6 +30,7 @@ export default defineConfig([
 				'ansi-colors',
 				'defu',
 				'loglayer',
+				'next-json',
 				'safe-stable-stringify',
 				'serialize-error',
 				'wrap-ansi',
@@ -82,35 +83,14 @@ export default defineConfig([
 		outDir: 'dist/standalone',
 		platform: 'browser',
 	},
-	// Electron
+	// Electron preload
 	{
 		deps: {
 			neverBundle: ['electron'],
 		},
 		dts: true,
-		entry: 'src/electron/renderer/index.ts',
-		outDir: 'dist/electron/renderer',
-		platform: 'browser',
-		tsconfig: 'tsconfig.build.json',
-	},
-	{
-		deps: {
-			neverBundle: ['electron'],
-		},
-		dts: true,
-		entry: 'src/electron/main/index.ts',
-		fixedExtension: false,
-		outDir: 'dist/electron/main',
-		platform: 'node',
-		tsconfig: 'tsconfig.build.json',
-	},
-	{
-		deps: {
-			neverBundle: ['electron'],
-		},
-		dts: true,
-		entry: 'src/electron/preload/index.ts',
-		outDir: 'dist/electron/preload',
+		entry: 'src/electron-preload/index.ts',
+		outDir: 'dist/electron-preload',
 		platform: 'browser',
 		tsconfig: 'tsconfig.build.json',
 	},

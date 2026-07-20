@@ -205,7 +205,7 @@ log.info('User logged in', 'Session started', 'Welcome email sent')
 
 ### Options
 
-Lognow has just five options:
+Lognow has just six options:
 
 #### `name`
 
@@ -261,6 +261,14 @@ Defaults to `false`.
 | `warn`  | 40       | ✅             | ✅            |
 | `error` | 50       | ✅             | ✅            |
 | `fatal` | 60       | ✅             | ✅            |
+
+#### `receiveRendererLogs`
+
+Electron main process only: receive logs forwarded from renderer processes into this logger. Has no effect outside the Electron main process.
+
+Defaults to `false` for loggers created with `createLogger()`, and `true` for the default `log` instance.
+
+Enabling this on multiple loggers duplicates renderer logs across them. See the [Electron](#electron) section for details.
 
 ### Configuration
 
@@ -393,32 +401,30 @@ _See a complete working [Electron + Lognow template project](https://github.com/
 
 Lognow automatically manages inter-process communication in Electron applications to merge any logs from the renderer process into your main process' log stream.
 
-In your main process, e.g. `main.js`, grab the default log instance like you would in any other context — the only difference is that you explicitly import from the `lognow/electron` export instead:
+Electron support is detected at runtime, so the same `lognow` import works everywhere — main process, renderer, plain browsers, plain Node.js, SSR — with no per-context entry points. Code shared between an Electron renderer and a regular web page just works.
+
+The only Electron-specific setup is one line in your preload script, e.g. `preload.js`. This exposes the inter-process-communication (IPC) bridge that ships messages from the renderer to the main process:
 
 ```ts
-import { log } from 'lognow/electron'
-
-log.info('Hello from main!')
-
-// The rest of your Electron main process code...
-```
-
-When you want to log from the renderer, add the following to your preload script, e.g. `preload.js`. This sets up an inter-process-communication (IPC) channel to ship messages from the renderer to the main process:
-
-```ts
-import 'lognow/electron/preload'
+import 'lognow/electron-preload'
 
 // The rest of your Electron preload code...
 ```
 
-Then, in your renderer / browser code, use the default `lognow/electron` log export as usual:
+Everywhere else, import `lognow` like you would in any other context:
 
 ```ts
-import { log } from 'lognow/electron'
+// Main process, e.g. main.js
+import { log } from 'lognow'
+
+log.info('Hello from main!')
+```
+
+```ts
+// Renderer / browser code
+import { log } from 'lognow'
 
 log.info('Hello from renderer!')
-
-// The rest of your Electron renderer code...
 ```
 
 That's it. When you run the project, logs from both processes will appear in your main process' console, prefixed with their origin:
@@ -432,7 +438,9 @@ That's it. When you run the project, logs from both processes will appear in you
 >
 > Timestamps reflect the time of the log entry in the originating process, not the time of the log entry in the receiving process, so timestamps in the main process' console might appear out of order.
 
-Electron support is designed primarily for use with the default log instance — for now, every log instance in the renderer process automatically sends logs to every log instance in the main process, so you can quickly end up with duplicate logs if you have multiple log instances in the main process.
+If the preload bridge isn't present — because the same code is running in a regular browser, or the preload import is missing — renderer-side loggers quietly skip forwarding and log to the console as usual.
+
+In the main process, renderer logs are received by the default `log` instance. If you use `createLogger()` in the main process instead, opt one logger in with `receiveRendererLogs: true` — it's off by default for custom loggers because every opted-in logger re-emits every renderer log, so opting in more than one duplicates them. If a renderer log arrives and no logger is set up to receive it, Lognow warns once in the main process' console.
 
 ### Libraries
 
