@@ -1,5 +1,5 @@
 import type { LogLayerTransportParams } from '@loglayer/transport'
-import { stringify as safeStableStringify } from 'safe-stable-stringify'
+import { stringify as safeStableStringify } from '@kitschpatrol/safe-stable-stringify'
 import { serializeError } from 'serialize-error'
 
 /**

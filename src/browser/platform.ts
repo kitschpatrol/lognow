@@ -3,9 +3,9 @@
  */
 
 import type { LoggerlessTransport } from '@loglayer/transport'
+import { inspect as nodeInspectExtracted } from '@kitschpatrol/node-inspect-extracted'
 import { BlankTransport } from 'loglayer'
 import { NJSON } from 'next-json'
-import { inspect as nodeInspectExtracted } from 'node-inspect-extracted'
 import type { PlatformAdapter } from '../log.js'
 import { getElectronBridge } from '../electron-bridge.js'
 

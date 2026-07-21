@@ -19,7 +19,15 @@
       "Bash(node -e ' *)",
       "Read(//Users/mika/Code/cma-ten-kings/**)",
       "Bash(pnpm why *)",
-      "Bash(rg -rn \"isElectron\\\\s*[:=]\" /Users/mika/Code/cma-ten-kings/src/lib)"
+      "Bash(rg -rn \"isElectron\\\\s*[:=]\" /Users/mika/Code/cma-ten-kings/src/lib)",
+      "Bash(node *)",
+      "Bash(rg -n \"node:|process\\\\.|globalThis|createColors|isColorSupported\" tinyrainbow/package/dist/*.js)",
+      "Read(//private/tmp/claude-501/colorvet/picocolors/package/**)",
+      "Bash(pnpm lint *)",
+      "Bash(pnpm fix *)",
+      "Bash(rg -l \"cspell\" package.json *.ts *.json)",
+      "Bash(rg -o '^export \\(declare \\)?\\(type |interface |class |const |function |enum \\)?\\\\{?[^;{\\(]*' __TRACKED_VAR__/standalone-dts-old.d.ts)",
+      "Bash(pnpm remove *)"
     ]
   },
   "enabledMcpjsonServers": [

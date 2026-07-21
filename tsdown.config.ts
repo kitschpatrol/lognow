@@ -1,5 +1,3 @@
-import { generateDtsBundle } from 'dts-bundle-generator'
-import { writeFileSync } from 'node:fs'
 import { defineConfig } from 'tsdown'
 
 export default defineConfig([
@@ -26,67 +24,61 @@ export default defineConfig([
 			alwaysBundle: [
 				'@loglayer/context-manager',
 				'@loglayer/transport',
-				'node-inspect-extracted',
-				'ansi-colors',
+				'@kitschpatrol/node-inspect-extracted',
+				'tinyrainbow',
 				'defu',
 				'loglayer',
 				'next-json',
-				'safe-stable-stringify',
+				'@kitschpatrol/safe-stable-stringify',
 				'serialize-error',
 				'wrap-ansi',
 			],
+			// Everything is bundled by design, so the accidental-inlining
+			// whitelist doesn't apply here
+			onlyBundle: false,
 		},
+		// Declarations come from the dedicated entry below — generating them
+		// here would split a shared rolldown-runtime chunk out of the JS
 		dts: false,
 		entry: 'src/browser/index.ts',
 		fixedExtension: false,
 		format: 'esm',
-		hooks: {
-			'build:done'() {
-				// Tsdown's type bundling doesn't work since we can't separately externalize
-				// type definitions and source code, but `dts-bundle-generator` seems to
-				// work fine.
-				const result = generateDtsBundle(
-					[
-						{
-							filePath: './src/browser/index.ts',
-							libraries: {
-								inlinedLibraries: [
-									'@loglayer/context-manager',
-									'@loglayer/plugin',
-									'@loglayer/shared',
-									'@loglayer/transport-log-file-rotation',
-									'@loglayer/transport',
-									'loglayer',
-									'node-inspect-extracted',
-								],
-							},
-							output: {
-								noBanner: true,
-							},
-						},
-					],
-					{
-						preferredConfigPath: './tsconfig.build.json',
-					},
-				)
-
-				// GenerateDtsBundle returns string[] (one per entry point)
-				const [dtsBundle] = result
-				if (dtsBundle === undefined) {
-					throw new Error('dts-bundle-generator returned no output for the standalone bundle')
-				}
-
-				writeFileSync('./dist/standalone/index.d.ts', dtsBundle)
-			},
-		},
 		minify: true,
 		outDir: 'dist/standalone',
 		platform: 'browser',
+	},
+	// Browser Standalone types (self-contained declaration bundle)
+	{
+		deps: {
+			dts: {
+				// Inline all types, including type-only deps absent from the JS
+				// bundle, so the standalone declaration file is self-contained
+				alwaysBundle: [
+					'@kitschpatrol/node-inspect-extracted',
+					'@kitschpatrol/safe-stable-stringify',
+					'@loglayer/context-manager',
+					'@loglayer/plugin',
+					'@loglayer/shared',
+					'@loglayer/transport',
+					'@loglayer/transport-log-file-rotation',
+					'loglayer',
+					'tinyrainbow',
+				],
+			},
+		},
+		dts: { emitDtsOnly: true },
+		entry: 'src/browser/index.ts',
+		fixedExtension: false,
+		format: 'esm',
+		outDir: 'dist/standalone',
+		platform: 'browser',
+		tsconfig: 'tsconfig.build.json',
 	},
 	// Electron preload
 	{
 		deps: {
 			neverBundle: ['electron'],
+			onlyBundle: [],
 		},
 		dts: true,
 		entry: 'src/electron-preload/index.ts',

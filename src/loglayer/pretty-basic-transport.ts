@@ -1,13 +1,16 @@
+import type { InspectOptions } from '@kitschpatrol/node-inspect-extracted'
 import type {
 	LogLayerTransportConfig,
 	LogLayerTransportParams,
 	LogLevelType,
 } from '@loglayer/transport'
-import type { InspectOptions } from 'node-inspect-extracted'
 // import type { InspectOptions } from 'node:util'
 import { BaseTransport, LogLevel } from '@loglayer/transport'
-import c from 'ansi-colors'
 import { defu } from 'defu'
+// Tinyrainbow auto-enables in Chrome consoles, which render ANSI colors
+// natively. Don't switch to per-target console styling (e.g. xpl/ansicolor's
+// asChromeConsoleLogArguments) — it had bugs in Safari.
+import c from 'tinyrainbow'
 import wrapAnsi from 'wrap-ansi'
 import type { ILogBasic, LogBasicTypedTarget } from '../log'
 import {
@@ -87,15 +90,6 @@ export class PrettyBasicTransport extends BaseTransport<ILogBasic> {
 
 		// Detect and narrow log type once...
 		this.typedTarget = createLogBasicTypedTarget(this.config.logger)
-
-		// Enable ANSI colors if we're using a chrome console
-		// The ansi-colors library typically only activates in Node.js environments.
-		// Tried to use `asChromeConsoleLogArguments` from
-		// https://github.com/xpl/ansicolor, but Chrome already renders ANSI colors
-		// correctly, and it had some bugs in Safari
-		if (this.typedTarget.type === 'Console' && 'window' in globalThis && 'chrome' in globalThis) {
-			c.enabled = true
-		}
 	}
 
 	/**
@@ -324,12 +318,12 @@ function formatTime(date: Date, colorize: boolean): string {
 
 // Pre-compute colorized level strings to avoid ANSI function calls per log
 const LOG_LEVEL_STRINGS_COLOR: Record<string, string> = {
-	debug: c.bold.green('DEBUG'),
-	error: c.bold.red('ERROR'),
-	fatal: c.bold.red('FATAL'),
-	info: c.bold.blue('INFO '),
-	trace: c.bold.gray('TRACE'),
-	warn: c.bold.yellow('WARN '),
+	debug: c.bold(c.green('DEBUG')),
+	error: c.bold(c.red('ERROR')),
+	fatal: c.bold(c.red('FATAL')),
+	info: c.bold(c.blue('INFO ')),
+	trace: c.bold(c.gray('TRACE')),
+	warn: c.bold(c.yellow('WARN ')),
 }
 
 const LOG_LEVEL_STRINGS_PLAIN: Record<string, string> = {
@@ -365,5 +359,5 @@ function getNamePrefix(
 		result += `[${name}]`
 	}
 
-	return colorize ? c.bold.gray(result) : result
+	return colorize ? c.bold(c.gray(result)) : result
 }

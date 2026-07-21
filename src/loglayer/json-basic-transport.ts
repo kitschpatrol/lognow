@@ -1,6 +1,5 @@
+import type { InspectOptions } from '@kitschpatrol/node-inspect-extracted'
 import type { LogLayerTransportConfig, LogLayerTransportParams } from '@loglayer/transport'
-import type { InspectOptions } from 'node-inspect-extracted'
-// import type { InspectOptions } from 'node:util'
 import { BaseTransport, LogLevel } from '@loglayer/transport'
 import { defu } from 'defu'
 import type { ILogBasic, LogBasicTypedTarget } from '../log'
@@ -72,19 +71,6 @@ export class JsonBasicTransport extends BaseTransport<ILogBasic> {
 
 		// Detect and narrow log type once...
 		this.typedTarget = createLogBasicTypedTarget(this.config.logger)
-
-		// Enable ANSI colors if we're using a chrome console
-		// The ansi-colors library typically only activates in Node.js environments.
-		// Tried to use `asChromeConsoleLogArguments` from
-		// https://github.com/xpl/ansicolor, but Chrome already renders ANSI colors
-		// correctly, and it had some bugs in Safari
-		// if (
-		// 	this.typedTarget.type === 'Console' &&
-		// 	'window' in globalThis &&
-		// 	'chrome' in globalThis.window
-		// ) {
-		// 	c.enabled = true
-		// }
 	}
 
 	// eslint-disable-next-line complexity
