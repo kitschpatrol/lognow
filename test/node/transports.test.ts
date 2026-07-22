@@ -376,14 +376,7 @@ describe('JsonBasicTransport', () => {
 
 		expect(parsed).toHaveProperty('level', 'info')
 		expect(parsed).toHaveProperty('messages')
-		if (
-			typeof parsed === 'object' &&
-			parsed !== null &&
-			'messages' in parsed &&
-			Array.isArray(parsed.messages)
-		) {
-			expect(parsed.messages).toContain('Test message')
-		}
+		expect(parsed).toHaveProperty('messages', expect.arrayContaining(['Test message']))
 	})
 
 	it('should respect pretty option', () => {

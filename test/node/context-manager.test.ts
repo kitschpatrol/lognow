@@ -65,9 +65,7 @@ describe('HierarchicalContextManager', () => {
 		expect(childContext.parentNames).toContain('grandparent')
 		expect(childContext.parentNames).toContain('parent')
 		expect(Array.isArray(childContext.parentNames)).toBe(true)
-		if (Array.isArray(childContext.parentNames)) {
-			expect(childContext.parentNames.length).toBe(2)
-		}
+		expect(childContext.parentNames).toHaveLength(2)
 	})
 
 	it('should handle parent without explicit name', () => {
@@ -158,9 +156,7 @@ describe('Context hierarchy in logging', () => {
 		expect(context.parentNames).toContain('named')
 		// Check that hierarchy is maintained
 		expect(Array.isArray(context.parentNames)).toBe(true)
-		if (Array.isArray(context.parentNames)) {
-			expect(context.parentNames.length).toBeGreaterThan(0)
-		}
+		expect(context.parentNames).not.toHaveLength(0)
 	})
 })
 

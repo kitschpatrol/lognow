@@ -22,7 +22,10 @@ export default eslintConfig(
 	{
 		files: ['readme.md/*.ts'],
 		rules: {
+			// TODO remove after KSC > 8.4.0
 			'import/no-unresolved': 'off',
+			'jsdoc/require-param-description': 'off',
+			'jsdoc/require-returns': 'off',
 		},
 	},
 )

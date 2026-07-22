@@ -48,8 +48,10 @@ export function pickLogTarget(): ILogBasic {
 	// Use stderr by default in a node environment, or console by default in a browser environment.
 	// Bundlers sometimes inject a partial `process` shim (e.g. `globalThis.process ??= {}`)
 	// into browser builds, so the presence of `process` alone isn't proof of a usable stream.
-	if (typeof process !== 'undefined' && typeof process.stderr?.write === 'function') {
-		return process.stderr
+	const runtimeProcess: undefined | { stderr?: StreamStderr } =
+		typeof process === 'undefined' ? undefined : process
+	if (typeof runtimeProcess?.stderr?.write === 'function') {
+		return runtimeProcess.stderr
 	}
 
 	return console
@@ -457,9 +459,9 @@ export const log = new Proxy({} as ILogLayer, {
 			return cached
 		}
 
-		const value = _log[property]
+		const value: unknown = Reflect.get(_log, property)
 		if (typeof value === 'function') {
-			const bound = value.bind(_log)
+			const bound: unknown = value.bind(_log)
 			boundMethodCache.set(property, bound)
 			return bound
 		}
