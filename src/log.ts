@@ -46,7 +46,9 @@ export type ILogBasic = Console | ConsoleLike | StreamLike | StreamStderr | Stre
  */
 export function pickLogTarget(): ILogBasic {
 	// Use stderr by default in a node environment, or console by default in a browser environment.
-	if (typeof process !== 'undefined') {
+	// Bundlers sometimes inject a partial `process` shim (e.g. `globalThis.process ??= {}`)
+	// into browser builds, so the presence of `process` alone isn't proof of a usable stream.
+	if (typeof process !== 'undefined' && typeof process.stderr?.write === 'function') {
 		return process.stderr
 	}
 
@@ -314,14 +316,18 @@ function isILogLayer(instance: unknown): instance is ILogLayer {
  * Type guard to check if a value is process.stdout
  */
 function isStreamStdout(instance: unknown): instance is StreamStdout {
-	return typeof process !== 'undefined' && instance === process.stdout
+	// The `instance !== undefined` check guards against a partial `process`
+	// shim where `process.stdout` is also undefined.
+	return typeof process !== 'undefined' && instance !== undefined && instance === process.stdout
 }
 
 /**
  * Type guard to check if a value is process.stderr
  */
 function isStreamStderr(instance: unknown): instance is StreamStderr {
-	return typeof process !== 'undefined' && instance === process.stderr
+	// The `instance !== undefined` check guards against a partial `process`
+	// shim where `process.stderr` is also undefined.
+	return typeof process !== 'undefined' && instance !== undefined && instance === process.stderr
 }
 
 /**
