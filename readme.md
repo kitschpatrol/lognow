@@ -6,8 +6,8 @@
 
 <!-- badges -->
 
-[![NPM Package lognow](https://img.shields.io/npm/v/lognow.svg)](https://npmjs.com/package/lognow)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/license/mit/)
+[![NPM Package lognow](https://img.shields.io/npm/v/lognow.svg)](https://www.npmjs.com/package/lognow)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/license/mit)
 [![CI](https://github.com/kitschpatrol/lognow/actions/workflows/ci.yml/badge.svg)](https://github.com/kitschpatrol/lognow/actions/workflows/ci.yml)
 
 <!-- /badges -->
@@ -485,6 +485,8 @@ import { log } from './log.js'
 
 /**
  * A function that uses the library's logger
+ *
+ * @param name
  */
 export function greet(name: string) {
   log.info('Greeting user', name)
@@ -533,7 +535,7 @@ setLogger(console)
 greet()
 ```
 
-Or, since LogLayer provides [many additional transport adapters](https://loglayer.dev/transports), it's easy for library consumers to integrate with their existing logging infrastructure of choice by defining a LogLayer instance to their liking:
+Or, since LogLayer provides [many additional transport adapters](https://loglayer.dev/transports/), it's easy for library consumers to integrate with their existing logging infrastructure of choice by defining a LogLayer instance to their liking:
 
 `the-application.ts`:
 
@@ -576,7 +578,7 @@ This brings a slight compromise in discoverability: Additional configuration man
 
 In the browser, you can pass objects directly to the console, but logging to a stream requires object serialization, formatting, and colorization.
 
-Many strategies were evaluated for pretty printing: [node:util inspect](https://nodejs.org/api/util.html#utilinspectvalue-options), [node-inspect-extracted](https://github.com/hildjj/node-inspect-extracted), [json-stringify-pretty-compact](https://github.com/lydell/json-stringify-pretty-compact), [pretty-format](https://github.com/facebook/jest/tree/main/packages/pretty-format), [stringify-object](https://github.com/sindresorhus/stringify-object), [loupe](https://github.com/sindresorhus/loupe), [object-inspect](https://github.com/inspect-js/object-inspect), and [tslog](https://github.com/fullstack-build/tslog).
+Many strategies were evaluated for pretty printing: [node:util inspect](https://nodejs.org/api/util.html#utilinspectobject-options), [node-inspect-extracted](https://github.com/hildjj/node-inspect-extracted), [json-stringify-pretty-compact](https://github.com/lydell/json-stringify-pretty-compact), [pretty-format](https://github.com/jestjs/jest/tree/main/packages/pretty-format), [stringify-object](https://github.com/sindresorhus/stringify-object), [loupe](https://github.com/chaijs/loupe), [object-inspect](https://github.com/inspect-js/object-inspect), and [tslog](https://github.com/fullstack-build/tslog).
 
 I found that it's hard to improve on node's native inspect implementation for handling unusual object types. A universal port of `inspect` is used for serialization to stream targets in the browser environment.
 
@@ -590,7 +592,7 @@ I found that [safe-stable-stringify](https://github.com/BridgeAR/safe-stable-str
 
 #### Serializing complex objects for Electron IPC
 
-Log objects must be serialized for transport between processes in Electron. Here, we _do_ care about parsability, since the log object must be deserialized before it's passed into the main process' log instance. [SuperJson](https://github.com/flightcontrolhq/superjson), [devalue](https://github.com/Rich-Harris/devalue), and [next-json](https://github.com/iccicci/next-json) were evaluated.
+Log objects must be serialized for transport between processes in Electron. Here, we _do_ care about parsability, since the log object must be deserialized before it's passed into the main process' log instance. [SuperJson](https://github.com/flightcontrolhq/superjson), [devalue](https://github.com/sveltejs/devalue), and [next-json](https://github.com/iccicci/next-json) were evaluated.
 
 Only next-json successfully round-tripped the [nightmare object](https://github.com/kitschpatrol/lognow/blob/main/test/assets/nightmare-object.ts) used in testing.
 
@@ -600,7 +602,7 @@ Only next-json successfully round-tripped the [nightmare object](https://github.
 
 ## Acknowledgments
 
-Thanks to [Theo Gravity](https://suteki.nu) for developing [LogLayer](https://loglayer.dev), and for responding to my questions so quickly and helpfully.
+Thanks to [Theo Gravity](https://theogravity.notion.site/About-Theo-Gravity-698b208a1e314f31ab7fc67fd166fd54) for developing [LogLayer](https://loglayer.dev), and for responding to my questions so quickly and helpfully.
 
 <!-- contributing -->
 

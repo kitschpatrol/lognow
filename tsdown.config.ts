@@ -22,15 +22,15 @@ export default defineConfig([
 	{
 		deps: {
 			alwaysBundle: [
+				'@kitschpatrol/node-inspect-extracted',
+				'@kitschpatrol/safe-stable-stringify',
 				'@loglayer/context-manager',
 				'@loglayer/transport',
-				'@kitschpatrol/node-inspect-extracted',
-				'tinyrainbow',
 				'defu',
 				'loglayer',
 				'next-json',
-				'@kitschpatrol/safe-stable-stringify',
 				'serialize-error',
+				'tinyrainbow',
 				'wrap-ansi',
 			],
 			// Everything is bundled by design, so the accidental-inlining
