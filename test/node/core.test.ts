@@ -2,7 +2,8 @@
  * Core logging functionality tests for Node.js environment
  */
 
-import { describe, expect, it, vi } from 'vitest'
+import type { Mock } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
 	createLogger,
 	DEFAULT_LOG_OPTIONS,
@@ -331,6 +332,161 @@ describe('electron main detection', () => {
 			vi.doUnmock('electron')
 			vi.resetModules()
 		}
+	})
+
+	it('should keep the renderer call time when forwarding renderer logs', async () => {
+		const on = vi.fn()
+		stubElectronMain()
+		vi.resetModules()
+		vi.doMock('electron', () => ({ ipcMain: { on } }))
+
+		try {
+			const { createLogger: freshCreateLogger } = await import('../../src/node/index.js')
+			const { NJSON: njson } = await import('next-json')
+
+			const mockConsole = createMockConsole()
+			freshCreateLogger({
+				logJsonToConsole: mockConsole,
+				logToConsole: false,
+				receiveRendererLogs: true,
+			})
+
+			await vi.waitFor(() => {
+				expect(on).toHaveBeenCalledTimes(1)
+			})
+
+			const [, listener] = on.mock.calls[0] as [string, (event: unknown, message: string) => void]
+			const rendererCallTime = '2020-01-01T00:00:00.000Z'
+
+			listener(
+				undefined,
+				njson.stringify({
+					context: { name: 'Renderer', timestamp: rendererCallTime },
+					logLevel: 'info',
+					messages: ['From renderer'],
+				}),
+			)
+
+			expect(parseJsonCall(mockConsole.info)).toMatchObject({
+				name: 'Renderer',
+				timestamp: rendererCallTime,
+			})
+		} finally {
+			restoreElectronMain()
+			vi.doUnmock('electron')
+			vi.resetModules()
+		}
+	})
+})
+
+function createMockConsole() {
+	return {
+		debug: vi.fn(),
+		error: vi.fn(),
+		info: vi.fn(),
+		trace: vi.fn(),
+		warn: vi.fn(),
+	}
+}
+
+function parseJsonCall(mockFunction: Mock, callIndex = 0): Record<string, unknown> {
+	return JSON.parse(getCallString(mockFunction, callIndex)) as Record<string, unknown>
+}
+
+const PRETTY_TIME_REGEX = /\d{2}:\d{2}:\d{2}\.\d{3}/v
+
+describe('timestamps', () => {
+	const createdAt = new Date('2026-10-11T14:00:00.000Z')
+	const firstCallAt = new Date('2026-10-11T15:00:00.000Z')
+	const secondCallAt = new Date('2026-10-11T15:00:00.050Z')
+
+	beforeEach(() => {
+		vi.useFakeTimers()
+		vi.setSystemTime(createdAt)
+	})
+
+	afterEach(() => {
+		vi.useRealTimers()
+	})
+
+	it('should stamp each log call with the time of the call, not logger creation', () => {
+		const mockConsole = createMockConsole()
+		const logger = createLogger({
+			logJsonToConsole: mockConsole,
+			logToConsole: false,
+			name: 'timestamps',
+		})
+
+		vi.setSystemTime(firstCallAt)
+		logger.info('first')
+		vi.setSystemTime(secondCallAt)
+		logger.info('second')
+
+		expect(parseJsonCall(mockConsole.info, 0).timestamp).toBe(firstCallAt.toISOString())
+		expect(parseJsonCall(mockConsole.info, 1).timestamp).toBe(secondCallAt.toISOString())
+	})
+
+	it('should stamp metadata-only log calls with the time of the call', () => {
+		const mockConsole = createMockConsole()
+		const logger = createLogger({ logJsonToConsole: mockConsole, logToConsole: false })
+
+		vi.setSystemTime(firstCallAt)
+		logger.metadataOnly({ event: 'first' })
+		vi.setSystemTime(secondCallAt)
+		logger.metadataOnly({ event: 'second' })
+
+		expect(parseJsonCall(mockConsole.info, 0).timestamp).toBe(firstCallAt.toISOString())
+		expect(parseJsonCall(mockConsole.info, 1).timestamp).toBe(secondCallAt.toISOString())
+	})
+
+	it('should stamp child logger calls with the time of the call', () => {
+		const mockConsole = createMockConsole()
+		const parent = createLogger({
+			logJsonToConsole: mockConsole,
+			logToConsole: false,
+			name: 'parent',
+		})
+		const child = getChildLogger(parent, 'child')
+
+		vi.setSystemTime(firstCallAt)
+		child.info('from child')
+
+		expect(parseJsonCall(mockConsole.info)).toMatchObject({
+			name: 'child',
+			parentNames: ['parent'],
+			timestamp: firstCallAt.toISOString(),
+		})
+	})
+
+	it('should give every transport the same timestamp for one log call', () => {
+		const jsonConsole = createMockConsole()
+		const prettyConsole = createMockConsole()
+		// Pretty output is written first; let time advance before the JSON transport runs.
+		prettyConsole.info.mockImplementation(() => {
+			vi.setSystemTime(secondCallAt)
+		})
+		const logger = createLogger({ logJsonToConsole: jsonConsole, logToConsole: prettyConsole })
+
+		vi.setSystemTime(firstCallAt)
+		logger.info('shared')
+
+		expect(prettyConsole.info).toHaveBeenCalledTimes(1)
+		expect(jsonConsole.info).toHaveBeenCalledTimes(1)
+		expect(Date.now()).toBe(secondCallAt.getTime())
+
+		const jsonTimestamp = parseJsonCall(jsonConsole.info).timestamp
+		expect(jsonTimestamp).toBe(firstCallAt.toISOString())
+
+		const prettyTimestamp = PRETTY_TIME_REGEX.exec(getCallString(prettyConsole.info))?.[0]
+		expect(prettyTimestamp).toBe(
+			firstCallAt.toLocaleTimeString('en-GB', {
+				fractionalSecondDigits: 3,
+				hour: '2-digit',
+				hour12: false,
+				minute: '2-digit',
+				second: '2-digit',
+			}),
+		)
 	})
 })
 

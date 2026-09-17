@@ -106,6 +106,36 @@ describe('browser-specific: electron bridge', () => {
 		}
 	})
 
+	it('should send the time of each log call to the preload bridge', async () => {
+		const { NJSON: njson } = await import('next-json')
+		const sendToMain = vi.fn<(message: string) => void>()
+		// eslint-disable-next-line unicorn/no-global-object-property-assignment
+		;(globalThis as Record<string, unknown>).__lognow__ = { sendToMain }
+
+		const firstCallAt = new Date('2026-10-11T15:00:00.000Z')
+		const secondCallAt = new Date('2026-10-11T15:00:00.050Z')
+		vi.useFakeTimers()
+		vi.setSystemTime(new Date('2026-10-11T14:00:00.000Z'))
+
+		try {
+			const logger = createLogger({ logToConsole: false })
+
+			vi.setSystemTime(firstCallAt)
+			logger.metadataOnly({ event: 'first' })
+			vi.setSystemTime(secondCallAt)
+			logger.metadataOnly({ event: 'second' })
+
+			const sentTimestamps = sendToMain.mock.calls.map(
+				([message]) =>
+					njson.parse<{ context?: { timestamp?: string } }>(message).context?.timestamp,
+			)
+			expect(sentTimestamps).toEqual([firstCallAt.toISOString(), secondCallAt.toISOString()])
+		} finally {
+			vi.useRealTimers()
+			delete (globalThis as Record<string, unknown>).__lognow__
+		}
+	})
+
 	it('should degrade gracefully without the bridge', () => {
 		const logger = createLogger({ logToConsole: false })
 		expect(() => {

@@ -8,7 +8,7 @@ import type { LoggerlessTransport } from '@loglayer/transport'
 import type { ILogLayer, LogLayerTransport } from 'loglayer'
 // import type { InspectOptions } from 'node:util'
 import { defu } from 'defu'
-import { LogLayer, LogLevel, MockLogLayer } from 'loglayer'
+import { lazy, LogLayer, LogLevel, MockLogLayer } from 'loglayer'
 import { serializeError } from 'serialize-error'
 import type { JsonBasicTransportConfig } from './loglayer/json-basic-transport'
 import type { JsonFileTransportConfig } from './loglayer/json-file-transport'
@@ -16,7 +16,6 @@ import type { PrettyBasicTransportConfig } from './loglayer/pretty-basic-transpo
 import { HierarchicalContextManager } from './loglayer/hierarchical-context-manager'
 import { JsonBasicTransport } from './loglayer/json-basic-transport'
 import { PrettyBasicTransport } from './loglayer/pretty-basic-transport'
-import { timestampPlugin } from './loglayer/timestamp-context-plugin'
 
 // eslint-disable-next-line unicorn/prefer-export-from
 export type { ILogLayer }
@@ -237,9 +236,14 @@ export function createLogger(optionsOrName?: LogOptions | string): ILogLayer {
 
 	const logLayer = new LogLayer({
 		errorSerializer: serializeError,
-		plugins: [timestampPlugin],
 		transport: transports,
 	}).withContextManager(new HierarchicalContextManager())
+
+	// Lazy context values resolve on every log call, so all transports (and the
+	// main process, for forwarded renderer logs) share one call-time timestamp
+	logLayer.withContext({
+		timestamp: lazy(() => new Date().toISOString()),
+	})
 
 	if (resolvedOptions.name !== undefined && resolvedOptions.name.length > 0) {
 		logLayer.withContext({

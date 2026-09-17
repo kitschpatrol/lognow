@@ -109,6 +109,8 @@ By default, you'll get a timestamped pretty log in the console or terminal:
 12:47:56.394 INFO | What hath God wrought?
 ```
 
+Each log entry is timestamped when the logging call occurs, and that timestamp is shared across its outputs.
+
 > [!IMPORTANT]
 >
 > The log instance's interface is a bit different than a typical `Console` object — it's a LogLayer `ILogLayer` instance, so instead of passing objects and metadata directly to the logging method, additional methods are chained together to separate message strings from metadata or context objects.
