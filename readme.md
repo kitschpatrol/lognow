@@ -231,7 +231,9 @@ Set to `true` or `false` to enable or disable file logging. When enabled, logs a
 
 Defaults to `false`.
 
-Logs are stored in the platform-standard location. The files are gzipped and rotated daily, and are never removed.
+Logs are stored in the platform-standard location. By default, the active file stays uncompressed as `.log`. The first write after the date changes rotates the previous file and gzips it to `.log.gz`. Log files are never removed by default.
+
+Compression happens only when an open file rotates. Starting the app on a later day does not compress files left by earlier runs, and existing uncompressed logs are not automatically converted.
 
 Complex metadata or context objects not natively representable within the JSON specification are serialized on a best-effort basis, with emphasis on being human-readable rather than being perfectly reconstructible as JavaScript.
 

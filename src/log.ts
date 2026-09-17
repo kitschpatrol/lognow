@@ -68,7 +68,8 @@ export type LogOptions = {
 	/**
 	 * Log to a typical log file path. Pass a `boolean` to enable / disable the
 	 * default configuration. Pass a directory path string to save the log to a
-	 * specific paths. By default, logs are gzipped and rotated daily, and are
+	 * specific paths. By default, active logs stay uncompressed and are rotated
+	 * on the first write after the date changes. Rotated logs are gzipped and are
 	 * never removed. Pass a partial `JsonFileTransportConfig` to override the
 	 * default configuration.
 	 */

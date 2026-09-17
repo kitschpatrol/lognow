@@ -27,6 +27,8 @@ export type JsonFileTransportConfig = Partial<LogFileRotationTransportConfig>
 export class JsonFileTransport extends LogFileRotationTransport {
 	constructor(params: JsonFileTransportConfig) {
 		const defaultParams: LogFileRotationTransportConfig = {
+			// The rotation transport only registers its gzip handler when callbacks is present.
+			callbacks: {},
 			filename: 'default-%DATE%.log',
 		}
 
