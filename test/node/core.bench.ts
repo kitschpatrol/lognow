@@ -1,5 +1,42 @@
-import { bench, describe } from 'vitest'
-import { createLogger, getChildLogger, injectionHelper } from '../../src/node/index.js'
+import type { BenchFn } from 'vitest'
+import type { JsonTestResults } from 'vitest/node'
+import { readFile } from 'node:fs/promises'
+import { describe, test } from 'vitest'
+import * as lognow from '../../src/node/index.js'
+
+// Capture exports once so Vitest's module getters aren't measured in the benchmark loop.
+const { createLogger, getChildLogger, injectionHelper } = lognow
+const writeBaseline = process.env.npm_lifecycle_event === 'bench:baseline'
+const baseline = writeBaseline
+	? undefined
+	: (JSON.parse(
+			await readFile(new URL('../benchmarks/baseline.json', import.meta.url), 'utf8'),
+		) as JsonTestResults)
+
+function bench(name: string, fn: BenchFn): void {
+	// eslint-disable-next-line test/expect-expect -- Benchmarks report measurements without asserting timing.
+	test(name, async ({ bench: measure, task }) => {
+		const current = measure('current', fn)
+		if (writeBaseline) {
+			await current.run()
+			return
+		}
+
+		const previous = baseline?.testResults
+			.flatMap((file) => file.assertionResults)
+			.flatMap((result) => result.benchmarks)
+			.find((group) => group.name === task.fullTestName)
+			?.tasks.find((result) => result.name === 'current')
+		if (previous === undefined) {
+			throw new Error(`Missing baseline for "${task.fullTestName}". Run pnpm bench:baseline.`)
+		}
+
+		await measure.compare(
+			current,
+			measure.from('baseline', () => previous),
+		)
+	})
+}
 
 describe('logger creation', () => {
 	bench('createLogger with defaults', () => {

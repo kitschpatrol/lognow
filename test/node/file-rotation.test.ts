@@ -46,7 +46,6 @@ describe('JSON file rotation', () => {
 	afterEach(async () => {
 		setDefaultLogOptions(DEFAULT_LOG_OPTIONS)
 		for (const transport of transports) {
-			// eslint-disable-next-line unicorn/no-nonstandard-builtin-properties -- The transport's public cleanup API.
 			transport[Symbol.dispose]()
 		}
 
