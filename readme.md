@@ -598,6 +598,13 @@ Log objects must be serialized for transport between processes in Electron. Here
 
 Only next-json successfully round-tripped the [nightmare object](https://github.com/kitschpatrol/lognow/blob/main/test/assets/nightmare-object.ts) used in testing.
 
+#### Forked dependencies
+
+Lognow uses two forks to support direct ESM imports in browsers:
+
+- [@kitschpatrol/node-inspect-extracted](https://github.com/kitschpatrol/node-inspect-extracted) adds an ESM build without CommonJS wrappers, allowing the `inspect` implementation used for pretty printing to load directly in browsers.
+- [@kitschpatrol/safe-stable-stringify](https://github.com/kitschpatrol/safe-stable-stringify) fixes upstream browser import issues by publishing the JSON serializer as ESM only.
+
 ## Maintainers
 
 [kitschpatrol](https://github.com/kitschpatrol)
