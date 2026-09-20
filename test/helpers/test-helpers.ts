@@ -33,35 +33,20 @@ export function parseAndStripTimestamp(value: string): unknown {
  */
 function stripTimestamp(object: Record<string, unknown>): Record<string, unknown> {
 	return Object.fromEntries(
-		Object.entries(object).map(([key, value]) => {
-			// If this is the timestamp key, replace with 'TIME'
-			if (key === 'timestamp') {
-				return [key, 'TIME']
-			}
-
-			// Recursively process nested objects
-			if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-				return [key, stripTimestamp(value as Record<string, unknown>)]
-			}
-
-			// Recursively process arrays
-			if (Array.isArray(value)) {
-				return [
-					key,
-					value.map((item) => {
-						if (typeof item === 'object' && item !== null && !Array.isArray(item)) {
-							return stripTimestamp(item as Record<string, unknown>)
-						}
-
-						// eslint-disable-next-line ts/no-unsafe-return
-						return item
-					}),
-				]
-			}
-
-			// Return primitives as-is
-			return [key, value]
-		}),
+		Object.entries(object).map(([key, value]) => [
+			key,
+			key === 'timestamp'
+				? 'TIME'
+				: typeof value === 'object' && value !== null && !Array.isArray(value)
+					? stripTimestamp(value as Record<string, unknown>)
+					: Array.isArray(value)
+						? value.map((item: unknown) =>
+								typeof item === 'object' && item !== null && !Array.isArray(item)
+									? stripTimestamp(item as Record<string, unknown>)
+									: item,
+							)
+						: value,
+		]),
 	)
 }
 

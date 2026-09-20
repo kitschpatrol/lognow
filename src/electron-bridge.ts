@@ -21,14 +21,10 @@ export type LognowElectronBridge = {
 export function getElectronBridge(): LognowElectronBridge | undefined {
 	const candidate = (globalThis as Record<string, unknown>)[LOGNOW_ELECTRON_BRIDGE_KEY]
 
-	if (
-		typeof candidate === 'object' &&
+	return typeof candidate === 'object' &&
 		candidate !== null &&
 		'sendToMain' in candidate &&
 		typeof (candidate as LognowElectronBridge).sendToMain === 'function'
-	) {
-		return candidate as LognowElectronBridge
-	}
-
-	return undefined
+		? (candidate as LognowElectronBridge)
+		: undefined
 }

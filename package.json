@@ -84,11 +84,11 @@
 	},
 	"devDependencies": {
 		"@arethetypeswrong/cli": "^0.18.5",
-		"@kitschpatrol/shared-config": "^8.8.0",
+		"@kitschpatrol/shared-config": "^8.9.0",
 		"@playwright/test": "^1.63.0",
 		"@vitest/browser-playwright": "^5.0.1",
 		"bumpp": "^12.3.0",
-		"electron": "39.8.5",
+		"electron": "39.8.10",
 		"publint": "^0.3.24",
 		"shx": "^0.4.0",
 		"tsdown": "^0.23.0",
@@ -96,7 +96,7 @@
 		"vitest": "^5.0.1"
 	},
 	"peerDependencies": {
-		"electron": ">=39.8.5"
+		"electron": ">=39.8.10"
 	},
 	"peerDependenciesMeta": {
 		"electron": {

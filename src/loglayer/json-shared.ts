@@ -85,9 +85,5 @@ export function paramsToJsonString(
 }
 
 function replacer(this: unknown, _: unknown, value: unknown) {
-	if (value instanceof Error) {
-		return serializeError(value)
-	}
-
-	return value
+	return value instanceof Error ? serializeError(value) : value
 }

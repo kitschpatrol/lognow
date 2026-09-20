@@ -24,18 +24,16 @@ function getTerminalWidth(): number {
  */
 function createElectronTransport(): LoggerlessTransport | undefined {
 	const bridge = getElectronBridge()
-	if (bridge === undefined) {
-		return undefined
-	}
+	return bridge === undefined
+		? undefined
+		: new BlankTransport({
+				shipToLogger(params) {
+					bridge.sendToMain(NJSON.stringify(params))
 
-	return new BlankTransport({
-		shipToLogger(params) {
-			bridge.sendToMain(NJSON.stringify(params))
-
-			// eslint-disable-next-line ts/no-unsafe-return
-			return params.messages
-		},
-	})
+					// eslint-disable-next-line ts/no-unsafe-return
+					return params.messages
+				},
+			})
 }
 
 export const browserPlatformAdapter: PlatformAdapter = {

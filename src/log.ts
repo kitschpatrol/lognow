@@ -49,11 +49,7 @@ export function pickLogTarget(): ILogBasic {
 	// into browser builds, so the presence of `process` alone isn't proof of a usable stream.
 	const runtimeProcess: undefined | { stderr?: StreamStderr } =
 		typeof process === 'undefined' ? undefined : process
-	if (typeof runtimeProcess?.stderr?.write === 'function') {
-		return runtimeProcess.stderr
-	}
-
-	return console
+	return typeof runtimeProcess?.stderr?.write === 'function' ? runtimeProcess.stderr : console
 }
 
 export type LogOptions = {
@@ -172,26 +168,25 @@ export function createLogger(optionsOrName?: LogOptions | string): ILogLayer {
 		resolvedOptions.verbose = true
 	}
 
-	const transports: LogLayerTransport[] = []
-
 	// Pretty transport
-	if (resolvedOptions.logToConsole !== false) {
-		transports.push(
-			new PrettyBasicTransport(
-				defu(
-					isILogBasic(resolvedOptions.logToConsole)
-						? { logger: resolvedOptions.logToConsole }
-						: typeof resolvedOptions.logToConsole === 'boolean'
-							? { logger: pickLogTarget() }
-							: resolvedOptions.logToConsole,
-					{
-						getTerminalWidth: platformAdapter.getTerminalWidth,
-						inspect: platformAdapter.inspect,
-					},
-				),
-			),
-		)
-	}
+	const transports: LogLayerTransport[] =
+		resolvedOptions.logToConsole === false
+			? []
+			: [
+					new PrettyBasicTransport(
+						defu(
+							isILogBasic(resolvedOptions.logToConsole)
+								? { logger: resolvedOptions.logToConsole }
+								: typeof resolvedOptions.logToConsole === 'boolean'
+									? { logger: pickLogTarget() }
+									: resolvedOptions.logToConsole,
+							{
+								getTerminalWidth: platformAdapter.getTerminalWidth,
+								inspect: platformAdapter.inspect,
+							},
+						),
+					),
+				]
 
 	// JSON transport
 	if (resolvedOptions.logJsonToConsole !== false) {
@@ -291,18 +286,15 @@ export function injectionHelper(logger?: ILogBasic | ILogLayer<unknown>): ILogLa
 		return new MockLogLayer()
 	}
 
-	if (isILogLayer(logger)) {
-		return logger
-	}
-
-	// Must be ILogBasic,
-	// so create a new LogLayer instance with the basic transport
-	return createLogger({
-		logJsonToFile: false,
-		logToConsole: logger,
-		name: undefined,
-		verbose: true,
-	})
+	// Wrap basic loggers in a new LogLayer instance with the basic transport
+	return isILogLayer(logger)
+		? logger
+		: createLogger({
+				logJsonToFile: false,
+				logToConsole: logger,
+				name: undefined,
+				verbose: true,
+			})
 }
 
 /**
@@ -508,12 +500,10 @@ function isEnvDefined(value: string): boolean {
 	}
 
 	// eslint-disable-next-line unicorn/prefer-global-this
-	if (typeof window !== 'undefined' && 'process' in window && 'env' in window.process) {
-		// eslint-disable-next-line unicorn/prefer-global-this
-		return window.process.env[value] !== undefined
-	}
-
-	return false
+	return typeof window !== 'undefined' && 'process' in window && 'env' in window.process
+		? // eslint-disable-next-line unicorn/prefer-global-this
+			window.process.env[value] !== undefined
+		: false
 }
 
 /**

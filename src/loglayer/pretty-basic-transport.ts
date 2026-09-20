@@ -290,16 +290,14 @@ export class PrettyBasicTransport extends BaseTransport<ILogBasic> {
 		}
 
 		// Check if it's an object
-		if (typeof value === 'object') {
-			return this.config.inspect(value, {
-				colors: this.config.colorize,
-				compact: true,
-				depth: Infinity,
-			})
-		}
-
-		// eslint-disable-next-line ts/no-base-to-string
-		return String(value)
+		return typeof value === 'object'
+			? this.config.inspect(value, {
+					colors: this.config.colorize,
+					compact: true,
+					depth: Infinity,
+				})
+			: // eslint-disable-next-line ts/no-base-to-string
+				String(value)
 	}
 
 	styleMessages(messages: unknown[]): string {
