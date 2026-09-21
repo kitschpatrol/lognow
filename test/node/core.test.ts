@@ -232,6 +232,33 @@ describe('injectionHelper', () => {
 		expect(result).toBe(original)
 	})
 
+	it('should return the default log proxy as-is', () => {
+		expect('withContext' in log).toBe(true)
+		expect(injectionHelper(log)).toBe(log)
+	})
+
+	it('should keep the default log verbosity when the default log is injected', () => {
+		const mockConsole = {
+			debug: vi.fn(),
+			error: vi.fn(),
+			info: vi.fn(),
+			trace: vi.fn(),
+			warn: vi.fn(),
+		}
+		setDefaultLogOptions({ logToConsole: mockConsole, verbose: false })
+
+		try {
+			const injected = injectionHelper(log)
+			injected.debug('hidden')
+			injected.info('shown')
+
+			expect(mockConsole.debug).not.toHaveBeenCalled()
+			expect(mockConsole.info).toHaveBeenCalledOnce()
+		} finally {
+			setDefaultLogOptions({ logToConsole: true })
+		}
+	})
+
 	it('should wrap Console instance', () => {
 		const mockConsole = {
 			debug: vi.fn(),

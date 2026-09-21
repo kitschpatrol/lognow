@@ -465,6 +465,13 @@ export const log = new Proxy({} as ILogLayer, {
 
 		return value
 	},
+	// Without this, `in` checks hit the empty proxy target, so the LogLayer
+	// detection in injectionHelper fails and wraps the singleton as a console
+	// target with verbose forced on
+	has(_, property) {
+		_log ??= createLogger(currentOptions)
+		return Reflect.has(_log, property)
+	},
 }) satisfies ILogLayer
 
 /**
