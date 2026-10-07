@@ -502,15 +502,14 @@ export function defaultInspector(object: unknown): string {
 }
 
 function isEnvDefined(value: string): boolean {
-	if (typeof process !== 'undefined') {
-		return process.env[value] !== undefined
-	}
-
-	// eslint-disable-next-line unicorn/prefer-global-this
-	return typeof window !== 'undefined' && 'process' in window && 'env' in window.process
-		? // eslint-disable-next-line unicorn/prefer-global-this
-			window.process.env[value] !== undefined
-		: false
+	/* eslint-disable unicorn/prefer-global-this -- Checks for a bundler-injected `window.process` shim specifically */
+	return typeof process === 'undefined'
+		? typeof window !== 'undefined' &&
+				'process' in window &&
+				'env' in window.process &&
+				window.process.env[value] !== undefined
+		: process.env[value] !== undefined
+	/* eslint-enable unicorn/prefer-global-this */
 }
 
 /**

@@ -11,10 +11,6 @@ export default eslintConfig(
 						allowed: ['read-package-up'],
 					},
 				],
-				// Disabled due to bug in @typescript-eslint/eslint-plugin where it
-				// fails on certain type constructs
-				// Error: "typeParameters.params is not iterable"
-				'ts/unified-signatures': 'off',
 			},
 		},
 		type: 'lib',
@@ -22,10 +18,8 @@ export default eslintConfig(
 	{
 		files: ['readme.md/*.ts'],
 		rules: {
-			// TODO remove after KSC > 8.4.0
+			// Readme examples import CDN URLs and hypothetical packages
 			'import/no-unresolved': 'off',
-			'jsdoc/require-param-description': 'off',
-			'jsdoc/require-returns': 'off',
 		},
 	},
 )

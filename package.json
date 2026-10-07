@@ -59,6 +59,7 @@
 		"clean-deep": "shx rm -f pnpm-lock.yaml && git clean -fdX -e !.claude/",
 		"fix": "ksc fix",
 		"lint": "ksc lint",
+		"prepare": "skills experimental_sync -y -f",
 		"release": "bumpp --commit 'Release: %s' && pnpm build && pnpm publish --otp $(op item get npm --otp)",
 		"test": "vitest run",
 		"test:browser": "vitest run --project browser",
@@ -66,7 +67,7 @@
 	},
 	"dependencies": {
 		"@kitschpatrol/node-inspect-extracted": "3.3.3-fork.1",
-		"@kitschpatrol/safe-stable-stringify": "2.5.0-fork.1",
+		"@kitschpatrol/safe-stable-stringify": "2.5.0-fork.2",
 		"@loglayer/context-manager": "^2.3.0",
 		"@loglayer/transport": "^3.3.0",
 		"@loglayer/transport-log-file-rotation": "^3.3.0",
@@ -76,24 +77,25 @@
 		"loglayer": "^9.4.0",
 		"next-json": "^0.5.1",
 		"read-package-up": "^12.0.0",
-		"serialize-error": "^13.0.1",
+		"serialize-error": "^13.0.2",
 		"terminal-size": "^4.0.1",
-		"tinyrainbow": "^3.1.1",
+		"tinyrainbow": "^3.2.0",
 		"untildify": "^6.0.0",
-		"wrap-ansi": "^10.0.1"
+		"wrap-ansi": "^10.0.2"
 	},
 	"devDependencies": {
 		"@arethetypeswrong/cli": "^0.18.5",
-		"@kitschpatrol/shared-config": "^8.9.0",
+		"@kitschpatrol/shared-config": "^8.12.1",
 		"@playwright/test": "^1.63.0",
-		"@vitest/browser-playwright": "^5.0.1",
+		"@vitest/browser-playwright": "^5.0.3",
 		"bumpp": "^12.3.0",
 		"electron": "39.8.10",
-		"publint": "^0.3.24",
+		"publint": "^0.3.25",
 		"shx": "^0.4.0",
+		"skills": "^1.7.0",
 		"tsdown": "^0.23.0",
 		"typescript": "~6.0.3",
-		"vitest": "^5.0.1"
+		"vitest": "^5.0.3"
 	},
 	"peerDependencies": {
 		"electron": ">=39.8.10"
@@ -103,9 +105,9 @@
 			"optional": true
 		}
 	},
-	"packageManager": "pnpm@12.4.2",
+	"packageManager": "pnpm@12.9.1",
 	"engines": {
-		"node": ">=20.19.0"
+		"node": "^20.19.0 || ^22.0.0 || ^24.0.0 || >=26.0.0"
 	},
 	"devEngines": {
 		"runtime": {

@@ -42,9 +42,15 @@ For the remaining 1% of my logging needs, it makes more sense to just work with 
 
 ## Getting started
 
+<!-- dependencies -->
+
 ### Dependencies
 
-Node 20.19.0+, or any recent web browser.
+- [Node.js](https://nodejs.org/) 20.19.0 or newer (specifically `^20.19.0 || ^22.0.0 || ^24.0.0 || >=26.0.0`)
+
+<!-- /dependencies -->
+
+Or any recent web browser.
 
 ### Installation
 

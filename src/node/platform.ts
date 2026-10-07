@@ -36,11 +36,9 @@ function isElectronMain(): boolean {
  * - On Windows: `%LOCALAPPDATA%\app\Log`
  * - On Linux/UNIX: `~/.local/state/app`
  */
-function getPlatformLogPath(name?: string): string {
+function getPlatformLogPath(resolvedName = 'app'): string {
 	const homedir = os.homedir()
 	const { env } = process
-
-	const resolvedName = name ?? 'app'
 
 	if (process.platform === 'darwin') {
 		return path.join(homedir, 'Library', 'Logs', resolvedName)
