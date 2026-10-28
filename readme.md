@@ -31,9 +31,10 @@ Lognow provides a handful of helpers and turn-key configurations for (my) typica
 It provides:
 
 - Pretty console logs by default with a reasonable amount of metadata, colorization, object formatting, error handling, etc.
-- Rotating JSONL file logs enabled via a single option flag.
-- A plausible strategy for log dependency injection in library projects and integration with other logging systems.
+- Rotating JSONL file logs to system-standard locations enabled via a single option flag.
 - A universal / isomorphic implementation with support for Node.js, web browsers, and Electron.
+- A plausible strategy for log dependency injection in library projects and integration with other logging systems.
+- The most painless Electron logging setup in the business.
 
 It's probably most similar aesthetically to [tslog](https://tslog.js.org), but with the extra interoperability abstractions provided by [LogLayer](https://loglayer.dev), and integrated Electron support a la [electron-log](https://github.com/megahertz/electron-log).
 
@@ -416,9 +417,8 @@ Electron support is detected at runtime, so the same `lognow` import works every
 The only Electron-specific setup is one line in your preload script, e.g. `preload.js`. This exposes the inter-process-communication (IPC) bridge that ships messages from the renderer to the main process:
 
 ```ts
+// Preload file, e.g. preload.js
 import 'lognow/electron-preload'
-
-// The rest of your Electron preload code...
 ```
 
 Everywhere else, import `lognow` like you would in any other context:
@@ -450,7 +450,7 @@ That's it. When you run the project, logs from both processes will appear in you
 
 If the preload bridge isn't present — because the same code is running in a regular browser, or the preload import is missing — renderer-side loggers quietly skip forwarding and log to the console as usual.
 
-In the main process, renderer logs are received by the default `log` instance. If you use `createLogger()` in the main process instead, opt one logger in with `receiveRendererLogs: true` — it's off by default for custom loggers because every opted-in logger re-emits every renderer log, so opting in more than one duplicates them. If a renderer log arrives and no logger is set up to receive it, Lognow warns once in the main process' console.
+In the main process, renderer logs are received by the default `log` instance. If you use `createLogger()` in the main process instead, opt one logger in with `receiveRendererLogs: true` — it's off by default for custom loggers because every opted-in logger re-emits every renderer log, so opting in more than one duplicates them. If a renderer log entry arrives and no logger is set up to receive it, Lognow warns once in the main process' console.
 
 ### Libraries
 
