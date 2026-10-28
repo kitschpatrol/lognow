@@ -4,6 +4,7 @@
 
 import type { Mock } from 'vitest'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { ILogBasic } from '../../src/node/index.js'
 import {
 	createLogger,
 	DEFAULT_LOG_OPTIONS,
@@ -271,6 +272,35 @@ describe('injectionHelper', () => {
 		const logger = injectionHelper(mockConsole)
 		expect(logger).toBeDefined()
 		expect(typeof logger.info).toBe('function')
+	})
+
+	it('should send every level to a console-like target without trace', () => {
+		const target = {
+			debug: vi.fn(),
+			error: vi.fn(),
+			info: vi.fn(),
+			log: vi.fn(),
+			warn: vi.fn(),
+		}
+		const stderrWrite = vi.spyOn(process.stderr, 'write').mockImplementation(() => true)
+
+		try {
+			const logger = injectionHelper(target)
+			logger.debug('debug message')
+			logger.trace('trace message')
+
+			expect(target.debug).toHaveBeenCalledTimes(2)
+			expect(
+				stderrWrite.mock.calls.some(([chunk]) => String(chunk).includes('debug message')),
+			).toBe(false)
+		} finally {
+			stderrWrite.mockRestore()
+		}
+	})
+
+	it('should reject a value that is neither a logger nor a log target', () => {
+		const notATarget = { log: vi.fn() } as unknown as ILogBasic
+		expect(() => injectionHelper(notATarget)).toThrow(TypeError)
 	})
 
 	it('should wrap process.stdout', () => {

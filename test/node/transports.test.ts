@@ -553,6 +553,22 @@ describe('Custom transport targets', () => {
 		expect(mockStream.write).toHaveBeenCalled()
 	})
 
+	it('should send trace logs to debug when a console-like target has no trace', () => {
+		const prettyTarget = { debug: vi.fn(), error: vi.fn(), info: vi.fn(), warn: vi.fn() }
+		const jsonTarget = { debug: vi.fn(), error: vi.fn(), info: vi.fn(), warn: vi.fn() }
+
+		const logger = createLogger({
+			logJsonToConsole: jsonTarget,
+			logToConsole: prettyTarget,
+			name: 'no-trace',
+			verbose: true,
+		})
+
+		logger.trace('Trace without trace')
+		expect(prettyTarget.debug).toHaveBeenCalledOnce()
+		expect(jsonTarget.debug).toHaveBeenCalledOnce()
+	})
+
 	it('should support custom stream', () => {
 		const mockStream = {
 			write: vi.fn(),

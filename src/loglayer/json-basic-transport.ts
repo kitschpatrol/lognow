@@ -121,7 +121,13 @@ export class JsonBasicTransport extends BaseTransport<ILogBasic> {
 
 					case LogLevel.trace:
 					case 'trace': {
-						this.typedTarget.target.trace(logString)
+						const { target } = this.typedTarget
+						if (target.trace === undefined) {
+							target.debug(logString)
+						} else {
+							target.trace(logString)
+						}
+
 						break
 					}
 

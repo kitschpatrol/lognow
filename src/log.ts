@@ -24,7 +24,8 @@ type ConsoleLike = {
 	debug(...data: unknown[]): void
 	error(...data: unknown[]): void
 	info(...data: unknown[]): void
-	trace(...data: unknown[]): void
+	/** Optional, since many loggers lack it. Trace logs go to `debug` without it. */
+	trace?(...data: unknown[]): void
 	warn(...data: unknown[]): void
 }
 
@@ -269,28 +270,42 @@ export function createLogger(optionsOrName?: LogOptions | string): ILogLayer {
  * 	}
  * 	```
  *
- * @param logger Accepts either a LogLayer instance or a target with typical
- *   Console-like logging methods. If undefined, a MockLogLayer instance is
- *   returned which will log nothing.
+ * @param logger Accepts either a LogLayer instance, a Console-like target with
+ *   `debug`, `error`, `info`, and `warn` methods (and optionally `trace`), or a
+ *   stream with a `write` method. Console-like and stream targets receive every
+ *   log level, including `debug` and `trace`. If undefined, a MockLogLayer
+ *   instance is returned which will log nothing.
  *
  * @returns A LogLayer instance, either the provided instance if it was a
  *   LogLayer instance, or a new LogLayer console-only instance if the passed in
  *   logger was a console-like instance.
+ * @throws {TypeError} If `logger` is neither a LogLayer instance nor a log
+ *   target.
  */
 export function injectionHelper(logger?: ILogBasic | ILogLayer<unknown>): ILogLayer {
 	if (logger === undefined) {
 		return new MockLogLayer()
 	}
 
+	if (isILogLayer(logger)) {
+		return logger
+	}
+
+	// Anything else would be taken as transport options by createLogger, which
+	// logs everything to the default target instead of the injected one
+	if (!isILogBasic(logger)) {
+		throw new TypeError(
+			'injectionHelper expects a LogLayer instance, a console-like object with debug, error, info, and warn methods, or a stream with a write method. Pass undefined to log nothing.',
+		)
+	}
+
 	// Wrap basic loggers in a new LogLayer instance with the basic transport
-	return isILogLayer(logger)
-		? logger
-		: createLogger({
-				logJsonToFile: false,
-				logToConsole: logger,
-				name: undefined,
-				verbose: true,
-			})
+	return createLogger({
+		logJsonToFile: false,
+		logToConsole: logger,
+		name: undefined,
+		verbose: true,
+	})
 }
 
 /**
@@ -350,7 +365,8 @@ function isConsole(instance: unknown): instance is Console {
 }
 
 /**
- * Type guard to check if a value is a ConsoleLike object
+ * Type guard to check if a value is a ConsoleLike object. The `trace` method is
+ * optional.
  */
 function isConsoleLike(instance: unknown): instance is ConsoleLike {
 	return (
@@ -359,13 +375,12 @@ function isConsoleLike(instance: unknown): instance is ConsoleLike {
 		'debug' in instance &&
 		'error' in instance &&
 		'info' in instance &&
-		'trace' in instance &&
 		'warn' in instance &&
 		typeof instance.debug === 'function' &&
 		typeof instance.error === 'function' &&
 		typeof instance.info === 'function' &&
-		typeof instance.trace === 'function' &&
-		typeof instance.warn === 'function'
+		typeof instance.warn === 'function' &&
+		(!('trace' in instance) || typeof instance.trace === 'function')
 	)
 }
 
