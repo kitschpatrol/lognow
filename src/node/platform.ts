@@ -164,6 +164,12 @@ function getTerminalWidth(): number {
 const rendererLogReceivers = new Set<ILogLayer>()
 let droppedMessageWarningShown = false
 
+/**
+ * Register a logger to receive logs forwarded from Electron renderer processes.
+ * Does nothing outside the Electron main process.
+ *
+ * @param logger - The logger that will receive renderer logs.
+ */
 function registerRendererLogReceiver(logger: ILogLayer): void {
 	if (isElectronMain()) {
 		rendererLogReceivers.add(logger)

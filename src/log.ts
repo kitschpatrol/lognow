@@ -246,11 +246,7 @@ export function createLogger(optionsOrName?: LogOptions | string): ILogLayer {
 		})
 	}
 
-	if (resolvedOptions.verbose) {
-		logLayer.setLevel(LogLevel.trace)
-	} else {
-		logLayer.setLevel(LogLevel.info)
-	}
+	logLayer.setLevel(resolvedOptions.verbose ? LogLevel.trace : LogLevel.info)
 
 	if (resolvedOptions.receiveRendererLogs) {
 		platformAdapter.registerRendererLogReceiver?.(logLayer)
