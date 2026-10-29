@@ -380,7 +380,7 @@ function isConsoleLike(instance: unknown): instance is ConsoleLike {
 		typeof instance.error === 'function' &&
 		typeof instance.info === 'function' &&
 		typeof instance.warn === 'function' &&
-		(!('trace' in instance) || typeof instance.trace === 'function')
+		(!('trace' in instance) || instance.trace === undefined || typeof instance.trace === 'function')
 	)
 }
 

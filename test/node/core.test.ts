@@ -274,29 +274,38 @@ describe('injectionHelper', () => {
 		expect(typeof logger.info).toBe('function')
 	})
 
-	it('should send every level to a console-like target without trace', () => {
-		const target = {
-			debug: vi.fn(),
-			error: vi.fn(),
-			info: vi.fn(),
-			log: vi.fn(),
-			warn: vi.fn(),
-		}
-		const stderrWrite = vi.spyOn(process.stderr, 'write').mockImplementation(() => true)
+	it.each([
+		{ traceOptions: {}, traceState: 'missing' },
+		{ traceOptions: { trace: undefined }, traceState: 'undefined' },
+	])(
+		'should send debug and trace to a console-like target with $traceState trace',
+		({ traceOptions }) => {
+			const target = {
+				...traceOptions,
+				debug: vi.fn(),
+				error: vi.fn(),
+				info: vi.fn(),
+				log: vi.fn(),
+				warn: vi.fn(),
+			}
+			const stderrWrite = vi.spyOn(process.stderr, 'write').mockImplementation(() => true)
 
-		try {
-			const logger = injectionHelper(target)
-			logger.debug('debug message')
-			logger.trace('trace message')
+			try {
+				const logger = injectionHelper(target)
+				logger.debug('debug message')
+				logger.trace('trace message')
 
-			expect(target.debug).toHaveBeenCalledTimes(2)
-			expect(
-				stderrWrite.mock.calls.some(([chunk]) => String(chunk).includes('debug message')),
-			).toBe(false)
-		} finally {
-			stderrWrite.mockRestore()
-		}
-	})
+				expect(target.debug).toHaveBeenCalledTimes(2)
+				expect(target.debug).toHaveBeenCalledWith(expect.stringContaining('debug message'))
+				expect(target.debug).toHaveBeenCalledWith(expect.stringContaining('trace message'))
+				const stderrOutput = stderrWrite.mock.calls.map(([chunk]) => String(chunk)).join('')
+				expect(stderrOutput).not.toContain('debug message')
+				expect(stderrOutput).not.toContain('trace message')
+			} finally {
+				stderrWrite.mockRestore()
+			}
+		},
+	)
 
 	it('should reject a value that is neither a logger nor a log target', () => {
 		const notATarget = { log: vi.fn() } as unknown as ILogBasic
