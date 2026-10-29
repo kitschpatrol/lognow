@@ -208,11 +208,17 @@ describe('getChildLogger', () => {
 	})
 
 	it('should treat an empty name the same as no name', () => {
-		const parent = createLogger({ logToConsole: false, name: 'parent' })
-		const childNoName = getChildLogger(parent)
-		const childEmptyName = getChildLogger(parent, '')
+		// The lazy timestamp resolves on each getContext() call, so freeze time to compare them
+		vi.useFakeTimers()
+		try {
+			const parent = createLogger({ logToConsole: false, name: 'parent' })
+			const childNoName = getChildLogger(parent)
+			const childEmptyName = getChildLogger(parent, '')
 
-		expect(childEmptyName.getContext()).toStrictEqual(childNoName.getContext())
+			expect(childEmptyName.getContext()).toStrictEqual(childNoName.getContext())
+		} finally {
+			vi.useRealTimers()
+		}
 	})
 })
 
