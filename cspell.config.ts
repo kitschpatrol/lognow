@@ -1,5 +1,6 @@
 import { cspellConfig } from '@kitschpatrol/cspell-config'
 
 export default cspellConfig({
-	words: ['ansicolor', 'tinyrainbow'],
+	ignorePaths: ['**/changelog.md'],
+	words: ['ansicolor', 'chagent', 'tinyrainbow'],
 })
