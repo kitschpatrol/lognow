@@ -27,24 +27,24 @@
 		".": {
 			"node": {
 				"types": "./dist/node/index.d.ts",
-				"import": "./dist/node/index.js"
+				"default": "./dist/node/index.js"
 			},
 			"browser": {
 				"types": "./dist/browser/index.d.ts",
-				"import": "./dist/browser/index.js"
+				"default": "./dist/browser/index.js"
 			},
 			"default": {
 				"types": "./dist/browser/index.d.ts",
-				"import": "./dist/browser/index.js"
+				"default": "./dist/browser/index.js"
 			}
 		},
 		"./electron-preload": {
 			"types": "./dist/electron-preload/index.d.ts",
-			"import": "./dist/electron-preload/index.js"
+			"default": "./dist/electron-preload/index.js"
 		},
 		"./standalone": {
 			"types": "./dist/standalone/index.d.ts",
-			"import": "./dist/standalone/index.js"
+			"default": "./dist/standalone/index.js"
 		}
 	},
 	"jsdelivr": "./dist/standalone/index.js",
