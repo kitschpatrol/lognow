@@ -74,7 +74,7 @@
 		"defu": "^6.1.7",
 		"filenamify": "^7.0.3",
 		"loglayer": "^9.4.0",
-		"next-json": "^0.5.1",
+		"next-json": "0.5.1",
 		"read-package-up": "^12.0.0",
 		"serialize-error": "^13.0.2",
 		"terminal-size": "^4.0.1",
