@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+Entries are drafted with LLM assistance via [Chagent](https://github.com/kitschpatrol/chagent).
+
+## [0.8.9] - 2026-11-20
+
+### Changed
+
+- Include the referenced ancestor’s depth in circular-reference markers such as `[Circular: 2]` in JSON console and file logs with `@kitschpatrol/safe-stable-stringify` 3.
+
+### Fixed
+
+- Fix `ReferenceError: global is not defined` on browser imports, including during Astro island hydration, by pinning `next-json` to `0.5.3`.
+- Use default export conditions for the main, Electron preload, and standalone ESM entry points so loaders such as `tsx` can resolve them through `require()`.
+
+### Documentation
+
+- Document `chagent` in the contribution guide, link to the changelog, and simplify the guidance on unsolicited pull requests.
+
+### Maintenance
+
+- Refresh `@kitschpatrol/node-inspect-extracted` and `serialize-error` for browser object inspection and JSON error serialization.
+- Refresh pnpm, shared-config, tsdown, Vitest, and Playwright, update pnpm release-age exemptions, and migrate the standalone browser declaration build to tsdown’s `dtsOnly` option.
+- Adjust lint rules to preserve `ILogBasic` compatibility with console and stream targets whose methods accept narrower types.
+- Backfill the changelog, integrate `chagent` into the release script to generate and commit future entries, and update the GitHub release workflow to use `github-action-release-changelog` v3.
+- Refresh GitHub Actions for pnpm setup, repository metadata sync, and automated dependency-update pull requests.
+- Remove local Claude settings from version control.
+
 ## [0.8.8] - 2026-11-01
 
 ### Changed
@@ -384,3 +410,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.8.6]: https://github.com/kitschpatrol/lognow/compare/v0.8.5...v0.8.6
 [0.8.7]: https://github.com/kitschpatrol/lognow/compare/v0.8.6...v0.8.7
 [0.8.8]: https://github.com/kitschpatrol/lognow/compare/v0.8.7...v0.8.8
+[0.8.9]: https://github.com/kitschpatrol/lognow/compare/v0.8.8...v0.8.9
