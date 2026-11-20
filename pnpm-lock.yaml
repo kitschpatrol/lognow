@@ -206,7 +206,7 @@ importers:
         specifier: ^9.4.0
         version: 9.4.0
       next-json:
-        specifier: 0.5.3
+        specifier: ^0.5.3
         version: 0.5.3
       read-package-up:
         specifier: ^12.0.0
