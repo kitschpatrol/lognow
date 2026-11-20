@@ -479,6 +479,33 @@ describe('JsonBasicTransport', () => {
 			})
 		}).not.toThrow()
 	})
+
+	it('should mark circular references with the referenced ancestor depth', () => {
+		const output: string[] = []
+		const mockStream = {
+			write(chunk: string) {
+				output.push(chunk)
+			},
+		}
+
+		const transport = new JsonBasicTransport({
+			logger: mockStream,
+		})
+
+		const circular: Record<string, unknown> = { name: 'circular' }
+		circular.self = circular
+
+		transport.shipToLogger({
+			context: {},
+			logLevel: 'info',
+			messages: ['Circular'],
+			metadata: { circular },
+		})
+
+		const parsed: unknown = JSON.parse(output[0] ?? '')
+
+		expect(parsed).toHaveProperty('metadata.circular.self', '[Circular: 2]')
+	})
 })
 
 describe('Transport integration', () => {

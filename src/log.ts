@@ -20,6 +20,7 @@ import { PrettyBasicTransport } from './loglayer/pretty-basic-transport'
 // eslint-disable-next-line unicorn/prefer-export-from
 export type { ILogLayer }
 
+/* eslint-disable ts/method-signature-style -- Method syntax keeps parameters bivariant, so consoles and streams with narrower parameter types, such as `write(chunk: string)`, remain assignable to `ILogBasic` */
 type ConsoleLike = {
 	debug(...data: unknown[]): void
 	error(...data: unknown[]): void
@@ -32,6 +33,7 @@ type ConsoleLike = {
 type StreamLike = {
 	write(data: string | Uint8Array): Promise<void> | void
 }
+/* eslint-enable ts/method-signature-style */
 
 type StreamStdout = typeof process.stdout
 type StreamStderr = typeof process.stderr

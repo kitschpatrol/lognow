@@ -65,8 +65,8 @@
 		"test:node": "vitest run --project node"
 	},
 	"dependencies": {
-		"@kitschpatrol/node-inspect-extracted": "3.3.4-fork.1",
-		"@kitschpatrol/safe-stable-stringify": "2.5.0-fork.2",
+		"@kitschpatrol/node-inspect-extracted": "3.3.4-fork.2",
+		"@kitschpatrol/safe-stable-stringify": "3.0.0-fork.1",
 		"@loglayer/context-manager": "^2.3.0",
 		"@loglayer/transport": "^3.3.0",
 		"@loglayer/transport-log-file-rotation": "^3.3.0",
@@ -74,9 +74,9 @@
 		"defu": "^6.1.7",
 		"filenamify": "^7.0.3",
 		"loglayer": "^9.4.0",
-		"next-json": "0.5.1",
+		"next-json": "0.5.3",
 		"read-package-up": "^12.0.0",
-		"serialize-error": "^13.0.2",
+		"serialize-error": "^13.1.0",
 		"terminal-size": "^4.0.1",
 		"tinyrainbow": "^3.2.0",
 		"untildify": "^6.0.0",
@@ -84,17 +84,17 @@
 	},
 	"devDependencies": {
 		"@arethetypeswrong/cli": "^0.18.5",
-		"@kitschpatrol/chagent": "^0.5.0",
-		"@kitschpatrol/shared-config": "^8.14.0",
-		"@playwright/test": "^1.64.1",
-		"@vitest/browser-playwright": "^5.0.5",
+		"@kitschpatrol/chagent": "^0.8.0",
+		"@kitschpatrol/shared-config": "^8.15.0",
+		"@playwright/test": "^1.65.1",
+		"@vitest/browser-playwright": "^5.1.1",
 		"bumpp": "^12.3.0",
 		"electron": "39.8.10",
 		"publint": "^0.3.25",
 		"shx": "^0.4.0",
-		"tsdown": "^0.23.4",
+		"tsdown": "^0.23.7",
 		"typescript": "~6.0.3",
-		"vitest": "^5.0.5"
+		"vitest": "^5.1.1"
 	},
 	"peerDependencies": {
 		"electron": ">=39.8.10"
@@ -104,7 +104,7 @@
 			"optional": true
 		}
 	},
-	"packageManager": "pnpm@12.16.1",
+	"packageManager": "pnpm@12.21.0",
 	"engines": {
 		"node": "^20.19.0 || ^22.0.0 || ^24.0.0 || >=26.0.0"
 	},

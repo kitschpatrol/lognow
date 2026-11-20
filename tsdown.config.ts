@@ -66,7 +66,7 @@ export default defineConfig([
 				],
 			},
 		},
-		dts: { emitDtsOnly: true },
+		dts: { dtsOnly: true },
 		entry: 'src/browser/index.ts',
 		fixedExtension: false,
 		format: 'esm',

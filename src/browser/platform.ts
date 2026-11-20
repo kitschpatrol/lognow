@@ -5,9 +5,6 @@
 import type { LoggerlessTransport } from '@loglayer/transport'
 import { inspect as nodeInspectExtracted } from '@kitschpatrol/node-inspect-extracted'
 import { BlankTransport } from 'loglayer'
-// TODO find alternative or file issue for next-json package
-// We have to pin next-json to 0.5.1 because 0.5.2 reads Node's `global` on import.
-// In browsers this throws `ReferenceError: global is not defined` during Astro island hydration.
 import { NJSON } from 'next-json'
 import type { PlatformAdapter } from '../log.js'
 import { getElectronBridge } from '../electron-bridge.js'
